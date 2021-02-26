@@ -1,0 +1,43 @@
+nohup: ignoring input
+/home/jianrenw/anaconda3/envs/tactile/lib/python3.8/site-packages/torch/utils/cpp_extension.py:266: UserWarning: 
+
+                               !! WARNING !!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Your compiler (c++) is not compatible with the compiler Pytorch was
+built with for this platform, which is g++ on linux. Please
+use g++ to to compile your extension. Alternatively, you may
+compile PyTorch from source using c++, and then you can also use
+c++ to compile your extension.
+
+See https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md for help
+with compiling PyTorch from source.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                              !! WARNING !!
+
+  warnings.warn(WRONG_COMPILER_WARNING.format(
+adroit_2-v4
+exp8
+......................................................................................
+ITERATION : 0 
+####### Gathering Samples #######
+======= Samples Gathered  ======= | >>>> Time taken = 36.541803 
+Performing evaluation rollouts ........
+####### Gathering Samples #######
+Unknown warning type Time = 0.0000.Check for NaN in simulation.
+Timeout Error raised... Trying again
+Unknown warning type Time = 0.0000.Check for NaN in simulation.
+Timeout Error raised... Trying again
+Unknown warning type Time = 0.0000.Check for NaN in simulation.
+Timeout Error raised... Trying again
+Unknown warning type Time = 0.0000.Check for NaN in simulation.
+Timeout Error raised... Trying again
+Traceback (most recent call last):
+  File "../mjrl/examples/linear_nn_comparison_adroitvx_expx.py", line 28, in <module>
+    train_agent(job_name='{}_nn_ppo_{}'.format(env_name, exp_num),
+  File "/home/jianrenw/prox/mj_envs/mjrl/mjrl/utils/train_agent.py", line 113, in train_agent
+    eval_paths = sample_paths(num_traj=evaluation_rollouts, policy=agent.policy, num_cpu=num_cpu,
+  File "/home/jianrenw/prox/mj_envs/mjrl/mjrl/samplers/core.py", line 141, in sample_paths
+    for result in results:
+TypeError: 'NoneType' object is not iterable
