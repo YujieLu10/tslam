@@ -15,8 +15,14 @@ setup(
     name='mjrl',
     version='1.0.0',
     packages=find_packages(),
-    description='RL algorithms for environments in MuJoCo',
+    description='Tactile Slam',
     long_description=read('README.md'),
-    url='https://github.com/aravindr93/mjrl.git',
-    author='Aravind Rajeswaran',
+    url='https://github.com/ziwenzhuang/tslam.git',
+    author='Ziwen Zhuang',
+    install_requires= [
+        'click',
+        'gym==0.13',
+        'mujoco-py<2.1,>=2.0',
+        'termcolor',
+    ],
 )

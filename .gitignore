@@ -105,3 +105,9 @@ ENV/
 
 # Mac OSX files
 *.DS_Store
+
+# workspace files
+data/
+.vscode
+.vs
+mj_envs/
