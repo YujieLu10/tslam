@@ -1,0 +1,3 @@
+[submodule "mj_envs"]
+	path = mj_envs
+	url = git@github.com:ziwenzhuang/mj_envs.git
