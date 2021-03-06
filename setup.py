@@ -24,5 +24,6 @@ setup(
         'gym==0.13',
         'mujoco-py<2.1,>=2.0',
         'termcolor',
+        'exptools@git+https://github.com/ziwenzhuang/exptools',
     ],
 )
