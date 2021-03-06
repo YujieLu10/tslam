@@ -4,7 +4,7 @@ Wrapper around a gym env that provides convenience functions
 
 import gym
 import numpy as np
-
+import mj_envs.envs.hand_manipulation_suite # just make the gym registration
 
 class EnvSpec(object):
     def __init__(self, obs_dim, act_dim, horizon):
@@ -14,8 +14,8 @@ class EnvSpec(object):
 
 
 class GymEnv(object):
-    def __init__(self, env_name):
-        env = gym.make(env_name)
+    def __init__(self, env_name, **env_kwargs):
+        env = gym.make(env_name, **env_kwargs)
         self.env = env
         self.env_id = env.spec.id
 
