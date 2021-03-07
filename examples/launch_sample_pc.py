@@ -4,18 +4,29 @@
 from exptools.launching.variant import VariantLevel, make_variants, update_config
 import numpy as np
 
+seed = 123
 default_config = dict(
     env_name = "adroit-v4",
     env_kwargs = dict(
-        obj_bid_idx = 2,
+        obj_bid_idx= 2,
+        goal_threshold= int(8e3), # how many points touched to achieve the goal
+        new_point_threshold= 0.001, # minimum distance new point to all previous points
+        forearm_orientation= "up", # ("up", "down")
+        chamfer_r_factor= 1,
+        palm_r_factor= 1,
+        untouch_p_factor= 1,
+        newpoints_p_factor= 0,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
-        
+        hidden_sizes= (64,64),
+        min_log_std= -3,
+        init_log_std= 0,
+        seed= seed,
     ),
     sample_method = "action", # `action`, `policy`
-    total_timesteps = int(1e4),
-    seed= 123,
+    total_timesteps = int(5e4),
+    seed= seed,
 )
 
 def main(args):
@@ -54,7 +65,7 @@ def main(args):
     if args.where == "local":
         from exptools.launching.affinity import encode_affinity, quick_affinity_code
         from exptools.launching.exp_launcher import run_experiments
-        affinity_code = quick_affinity_code(n_parallel= 16)
+        affinity_code = quick_affinity_code(n_parallel= len(variants))
         run_experiments(
             script= "examples/run_sample_pc.py",
             affinity_code= affinity_code,
