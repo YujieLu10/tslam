@@ -6,8 +6,7 @@ import sys
 import os
 import numpy as np
 import torch
-from matplotlib import cm
-from PIL import Image
+from colorsys import hsv_to_rgb
 
 from mjrl.policies.gaussian_mlp import MLP
 from mjrl.utils import gym_env
@@ -42,7 +41,6 @@ def run_experiment(log_dir, args):
         args["policy_kwargs"]["hidden_sizes"] = tuple(args["policy_kwargs"]["hidden_sizes"])
         policy = MLP(env.spec, **args["policy_kwargs"])
 
-    cmap = cm.get_cmap('viridis', 12)
     for i in range(args["total_timesteps"]):
         if args["sample_method"] == "policy":
             obs, rew, done, info = env.step(policy.get_action(obs)[0])
@@ -55,15 +53,20 @@ def run_experiment(log_dir, args):
         for k, v in info.items():
             if "_p" in k or "_r" in k:
                 logger.record_tabular(k, v, itr= i)
-        if (i+1) % int(5e3) == 0:
+        if (i+1) % int(4e3) == 0:
             pc = np.array(info["pointcloud"]) # (N, 3)
             # log pointcloud to tensorboard
-            colors = cmap(pc[:, 0])[:, :3]*200 + 56 # (N, 3)
+            z_max, z_min = np.max(pc[:, 2]), np.min(pc[:, 2])
+            colors = np.zeros_like(pc) # (N, 3)
+            for pc_idx in range(pc.shape[0]):
+                h = pc[pc_idx, 2]
+                colors[pc_idx] = hsv_to_rgb(h, 100.0, 100.0)
             logger.log("pc.shape {}".format(pc.shape))
             logger.log("colors.shape {}".format(colors.shape))
             logger._tb_writer.add_mesh("pointcloud",
                 vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
                 colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
+                global_step= i,
             )
 
         logger.dump_tabular()
