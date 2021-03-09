@@ -9,10 +9,14 @@ default_config = dict(
     env_name = "adroit-v4",
     env_kwargs = dict(
         obj_bid_idx= 2,
+        obj_orientation= [0, 0, 0], # object orientation
+        obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation= "up", # ("up", "down")
         chamfer_r_factor= 1,
+        mesh_p_factor= 0, # not implemented yet
+        mseh_reconstruct_alpha= 0.01,
         palm_r_factor= 1,
         untouch_p_factor= 1,
         newpoints_p_factor= 0,
@@ -35,26 +39,64 @@ def main(args):
     # set up variants
     variant_levels = list()
 
+    # These are the settings which makes most contact points when
+    # uniformly sample from action space
+    # values = [
+    #     [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+    #     [1, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+    #     [2, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+    #     [3, "up", [0.77, 0, 0],  [0, 0.5, 0.05], ],
+    #     [4, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+    #     [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+    #     [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+    #     [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+    # ]
+    # dir_names = ["obj{}".format(v[0]) for v in values]
+    # keys = [
+    #     ("env_kwargs", "obj_bid_idx"),
+    #     ("env_kwargs", "forearm_orientation"),
+    #     ("env_kwargs", "obj_orientation"),
+    #     ("env_kwargs", "obj_relative_position"),
+    # ] # each entry in the list is the string path to your config
+    # variant_levels.append(VariantLevel(keys, values, dir_names))
+
     values = [
-        [0,],
-        [1,],
-        [2,],
-        [3,],
-        [4,],
-        [5,],
-        [6,],
-        [7,],
+        # [0,], # running 2490
+        # [1,],
+        # [2,],
+        # [3,],
+        # [4,],
+        # [5,],
+        # [6,],
+        # [7,],
     ]
-    dir_names = ["{}".format(*v) for v in values]
+    dir_names = ["obj{}".format(*v) for v in values]
     keys = [("env_kwargs", "obj_bid_idx")] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
         ["action"],
-        ["policy"],
+        # ["policy"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        ["up"],
+        ["down"],
+    ]
+    dir_names = ["{}".format(*v) for v in values]
+    keys = [("env_kwargs", "forearm_orientation"), ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        [[0, 0, 0],  [0, 0.5, 0.05],  ],
+        [[0.77, 0, 0],  [0, 0.5, 0.05],  ],
+        [[0.77, 0, 0],  [0, 0.5, 0.07],  ],
+    ]
+    dir_names = ["orient{}dist{}".format(v[0][0], v[1][2]) for v in values]
+    keys = [("env_kwargs", "obj_orientation"), ("env_kwargs", "obj_relative_position"),]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
@@ -78,6 +120,24 @@ def main(args):
     elif args.where == "slurm":
         from exptools.launching.slurm import build_slurm_resource
         from exptools.launching.exp_launcher import run_on_slurm
+        slurm_resource = build_slurm_resource(
+            mem= "16G",
+            time= "3-12:00:00",
+            n_gpus= 1,
+            partition= "short",
+            cuda_module= "cuda-10.0",
+        )
+        run_on_slurm(
+            script= "examples/run_sample_pc.py",
+            slurm_resource= slurm_resource,
+            experiment_title= experiment_title + ("--debug" if args.debug else ""),
+            # experiment_title= "temp_test" + ("--debug" if args.debug else ""),
+            script_name= experiment_title,
+            runs_per_setting= 1,
+            variants= variants,
+            log_dirs= log_dirs,
+            debug_mode= args.debug,
+        )
 
 if __name__ == "__main__":
     import argparse
