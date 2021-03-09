@@ -17,6 +17,10 @@ import mjrl.samplers.core as trajectory_sampler
 import mjrl.utils.process_samples as process_samples
 from mjrl.utils.logger import DataLog
 
+try:
+    import exptools
+except ImportError:
+    exptools = None
 
 class BatchREINFORCE:
     def __init__(self, env, policy, baseline,
@@ -66,7 +70,7 @@ class BatchREINFORCE:
                    gae_lambda=0.97,
                    num_cpu='max',
                    env_kwargs=None,
-                   iter= None,
+                   itr= None,
                    ):
 
         # Clean up input arguments
@@ -88,6 +92,7 @@ class BatchREINFORCE:
 
         if self.save_logs:
             self.logger.log_kv('time_sampling', timer.time() - ts)
+            if iter
 
         self.seed = self.seed + N if self.seed is not None else self.seed
 
