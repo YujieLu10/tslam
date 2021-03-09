@@ -61,7 +61,6 @@ class ModelAccelNPG(NPG):
                    gae_lambda=0.97,
                    num_cpu='max',
                    env_kwargs=None,
-                   itr= None,
                    ):
 
         ts = timer.time()

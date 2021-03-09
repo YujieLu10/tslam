@@ -11,6 +11,10 @@ import time as timer
 import os
 import copy
 
+try:
+    import exptools
+except ImportError:
+    exptools = None
 
 def _load_latest_policy_and_logs(agent, *, policy_dir, logs_dir):
     """Loads the latest policy.
@@ -71,6 +75,7 @@ def train_agent(job_name, agent,
                 save_freq = 10,
                 evaluation_rollouts = None,
                 plot_keys = ['stoc_pol_mean'],
+                env_kwargs= dict(),
                 ):
 
     np.random.seed(seed)
@@ -110,10 +115,11 @@ def train_agent(job_name, agent,
         if evaluation_rollouts is not None and evaluation_rollouts > 0:
             print("Performing evaluation rollouts ........")
             eval_paths = sample_paths(num_traj=evaluation_rollouts, policy=agent.policy, num_cpu=num_cpu,
-                                      env=e.env_id, eval_mode=True, base_seed=seed)
+                                      env=e.env_id, eval_mode=True, base_seed=seed, env_kwargs= env_kwargs)
             mean_pol_perf = np.mean([np.sum(path['rewards']) for path in eval_paths])
             if agent.save_logs:
                 agent.logger.log_kv('eval_score', mean_pol_perf)
+                if exptools: exptools.logging.logger.record_tabular('eval_score', mean_pol_perf, i)
 
         if i % save_freq == 0 and i > 0:
             if agent.save_logs:
@@ -132,8 +138,8 @@ def train_agent(job_name, agent,
             print("Iter | Stoc Pol | Mean Pol | Best (Stoc) \n")
             result_file.write("Iter | Sampling Pol | Evaluation Pol | Best (Sampled) \n")
             result_file.close()
-        print("[ %s ] %4i %5.2f %5.2f %5.2f " % (timer.asctime(timer.localtime(timer.time())),
-                                                 i, train_curve[i], mean_pol_perf, best_perf))
+        # print("[ %s ] %4i %5.2f %5.2f %5.2f " % (timer.asctime(timer.localtime(timer.time())),
+        #                                          i, train_curve[i], mean_pol_perf, best_perf))
         result_file = open('results.txt', 'a')
         result_file.write("%4i %5.2f %5.2f %5.2f \n" % (i, train_curve[i], mean_pol_perf, best_perf))
         result_file.close()
@@ -141,6 +147,12 @@ def train_agent(job_name, agent,
             print_data = sorted(filter(lambda v: np.asarray(v[1]).size == 1,
                                        agent.logger.get_current_log().items()))
             print(tabulate(print_data))
+        if exptools:
+            exptools.logging.logger.record_tabular("Iter", i, i)
+            exptools.logging.logger.record_tabular("SamplingPol", train_curve[i], i)
+            exptools.logging.logger.record_tabular("EvaluationPol", mean_pol_perf, i)
+            exptools.logging.logger.record_tabular("BestSampled", best_perf, i)
+            exptools.logging.logger.dump_tabular()
 
     # final save
     pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
