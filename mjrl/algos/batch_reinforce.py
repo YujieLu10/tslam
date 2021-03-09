@@ -66,6 +66,7 @@ class BatchREINFORCE:
                    gae_lambda=0.97,
                    num_cpu='max',
                    env_kwargs=None,
+                   iter= None,
                    ):
 
         # Clean up input arguments
