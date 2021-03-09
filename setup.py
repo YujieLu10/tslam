@@ -25,5 +25,6 @@ setup(
         'mujoco-py<2.1,>=2.0',
         'termcolor',
         'exptools@git+https://github.com/ziwenzhuang/exptools',
+        'tabulate',
     ],
 )

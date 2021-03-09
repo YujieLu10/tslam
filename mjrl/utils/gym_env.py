@@ -14,7 +14,7 @@ class EnvSpec(object):
 
 
 class GymEnv(object):
-    def __init__(self, env_name, env_kwargs):
+    def __init__(self, env_name, env_kwargs= dict()):
         env = gym.make(env_name, **env_kwargs)
         self.env = env
         self.env_id = env.spec.id

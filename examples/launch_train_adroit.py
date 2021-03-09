@@ -1,7 +1,6 @@
 from exptools.launching.variant import VariantLevel, make_variants, update_config
 import numpy as np
 
-seed = 123
 default_config = dict(
     env_name = "adroit-v4",
     env_kwargs = dict(
@@ -23,7 +22,7 @@ default_config = dict(
         hidden_sizes= (64,64),
         min_log_std= -3,
         init_log_std= 0,
-        seed= seed,
+        # seed= seed,
     ),
     baseline_kwargs = dict(
         inp_dim=None,
@@ -41,11 +40,11 @@ default_config = dict(
         epochs = 10,
         mb_size = 64,
         learn_rate = 3e-4,
-        seed = seed,
-        save_logs = False,
+        # seed = seed,
+        save_logs = True,
     ),
     train_agent_kwargs = dict(
-        seed = seed,
+        # seed = seed,
         niter = 100,
         gamma = 0.995,
         gae_lambda = 0.97,
@@ -56,12 +55,32 @@ default_config = dict(
         save_freq = 10,
         evaluation_rollouts = 5,
         plot_keys = ['stoc_pol_mean'],
-    )
+    ),
+    seed= 123,
 )
 
 def main(args):
     # set up variants
     variant_levels = list()
+
+    values = [
+        [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [1, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        [2, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [3, "up", [0.77, 0, 0],  [0, 0.5, 0.05], ],
+        [4, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+    ]
+    dir_names = ["obj{}".format(v[0]) for v in values]
+    keys = [
+        ("env_kwargs", "obj_bid_idx"),
+        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "obj_orientation"),
+        ("env_kwargs", "obj_relative_position"),
+    ] # each entry in the list is the string path to your config
+    variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
     variants, log_dirs = make_variants(*variant_levels)
@@ -74,9 +93,9 @@ def main(args):
         from exptools.launching.exp_launcher import run_experiments
         affinity_code = quick_affinity_code(n_parallel= len(variants))
         run_experiments(
-            script= "examples/run_sample_pc.py",
+            script= "examples/run_train_adroit.py",
             affinity_code= affinity_code,
-            experiment_title= experiment_title,
+            experiment_title= experiment_title + ("--debug" if args.debug else ""),
             runs_per_setting= 1, # how many times to run repeated experiments
             variants= variants,
             log_dirs= log_dirs,
@@ -93,7 +112,7 @@ def main(args):
             cuda_module= "cuda-10.0",
         )
         run_on_slurm(
-            script= "examples/run_sample_pc.py",
+            script= "examples/run_train_adroit.py",
             slurm_resource= slurm_resource,
             experiment_title= experiment_title + ("--debug" if args.debug else ""),
             # experiment_title= "temp_test" + ("--debug" if args.debug else ""),
