@@ -6,13 +6,17 @@ from mjrl.utils.make_train_plots import make_train_plots
 from mjrl.utils.gym_env import GymEnv
 from mjrl.samplers.core import sample_paths
 import numpy as np
+import torch
 import pickle
+import imageio
 import time as timer
 import os
 import copy
 
 try:
     import exptools
+    from colorsys import hsv_to_rgb
+    import pyvista as pv
 except ImportError:
     exptools = None
 
@@ -76,6 +80,7 @@ def train_agent(job_name, agent,
                 evaluation_rollouts = None,
                 plot_keys = ['stoc_pol_mean'],
                 env_kwargs= dict(),
+                visualize_kwargs= dict(),
                 ):
 
     np.random.seed(seed)
@@ -89,7 +94,7 @@ def train_agent(job_name, agent,
     best_perf = -1e8
     train_curve = best_perf*np.ones(niter)
     mean_pol_perf = 0.0
-    e = GymEnv(agent.env.env_id)
+    e = GymEnv(agent.env.env_id, env_kwargs)
 
     # Load from any existing checkpoint, policy, statistics, etc.
     # Why no checkpointing.. :(
@@ -143,6 +148,32 @@ def train_agent(job_name, agent,
             pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
             pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
             # pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
+
+            # save videos and pointcloud and reconstruted mesh
+            if exptools:
+                video, env_infos = e.visualize_policy_offscreen(
+                    policy= agent.policy,
+                    **visualize_kwargs,
+                ) # (T, C, H, W)
+                exptools.logging.logger.record_image("rendered", video[-1], i)
+                exptools.logging.logger.record_gif("rendered", video, i)
+                pc = np.array(env_infos[-1]["pointcloud"]) # (N, 3)
+                colors = np.zeros_like(pc)
+                for pc_idx in range(pc.shape[0]):
+                    h = pc[pc_idx, 2]
+                    colors[pc_idx] = hsv_to_rgb(h, 100.0, 100.0)
+                exptools.logging.logger._tb_writer.add_mesh("pointcloud",
+                    vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
+                    colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
+                    global_step= i,
+                )
+                mesh = pv.PolyData(pc).delaunay_3d(alpha= env_kwargs["mesh_reconstruct_alpha"]).extract_geometry()
+                exptools.logging.logger._tb_writer.add_mesh("reconstruction",
+                    vertices= torch.from_numpy(np.expand_dims(mesh.points, 0)),
+                    faces= torch.from_numpy(np.expand_dims(mesh.faces.reshape(-1, 4)[:, 1:], 0)),
+                    global_step= i,
+                )
+                
 
         # print results to console
         if i == 0:
