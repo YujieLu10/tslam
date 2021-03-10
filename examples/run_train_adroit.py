@@ -38,6 +38,7 @@ def run_experiment(log_dir, args):
     train_agent(
         job_name= log_dir, # using this interface to guide the algorithm log files into our designated log_dir
         agent= agent,
+        env_kwargs= args["env_kwargs"],
         **args["train_agent_kwargs"],
     )
     
