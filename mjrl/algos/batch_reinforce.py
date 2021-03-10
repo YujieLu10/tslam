@@ -91,7 +91,7 @@ class BatchREINFORCE:
 
         if self.save_logs:
             time_sampling = timer.time() - ts
-            self.logger.log_kv('time_sampling', )
+            self.logger.log_kv('time_sampling', time_sampling)
             if exptools: exptools.logging.logger.record_tabular("time_sampling", time_sampling)
 
         self.seed = self.seed + N if self.seed is not None else self.seed
