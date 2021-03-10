@@ -80,6 +80,9 @@ class GymEnv(object):
         except:
             self.env.render()
 
+    def render_offscreen(self, **kwargs):
+        return self.env.env.sim.render(**kwargs)
+
     def set_seed(self, seed=123):
         try:
             self.env.seed(seed)
@@ -135,6 +138,29 @@ class GymEnv(object):
                     o, r, d, _ = self.step(a)
                     self.render()
                     t = t+1
+
+    def visualize_policy_offscreen(self, policy,
+            horizon=1000,
+            num_episodes= 1,
+            mode='exploration',
+            **render_kwargs,
+        ):
+        """ The only difference is this method returns a nparray with size (T, C, H, W) as video
+        """
+        frames = list()
+        env_infos = list()
+        for ep in range(num_episodes):
+            o = self.reset()
+            d = False
+            t = 0
+            while t < horizon and d is False:
+                a = policy.get_action(o)[0] if mode == 'exploration' else policy.get_action(o)[1]['evaluation']
+                o, r, d, info = self.step(a)
+                frame = self.render_offscreen(mode= "offscreen", **render_kwargs)
+                frames.append(np.transpose(frame[::-1, :, :], (2,0,1)))
+                env_infos.append(info)
+                t = t+1
+        return np.array(frames), env_infos
 
     def evaluate_policy(self, policy,
                         num_episodes=5,
