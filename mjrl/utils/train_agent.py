@@ -120,6 +120,18 @@ def train_agent(job_name, agent,
             if agent.save_logs:
                 agent.logger.log_kv('eval_score', mean_pol_perf)
                 if exptools: exptools.logging.logger.record_tabular('eval_score', mean_pol_perf, i)
+            if exptools:
+                env_infos = [path["env_infos"] for path in eval_paths] # a list of dict
+                rewards = dict()
+                if env_infos:
+                    # get decomposed reward statistics
+                    keys = [k for k in env_infos[0].keys() if "_p" in k[-2:] or "_r" in k[-2:]]
+                    for k in keys:
+                        rewards[k] = list()
+                        for env_info in env_infos:
+                            rewards[k].append(env_info[k])
+                for k, v in rewards.items():
+                    exptools.logging.logger.record_tabular_misc_stat(k, v, i)
 
         if i % save_freq == 0 and i > 0:
             if agent.save_logs:
