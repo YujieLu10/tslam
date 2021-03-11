@@ -10,12 +10,12 @@ default_config = dict(
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation= "up", # ("up", "down")
-        chamfer_r_factor= 1,
+        chamfer_r_factor= 1e3,
         mesh_p_factor= 1,
         mesh_reconstruct_alpha= 0.01,
-        palm_r_factor= 1,
-        untouch_p_factor= 1,
-        newpoints_p_factor= 0,
+        palm_r_factor= 0.1,
+        untouch_p_factor= 0,
+        newpoints_r_factor= 1,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
