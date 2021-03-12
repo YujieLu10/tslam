@@ -61,7 +61,7 @@ def run_experiment(log_dir, args):
             colors = np.zeros_like(pc) # (N, 3)
             for pc_idx in range(pc.shape[0]):
                 h = pc[pc_idx, 2]
-                colors[pc_idx] = hsv_to_rgb(h, 100.0, 100.0)
+                colors[pc_idx] = hsv_to_rgb(h/10, 100.0, 100.0)
             logger.log("pc.shape {}".format(pc.shape))
             logger.log("colors.shape {}".format(colors.shape))
             logger._tb_writer.add_mesh("pointcloud",
