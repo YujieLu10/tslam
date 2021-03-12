@@ -69,6 +69,8 @@ def main(args):
         # [5,],
         # [6,],
         # [7,],
+        # [8,],
+        # [9,],
     ]
     dir_names = ["obj{}".format(*v) for v in values]
     keys = [("env_kwargs", "obj_bid_idx")] # each entry in the list is the string path to your config
@@ -94,6 +96,7 @@ def main(args):
         [[0, 0, 0],  [0, 0.5, 0.05],  ],
         [[0.77, 0, 0],  [0, 0.5, 0.05],  ],
         [[0.77, 0, 0],  [0, 0.5, 0.07],  ],
+        [[1.57, 0, 0],  [0, 0.5, 0.05],  ],
     ]
     dir_names = ["orient{}dist{}".format(v[0][0], v[1][2]) for v in values]
     keys = [("env_kwargs", "obj_orientation"), ("env_kwargs", "obj_relative_position"),]
@@ -107,7 +110,11 @@ def main(args):
     if args.where == "local":
         from exptools.launching.affinity import encode_affinity, quick_affinity_code
         from exptools.launching.exp_launcher import run_experiments
-        affinity_code = quick_affinity_code(n_parallel= len(variants))
+        affinity_code = encode_affinity(
+            n_cpu_core= 8,
+            n_gpu= 4,
+            contexts_per_gpu= 2,
+        )
         run_experiments(
             script= "examples/run_sample_pc.py",
             affinity_code= affinity_code,

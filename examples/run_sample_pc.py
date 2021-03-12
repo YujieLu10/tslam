@@ -35,7 +35,7 @@ def run_experiment(log_dir, args):
         frame = env.env.env.sim.render(width=640, height=480,
                             mode='offscreen', camera_name=cam_name, device_id=0)
         frame = frame[::-1, :, :]
-        logger.tb_image("rendered {}".format(cam_name), np.transpose(frame, (2,0,1)))
+        logger.record_image("rendered {}".format(cam_name), np.transpose(frame, (2,0,1)))
 
     if args["sample_method"] == "policy":
         args["policy_kwargs"]["hidden_sizes"] = tuple(args["policy_kwargs"]["hidden_sizes"])
@@ -72,7 +72,7 @@ def run_experiment(log_dir, args):
             
         if (i+1) <= 100:
             frame = env.env.env.sim.render(width=640, height=480,
-                                mode='offscreen', camera_name="view_2", device_id=0)
+                                mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
         if (i+1) == 100:
