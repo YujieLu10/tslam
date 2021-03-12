@@ -10,11 +10,12 @@ default_config = dict(
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation= "up", # ("up", "down")
+        # scale all reward/penalty to the scale of 1.0
         chamfer_r_factor= 1e3,
         mesh_p_factor= 1,
         mesh_reconstruct_alpha= 0.01,
-        palm_r_factor= 0.1,
-        untouch_p_factor= 0,
+        palm_r_factor= 1e2,
+        untouch_p_factor= 1,
         newpoints_r_factor= 1,
     ),
     policy_name = "MLP",
@@ -80,6 +81,8 @@ def main(args):
         [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
         [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
         [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [8, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        [9, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
     ]
     dir_names = ["obj{}".format(v[0]) for v in values]
     keys = [
