@@ -41,6 +41,7 @@ def run_experiment(log_dir, args):
         args["policy_kwargs"]["hidden_sizes"] = tuple(args["policy_kwargs"]["hidden_sizes"])
         policy = MLP(env.spec, **args["policy_kwargs"])
 
+    gif_frames = list()
     for i in range(args["total_timesteps"]):
         if args["sample_method"] == "policy":
             obs, rew, done, info = env.step(policy.get_action(obs)[0])
@@ -68,6 +69,14 @@ def run_experiment(log_dir, args):
                 colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
                 global_step= i,
             )
+            
+        if (i+1) <= 100:
+            frame = env.env.env.sim.render(width=640, height=480,
+                                mode='offscreen', camera_name="view_2", device_id=0)
+            frame = np.transpose(frame[::-1, :, :], (2,0,1))
+            gif_frames.append(frame)
+        if (i+1) == 100:
+            logger.record_gif("rendered", gif_frames, itr= i)
 
         logger.dump_tabular()
     

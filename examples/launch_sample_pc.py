@@ -15,11 +15,11 @@ default_config = dict(
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation= "up", # ("up", "down")
         chamfer_r_factor= 1,
-        mesh_p_factor= 0, # not implemented yet
-        mseh_reconstruct_alpha= 0.01,
+        mesh_p_factor= 0,
+        mesh_reconstruct_alpha= 0.01,
         palm_r_factor= 1,
         untouch_p_factor= 1,
-        newpoints_p_factor= 0,
+        newpoints_r_factor= 1,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
