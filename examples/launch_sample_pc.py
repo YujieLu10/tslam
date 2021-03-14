@@ -50,8 +50,8 @@ def main(args):
     #     [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
     #     [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
     #     [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [8, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [9, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+    #     [8, "down", [0.77, 0, 0],  [0, 0.55, 0.045], ],
+    #     [9, "down", [0.77, 0, 0],  [0, 0.55, 0.05], ],
     # ]
     # dir_names = ["obj{}".format(v[0]) for v in values]
     # keys = [
@@ -80,7 +80,7 @@ def main(args):
 
     values = [
         ["action"],
-        # ["policy"],
+        ["policy"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]
@@ -95,13 +95,23 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        [[0, 0, 0],  [0, 0.5, 0.05],  ],
-        [[0.77, 0, 0],  [0, 0.5, 0.05],  ],
-        [[0.77, 0, 0],  [0, 0.5, 0.07],  ],
-        [[1.57, 0, 0],  [0, 0.5, 0.05],  ],
+        # [[0, 0, 0], ],
+        # [[0.77, 0, 0], ],
+        # [[1.57, 0, 0], ],
     ]
-    dir_names = ["orient{}dist{}".format(v[0][0], v[1][2]) for v in values]
+    dir_names = ["orient{}".format(v[0][0]) for v in values]
     keys = [("env_kwargs", "obj_orientation"), ("env_kwargs", "obj_relative_position"),]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        [[0, 0.5, 0.05],  ],
+        [[0, 0.55, 0.05],  ],
+        [[0, 0.55, 0.045],  ],
+        [[0, 0.53, 0.045],  ],
+        [[0, 0.5, 0.07],  ],
+    ]
+    dir_names = ["dist{}-{}".format(v[0][1], v[0][2]) for v in values]
+    keys = [("env_kwargs", "obj_relative_position"),]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
