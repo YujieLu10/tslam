@@ -157,7 +157,7 @@ def train_agent(job_name, agent,
                 ) # (T, C, H, W)
                 exptools.logging.logger.record_image("rendered", video[-1], i)
                 exptools.logging.logger.record_gif("rendered", video, i)
-                pc = np.array(env_infos[-1]["pointcloud"]) # (N, 3)
+                pc = np.array(env_infos[-1]["pointcloud"]) if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)) # (N, 3)
                 colors = np.zeros_like(pc)
                 for pc_idx in range(pc.shape[0]):
                     h = pc[pc_idx, 2]
