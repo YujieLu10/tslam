@@ -8,7 +8,7 @@ default_config = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
-        new_point_threshold= 0.001, # minimum distance new point to all previous points
+        new_point_threshold= 0.0001, # minimum distance new point to all previous points
         forearm_orientation= "up", # ("up", "down")
         # scale all reward/penalty to the scale of 1.0
         chamfer_r_factor= 1e3,
@@ -46,7 +46,7 @@ default_config = dict(
     ),
     train_agent_kwargs = dict(
         # seed = seed,
-        niter = 100,
+        niter = 200,
         gamma = 0.995,
         gae_lambda = 0.97,
         num_cpu = 8,
@@ -61,7 +61,7 @@ default_config = dict(
             num_episodes= 1,
             mode='exploration',
             width= 640, height= 480,
-            camera_name= "view_2",
+            camera_name= "view_1",
             device_id= 0,
         )
     ),
@@ -73,16 +73,16 @@ def main(args):
     variant_levels = list()
 
     values = [
-        [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        [1, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-        [2, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        [3, "up", [0.77, 0, 0],  [0, 0.5, 0.05], ],
-        [4, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-        [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-        [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-        [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        [8, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-        [9, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [1, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ], # hard 0
+        [2, "down", [0, 0, 0],  [0, 0.5, 0.05], ], # hard 1
+        [3, "up", [0.77, 0, 0],  [0, 0.5, 0.05], ], # medium 0
+        [4, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ], # medium 1
+        # [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        # [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
+        # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [8, "down", [0.77, 0, 0],  [0, 0.55, 0.045], ], # simple 0
+        [9, "down", [0.77, 0, 0],  [0, 0.55, 0.05], ],  # simple 1
     ]
     dir_names = ["obj{}".format(v[0]) for v in values]
     keys = [
