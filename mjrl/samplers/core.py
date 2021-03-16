@@ -198,7 +198,7 @@ def _try_multiprocess(func, input_dict_list, num_cpu, max_process_time, max_time
     parallel_runs = [pool.apply_async(func, kwds=input_dict) for input_dict in input_dict_list]
     try:
         results = [p.get(timeout=max_process_time) for p in parallel_runs]
-    except Exception as e:
+    except TimeoutError as e:
         print(str(e))
         print("Timeout Error raised... Trying again")
         pool.close()
