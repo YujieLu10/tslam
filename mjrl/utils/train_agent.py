@@ -128,6 +128,7 @@ def train_agent(job_name, agent,
             if exptools:
                 env_infos = [path["env_infos"] for path in eval_paths] # a list of dict
                 rewards = dict()
+                total_points = list()
                 if env_infos:
                     # get decomposed reward statistics
                     keys = [k for k in env_infos[0].keys() if "_p" in k[-2:] or "_r" in k[-2:]]
@@ -135,8 +136,11 @@ def train_agent(job_name, agent,
                         rewards[k] = list()
                         for env_info in env_infos:
                             rewards[k].append(env_info[k])
+                    for env_info in env_infos:
+                        total_points.append(len(env_info["pointcloud"]))
                 for k, v in rewards.items():
                     exptools.logging.logger.record_tabular_misc_stat(k, v, i)
+                exptools.logging.logger.record_tabular_misc_stat("total_num_points", total_points, i)
 
         if i % save_freq == 0 and i > 0:
             if agent.save_logs:
