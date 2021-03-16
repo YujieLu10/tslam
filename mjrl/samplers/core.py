@@ -159,6 +159,7 @@ def sample_data_batch(
         num_cpu = 1,
         paths_per_call = 2,
         env_kwargs=None,
+        sample_paths_kwargs= dict(),
         ):
 
     num_cpu = 1 if num_cpu is None else num_cpu
@@ -175,7 +176,7 @@ def sample_data_batch(
         base_seed = base_seed + 12345
         new_paths = sample_paths(paths_per_call * num_cpu, env, policy,
                                  eval_mode, horizon, base_seed, num_cpu,
-                                 suppress_print=True, env_kwargs=env_kwargs)
+                                 suppress_print=True, env_kwargs=env_kwargs, **sample_paths_kwargs)
         for path in new_paths:
             paths.append(path)
         paths_so_far += len(new_paths)

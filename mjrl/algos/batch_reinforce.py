@@ -70,6 +70,7 @@ class BatchREINFORCE:
                    gae_lambda=0.97,
                    num_cpu='max',
                    env_kwargs=None,
+                   sample_paths_kwargs= dict(),
                    ):
 
         # Clean up input arguments
@@ -81,12 +82,28 @@ class BatchREINFORCE:
         ts = timer.time()
 
         if sample_mode == 'trajectories':
-            input_dict = dict(num_traj=N, env=env, policy=self.policy, horizon=horizon,
-                              base_seed=self.seed, num_cpu=num_cpu, env_kwargs=env_kwargs)
+            input_dict = dict(
+                num_traj=N,
+                env=env,
+                policy=self.policy,
+                horizon=horizon,
+                base_seed=self.seed,
+                num_cpu=num_cpu,
+                env_kwargs=env_kwargs,
+                **sample_paths_kwargs
+            )
             paths = trajectory_sampler.sample_paths(**input_dict)
         elif sample_mode == 'samples':
-            input_dict = dict(num_samples=N, env=env, policy=self.policy, horizon=horizon,
-                              base_seed=self.seed, num_cpu=num_cpu, env_kwargs=env_kwargs)
+            input_dict = dict(
+                num_samples=N,
+                env=env,
+                policy=self.policy,
+                horizon=horizon,
+                base_seed=self.seed,
+                num_cpu=num_cpu,
+                env_kwargs=env_kwargs,
+                sample_paths_kwargs= sample_paths_kwargs,
+            )
             paths = trajectory_sampler.sample_data_batch(**input_dict)
 
         if self.save_logs:

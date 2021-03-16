@@ -81,6 +81,7 @@ def train_agent(job_name, agent,
                 plot_keys = ['stoc_pol_mean'],
                 env_kwargs= dict(),
                 visualize_kwargs= dict(),
+                sample_paths_kwargs= dict(),
                 ):
 
     np.random.seed(seed)
@@ -113,14 +114,21 @@ def train_agent(job_name, agent,
             best_perf = train_curve[i-1]
 
         N = num_traj if sample_mode == 'trajectories' else num_samples
-        args = dict(N=N, sample_mode=sample_mode, gamma=gamma, gae_lambda=gae_lambda, num_cpu=num_cpu)
+        args = dict(N=N, sample_mode=sample_mode, gamma=gamma, gae_lambda=gae_lambda, num_cpu=num_cpu, sample_paths_kwargs= sample_paths_kwargs)
         stats = agent.train_step(**args)
         train_curve[i] = stats[0]
 
         if evaluation_rollouts is not None and evaluation_rollouts > 0:
             print("Performing evaluation rollouts ........")
-            eval_paths = sample_paths(num_traj=evaluation_rollouts, policy=agent.policy, num_cpu=num_cpu,
-                                      env=e.env_id, eval_mode=True, base_seed=seed, env_kwargs= env_kwargs)
+            eval_paths = sample_paths(
+                num_traj=evaluation_rollouts,
+                env=e.env_id,
+                policy=agent.policy,
+                eval_mode=True,
+                base_seed=seed,
+                num_cpu=num_cpu,
+                env_kwargs= env_kwargs,
+                **sample_paths_kwargs)
             mean_pol_perf = np.mean([np.sum(path['rewards']) for path in eval_paths])
             if agent.save_logs:
                 agent.logger.log_kv('eval_score', mean_pol_perf)

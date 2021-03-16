@@ -16,7 +16,7 @@ default_config = dict(
         mesh_reconstruct_alpha= 0.01,
         palm_r_factor= 1e2,
         untouch_p_factor= 1,
-        newpoints_r_factor= 1,
+        newpoints_r_factor= 1e2,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -63,7 +63,13 @@ default_config = dict(
             width= 640, height= 480,
             camera_name= "view_1",
             device_id= 0,
-        )
+        ),
+        sample_paths_kwargs = dict(
+            horizon=1e6,
+            max_process_time=300,
+            max_timeouts=4,
+            suppress_print=False,
+        ),
     ),
     seed= 123,
 )
@@ -102,7 +108,11 @@ def main(args):
     if args.where == "local":
         from exptools.launching.affinity import encode_affinity, quick_affinity_code
         from exptools.launching.exp_launcher import run_experiments
-        affinity_code = quick_affinity_code(n_parallel= len(variants))
+        affinity_code = encode_affinity(
+            n_cpu_core= 12,
+            n_gpu= 4,
+            contexts_per_gpu= 3,
+        )
         run_experiments(
             script= "examples/run_train_adroit.py",
             affinity_code= affinity_code,
