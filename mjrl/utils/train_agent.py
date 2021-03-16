@@ -114,8 +114,15 @@ def train_agent(job_name, agent,
             best_perf = train_curve[i-1]
 
         N = num_traj if sample_mode == 'trajectories' else num_samples
-        args = dict(N=N, sample_mode=sample_mode, gamma=gamma, gae_lambda=gae_lambda, num_cpu=num_cpu, sample_paths_kwargs= sample_paths_kwargs)
-        stats = agent.train_step(**args)
+        stats = agent.train_step(
+            N=N, 
+            sample_mode=sample_mode,
+            gamma=gamma,
+            gae_lambda=gae_lambda,
+            num_cpu=num_cpu,
+            env_kwargs= env_kwargs,
+            sample_paths_kwargs= sample_paths_kwargs,
+        )
         train_curve[i] = stats[0]
 
         if evaluation_rollouts is not None and evaluation_rollouts > 0:
