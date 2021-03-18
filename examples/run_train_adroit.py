@@ -1,7 +1,7 @@
 from exptools.launching.affinity import affinity_from_code
 from exptools.launching.variant import load_variant
 from exptools.logging.context import logger_context
-import exptools.logging.logger as logger
+from exptools.logging import logger
 
 import os, sys
 
