@@ -139,7 +139,7 @@ def train_agent(job_name, agent,
             mean_pol_perf = np.mean([np.sum(path['rewards']) for path in eval_paths])
             if agent.save_logs:
                 agent.logger.log_kv('eval_score', mean_pol_perf)
-                if exptools: exptools.logging.logger.record_tabular('eval_score', mean_pol_perf, i)
+                if exptools: exptools.logging.logger.log_scalar('eval_score', mean_pol_perf, i)
             if exptools:
                 env_infos = [path["env_infos"] for path in eval_paths] # a list of dict
                 rewards = dict()
@@ -154,8 +154,8 @@ def train_agent(job_name, agent,
                     for env_info in env_infos:
                         total_points.append(len(env_info["pointcloud"]))
                 for k, v in rewards.items():
-                    exptools.logging.logger.record_tabular_misc_stat(k, v, i)
-                exptools.logging.logger.record_tabular_misc_stat("total_num_points", total_points, i)
+                    exptools.logging.logger.log_scalar_batch(k, v, i)
+                exptools.logging.logger.log_scalar_batch("total_num_points", total_points, i)
 
         if i % save_freq == 0 and i > 0:
             if agent.save_logs:
@@ -210,11 +210,11 @@ def train_agent(job_name, agent,
                                        agent.logger.get_current_log().items()))
             print(tabulate(print_data))
         if exptools:
-            exptools.logging.logger.record_tabular("Iter", i, i)
-            exptools.logging.logger.record_tabular("SamplingPol", train_curve[i], i)
-            exptools.logging.logger.record_tabular("EvaluationPol", mean_pol_perf, i)
-            exptools.logging.logger.record_tabular("BestSampled", best_perf, i)
-            exptools.logging.logger.dump_tabular()
+            exptools.logging.logger.log_scalar("Iter", i, i)
+            exptools.logging.logger.log_scalar("SamplingPol", train_curve[i], i)
+            exptools.logging.logger.log_scalar("EvaluationPol", mean_pol_perf, i)
+            exptools.logging.logger.log_scalar("BestSampled", best_perf, i)
+            exptools.logging.logger.dump_scalar()
 
     # final save
     pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))

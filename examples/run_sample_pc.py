@@ -35,7 +35,7 @@ def run_experiment(log_dir, args):
         frame = env.env.env.sim.render(width=640, height=480,
                             mode='offscreen', camera_name=cam_name, device_id=0)
         frame = frame[::-1, :, :]
-        logger.record_image("rendered {}".format(cam_name), np.transpose(frame, (2,0,1)))
+        logger.log_image("rendered {}".format(cam_name), np.transpose(frame, (2,0,1)))
 
     if args["sample_method"] == "policy":
         args["policy_kwargs"]["hidden_sizes"] = tuple(args["policy_kwargs"]["hidden_sizes"])
@@ -48,12 +48,12 @@ def run_experiment(log_dir, args):
         elif args["sample_method"] == "action":
             obs, rew, done, info = env.step(env.action_space.sample())
 
-        logger.record_tabular("step", i, itr= i)
-        logger.record_tabular("total_reward", rew, itr= i)
-        logger.record_tabular("n_points", len(info["pointcloud"]), itr= i)
+        logger.log_scalar("step", i, i)
+        logger.log_scalar("total_reward", rew, i)
+        logger.log_scalar("n_points", len(info["pointcloud"]), i)
         for k, v in info.items():
             if "_p" in k or "_r" in k:
-                logger.record_tabular(k, v, itr= i)
+                logger.log_scalar(k, v, i)
         if (i+1) % int(4e3) == 0:
             pc = np.array(info["pointcloud"]) # (N, 3)
             # log pointcloud to tensorboard
@@ -62,9 +62,9 @@ def run_experiment(log_dir, args):
             for pc_idx in range(pc.shape[0]):
                 h = pc[pc_idx, 2]
                 colors[pc_idx] = hsv_to_rgb(h/10, 100.0, 100.0)
-            logger.log("pc.shape {}".format(pc.shape))
-            logger.log("colors.shape {}".format(colors.shape))
-            logger._tb_writer.add_mesh("pointcloud",
+            logger.log_text("pc.shape {}".format(pc.shape))
+            logger.log_text("colors.shape {}".format(colors.shape))
+            logger.tb_writer.add_mesh("pointcloud",
                 vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
                 colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
                 global_step= i,
@@ -76,7 +76,7 @@ def run_experiment(log_dir, args):
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
         if (i+1) == 100:
-            logger.record_gif("rendered", gif_frames, itr= i)
+            logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()
     
