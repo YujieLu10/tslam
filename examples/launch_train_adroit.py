@@ -22,7 +22,7 @@ default_config = dict(
     policy_kwargs = dict(
         hidden_sizes= (64,64),
         min_log_std= -3,
-        init_log_std= 0,
+        init_log_std= 2.5,
         # seed= seed,
     ),
     baseline_kwargs = dict(
@@ -65,8 +65,7 @@ default_config = dict(
             device_id= 0,
         ),
         sample_paths_kwargs = dict(
-            horizon=1e6,
-            max_process_time=300,
+            max_process_time=3000,
             max_timeouts=4,
             suppress_print=False,
         ),
