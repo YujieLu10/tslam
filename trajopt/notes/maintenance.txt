@@ -1,4 +1,0 @@
-Run unit tests
-Run pylint
-Note benchmark results (+ rev num)
-valgrind
