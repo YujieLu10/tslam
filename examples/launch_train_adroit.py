@@ -120,6 +120,10 @@ def main(args):
     variants, log_dirs = make_variants(*variant_levels)
     for i, variant in enumerate(variants):
         variants[i] = update_config(default_config, variant)
+        if args.debug > 0:
+            variants[i]["train_agent_kwargs"]["num_cpu"] = None
+            variants[i]["train_agent_kwargs"]["num_samples"] = 120
+            variants[i]["train_agent_kwargs"]["num_traj"] = 16
 
     experiment_title = "train_adroit"
     if args.where == "local":
