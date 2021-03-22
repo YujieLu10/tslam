@@ -78,7 +78,7 @@ def run_experiment(log_dir, args):
         if (i+1) == 100:
             logger.log_gif("rendered", gif_frames, i)
 
-        logger.dump_tabular()
+        logger.dump_data()
     
 if __name__ == "__main__":
     main(*sys.argv[1:])

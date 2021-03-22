@@ -109,7 +109,7 @@ class BatchREINFORCE:
         if self.save_logs:
             time_sampling = timer.time() - ts
             self.logger.log_kv('time_sampling', time_sampling)
-            if exptools: exptools.logging.logger.record_tabular("time_sampling", time_sampling)
+            if exptools: exptools.logging.logger.log_scalar("time_sampling", time_sampling)
 
         self.seed = self.seed + N if self.seed is not None else self.seed
 
@@ -124,7 +124,7 @@ class BatchREINFORCE:
         if self.save_logs:
             num_samples = np.sum([p["rewards"].shape[0] for p in paths])
             self.logger.log_kv('num_samples', num_samples)
-            if exptools: exptools.logging.logger.record_tabular('num_samples', num_samples)
+            if exptools: exptools.logging.logger.log_scalar('num_samples', num_samples)
         # fit baseline
         if self.save_logs:
             ts = timer.time()
@@ -134,9 +134,9 @@ class BatchREINFORCE:
             self.logger.log_kv('VF_error_before', error_before)
             self.logger.log_kv('VF_error_after', error_after)
             if exptools:
-                exptools.logging.logger.record_tabular('time_VF', time_VF)
-                exptools.logging.logger.record_tabular('VF_error_before', error_before)
-                exptools.logging.logger.record_tabular('VF_error_after', error_after)
+                exptools.logging.logger.log_scalar('time_VF', time_VF)
+                exptools.logging.logger.log_scalar('VF_error_before', error_before)
+                exptools.logging.logger.log_scalar('VF_error_after', error_after)
         else:
             self.baseline.fit(paths)
 
@@ -192,11 +192,11 @@ class BatchREINFORCE:
             self.logger.log_kv('surr_improvement', surr_after - surr_before)
             self.logger.log_kv('running_score', self.running_score)
             if exptools:
-                exptools.logging.logger.record_tabular('alpha', self.alpha)
-                exptools.logging.logger.record_tabular('time_vpg', t_gLL)
-                exptools.logging.logger.record_tabular('kl_dist', kl_dist)
-                exptools.logging.logger.record_tabular('surr_improvement', surr_after - surr_before)
-                exptools.logging.logger.record_tabular('running_score', self.running_score)
+                exptools.logging.logger.log_scalar('alpha', self.alpha)
+                exptools.logging.logger.log_scalar('time_vpg', t_gLL)
+                exptools.logging.logger.log_scalar('kl_dist', kl_dist)
+                exptools.logging.logger.log_scalar('surr_improvement', surr_after - surr_before)
+                exptools.logging.logger.log_scalar('running_score', self.running_score)
             try:
                 self.env.env.env.evaluate_success(paths, self.logger)
             except:
@@ -204,7 +204,7 @@ class BatchREINFORCE:
                 try:
                     success_rate = self.env.env.env.evaluate_success(paths)
                     self.logger.log_kv('success_rate', success_rate)
-                    if exptools: exptools.logging.logger.record_tabular('success_rate', success_rate)
+                    if exptools: exptools.logging.logger.log_scalar('success_rate', success_rate)
                 except:
                     pass
 
@@ -244,7 +244,7 @@ class BatchREINFORCE:
         self.logger.log_kv('stoc_pol_max', max_return)
         self.logger.log_kv('stoc_pol_min', min_return)
         if exptools:
-            exptools.logging.logger.record_tabular('stoc_pol_mean', mean_return)
-            exptools.logging.logger.record_tabular('stoc_pol_std', std_return)
-            exptools.logging.logger.record_tabular('stoc_pol_max', max_return)
-            exptools.logging.logger.record_tabular('stoc_pol_min', min_return)
+            exptools.logging.logger.log_scalar('stoc_pol_mean', mean_return)
+            exptools.logging.logger.log_scalar('stoc_pol_std', std_return)
+            exptools.logging.logger.log_scalar('stoc_pol_max', max_return)
+            exptools.logging.logger.log_scalar('stoc_pol_min', min_return)

@@ -113,10 +113,10 @@ class PPO(BatchREINFORCE):
             self.logger.log_kv('surr_improvement', surr_after - surr_before)
             self.logger.log_kv('running_score', self.running_score)
             if exptools:
-                exptools.logging.logger.record_tabular('t_opt', t_opt)
-                exptools.logging.logger.record_tabular('kl_dist', kl_dist)
-                exptools.logging.logger.record_tabular('surr_improvement', surr_after - surr_before)
-                exptools.logging.logger.record_tabular('running_score', self.running_score)
+                exptools.logging.logger.log_scalar('t_opt', t_opt)
+                exptools.logging.logger.log_scalar('kl_dist', kl_dist)
+                exptools.logging.logger.log_scalar('surr_improvement', surr_after - surr_before)
+                exptools.logging.logger.log_scalar('running_score', self.running_score)
             try:
                 self.env.env.env.evaluate_success(paths, self.logger)
             except:
@@ -124,7 +124,7 @@ class PPO(BatchREINFORCE):
                 try:
                     success_rate = self.env.env.env.evaluate_success(paths)
                     self.logger.log_kv('success_rate', success_rate)
-                    if exptools: exptools.logging.logger.record_tabular('success_rate', success_rate)
+                    if exptools: exptools.logging.logger.log_scalar('success_rate', success_rate)
                 except:
                     pass
 
