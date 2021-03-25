@@ -142,7 +142,7 @@ class GymEnv(object):
     def visualize_policy_offscreen(self, policy,
             horizon=1000,
             num_episodes= 1,
-            mode='exploration',
+            mode='evaluation',
             **render_kwargs,
         ):
         """ The only difference is this method returns a nparray with size (T, C, H, W) as video

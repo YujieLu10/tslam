@@ -9,6 +9,10 @@ class MLP:
                  hidden_sizes=(64,64),
                  min_log_std=-3,
                  init_log_std=0,
+                 m_f=1e4,
+                 n_f=1e-6,
+                 in_ss=False,
+                 out_ss=False,
                  seed=None):
         """
         :param env_spec: specifications of the env (see utils/gym_env.py)
@@ -20,6 +24,8 @@ class MLP:
         self.n = env_spec.observation_dim  # number of states
         self.m = env_spec.action_dim  # number of actions
         self.min_log_std = min_log_std
+        self.mean_factor = m_f
+        self.noise_factor = n_f
 
         # Set seed
         # ------------------------
@@ -31,7 +37,11 @@ class MLP:
 
         # Policy network
         # ------------------------
-        self.model = FCNetwork(self.n, output_dim, hidden_sizes)
+        self.in_shift = torch.randn(self.n)
+        self.in_scale = torch.randn(1)
+        self.out_shift = torch.randn(57)
+        self.out_scale = torch.randn(1)
+        self.model = FCNetwork(self.n, output_dim, hidden_sizes, self.in_shift if in_ss else None, self.in_scale if in_ss else None, self.out_shift if out_ss else None, self.out_scale if out_ss else None)
         # make weights small
         for param in list(self.model.parameters())[-2:]:  # only last layer
            param.data = 1e-2 * param.data
@@ -43,7 +53,7 @@ class MLP:
 
         # Old Policy network
         # ------------------------
-        self.old_model = FCNetwork(self.n, output_dim, hidden_sizes)
+        self.old_model = FCNetwork(self.n, output_dim, hidden_sizes, self.in_shift if in_ss else None, self.in_scale if in_ss else None, self.out_shift if out_ss else None, self.out_scale if out_ss else None)
         self.old_params = list(self.old_model.parameters())
         self.old_log_std = None
         if not init_log_std is None:
@@ -102,12 +112,13 @@ class MLP:
     def get_action(self, observation):
         o = np.float32(observation.reshape(1, -1))
         self.obs_var.data = torch.from_numpy(o)
-        mean = self.model(self.obs_var).data.numpy().ravel()
+        mean = self.model(self.obs_var).data.numpy().ravel() * self.mean_factor
         if self.log_std is None:
             self.log_std_val = mean[..., self.m:]
             mean = mean[..., :self.m]
-        noise = np.exp(self.log_std_val) * np.random.randn(self.m)
+        noise = np.exp(self.log_std_val) * self.noise_factor * np.random.randn(self.m)
         action = mean + noise
+        # print(">>> mean{} noise{} action{}".format(mean, noise, action))
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
 
     def mean_LL(self, observations, actions, model=None, log_std=None):
@@ -120,7 +131,7 @@ class MLP:
             act_var = Variable(torch.from_numpy(actions).float(), requires_grad=False)
         else:
             act_var = actions
-        mean = model(obs_var)
+        mean = model(obs_var) * self.mean_factor
         if self.log_std is None:
             self.log_std_var = mean[..., self.m:]
             mean = mean[..., :self.m]

@@ -105,7 +105,7 @@ def sample_paths(
         horizon = 1e6,
         base_seed = None,
         num_cpu = 1,
-        max_process_time=300,
+        max_process_time=30000,
         max_timeouts=4,
         suppress_print=False,
         env_kwargs=None,

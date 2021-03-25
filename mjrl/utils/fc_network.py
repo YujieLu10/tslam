@@ -12,7 +12,6 @@ class FCNetwork(nn.Module):
                  out_shift = None,
                  out_scale = None):
         super(FCNetwork, self).__init__()
-
         self.obs_dim = obs_dim
         self.act_dim = act_dim
         assert type(hidden_sizes) == tuple
@@ -43,6 +42,7 @@ class FCNetwork(nn.Module):
             out = x.to('cpu')
         else:
             out = x
+        # print(">> out {} obs_dim{} self.out_scale{}".format(out.shape, self.obs_dim, self.out_scale.shape))
         out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
             out = self.fc_layers[i](out)

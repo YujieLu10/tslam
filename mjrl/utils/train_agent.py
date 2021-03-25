@@ -72,7 +72,7 @@ def train_agent(job_name, agent,
                 niter = 101,
                 gamma = 0.995,
                 gae_lambda = None,
-                num_cpu = 1,
+                num_cpu = 16,
                 sample_mode = 'trajectories',
                 num_traj = 50,
                 num_samples = 50000, # has precedence, used with sample_mode = 'samples'
@@ -83,7 +83,7 @@ def train_agent(job_name, agent,
                 visualize_kwargs= dict(),
                 sample_paths_kwargs= dict(),
                 ):
-
+    print("num_cpu{}".format(num_cpu))
     np.random.seed(seed)
     if os.path.isdir(job_name) == False:
         os.mkdir(job_name)

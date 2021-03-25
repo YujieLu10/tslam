@@ -17,6 +17,7 @@ default_config = dict(
         palm_r_factor= 1e2,
         untouch_p_factor= 1,
         newpoints_r_factor= 1e2,
+        knn_r_factor= 1,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -100,19 +101,20 @@ def main(args):
 
     values = [
         # [1e3, 1, 1e2, 1, 1e2],
-        [1e3, 0, 0, 0, 0,],
+        [1e3, 0, 0, 0, 0, 1],
         # [0, 1, 0, 0, 0,],
         # [0, 0, 1e2, 0, 0,],
         # [0, 0, 0, 1, 0,],
-        [0, 0, 0, 0, 1e2,],
+        [0, 0, 0, 0, 1e2, 1],
     ]
-    dir_names = ["cham{}mesh{}palm{}untouch{}new{}".format(*tuple(str(vi != 0) for vi in v)) for v in values]
+    dir_names = ["cham{}mesh{}palm{}untouch{}new{}knn{}".format(*tuple(str(vi != 0) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "chamfer_r_factor", ),
         ("env_kwargs", "mesh_p_factor", ),
         ("env_kwargs", "palm_r_factor", ),
         ("env_kwargs", "untouch_p_factor", ),
         ("env_kwargs", "newpoints_r_factor", ),
+        ("env_kwargs", "knn_r_factor", ),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
