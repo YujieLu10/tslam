@@ -121,6 +121,18 @@ class MLP:
         # print(">>> mean{} noise{} action{}".format(mean, noise, action))
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
 
+    def get_action_eval(self, observation):
+        o = np.float32(observation.reshape(1, -1))
+        self.obs_var.data = torch.from_numpy(o)
+        mean = self.model(self.obs_var).data.numpy().ravel()
+        if self.log_std is None:
+            self.log_std_val = mean[..., self.m:]
+            mean = mean[..., :self.m]
+        noise = np.exp(self.log_std_val) * np.random.randn(self.m)
+        action = mean + noise
+        # print(">>> mean{} noise{} action{}".format(mean, noise, action))
+        return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
+
     def mean_LL(self, observations, actions, model=None, log_std=None):
         model = self.model if model is None else model
         if type(observations) is not torch.Tensor:

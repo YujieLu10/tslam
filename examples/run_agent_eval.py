@@ -45,18 +45,18 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/share/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "best_policy.pickle"), 'rb'))
-        policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
+        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "best_policy.pickle"), 'rb'))
+        # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
 
     gif_frames = list()
     pc_frames = list()
     for i in range(args["total_timesteps"]):
         if args["sample_method"] == "policy" or args["sample_method"] == "explore":
-            obs, rew, done, info = env.step(policy.get_action(obs)[0])
+            obs, rew, done, info = env.step(policy.get_action_eval(obs)[0])
         elif args["sample_method"] == "action":
             obs, rew, done, info = env.step(env.action_space.sample())
         elif args["sample_method"] == "agent":
-            obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
+            obs, rew, done, info = env.step(policy.get_action_eval(obs)[1]['evaluation'])
 
         # logger.record_tabular("step", i, itr= i)
         # logger.record_tabular("total_reward", rew, itr= i)

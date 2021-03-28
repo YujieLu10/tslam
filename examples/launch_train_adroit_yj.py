@@ -2,7 +2,7 @@ from exptools.launching.variant import VariantLevel, make_variants, update_confi
 import numpy as np
 
 default_config = dict(
-    env_name = "adroit-v1",
+    env_name = "adroit-v0",
     env_kwargs = dict(
         obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
@@ -80,12 +80,13 @@ def main(args):
 
     values = [
         # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        [False, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 1, 1, 1e5, 1, True, False, 0.5],
-        [False, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1, 5e4, 1, True, True, 0.5],
+        # [False, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 1, 1, 1e5, 1, True, False, 0.5],
+        # [False, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1, 5e4, 1, True, True, 0.5],
         # [False, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 0, 1, 1, 5e4, 1, True, True, 0.5],
         # [False, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1, 1e5, 1, True, False, 0.5],
-        # [False, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1, 1e5, 1, True, False, 0.5],
-        # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1, 1e5, 1, True, True, 0.5],
+        [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 10, 100, 1e4, 1, False, False, 0.5],
+        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1e4, 1, False, False, 0.5],
+        [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 100, 10, 1e4, 1, False, False, 0.5],
         # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1, 1e4, 1, False, False, 0.5],
         # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
         # [False, 8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1, 1e5, 1, True, True, 0.5],
@@ -95,7 +96,10 @@ def main(args):
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 0, 1], # no chamfer
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 1, 0], # no knn
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 10, 1], # big chamfer reward
-        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1, 1, 1e5, 1, True, True, 0.5],
+        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 10, 100, 1e4, 1, False, False, 0.5],
+        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 100, 100, 1e4, 1, False, False, 0.5],
+        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 200, 100, 1e4, 1, False, False, 0.5],
+        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 200, 200, 1e4, 1, False, False, 0.5],
         # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1, 1, 1e6, 1e-5, 0.5],
         # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.01], 10, 1, 10], # big mesh penalty and big knn reward
     ]

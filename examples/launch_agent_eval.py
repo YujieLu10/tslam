@@ -6,7 +6,7 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v4",
+    env_name = "adroit-v2",
     env_kwargs = dict(
         obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
@@ -20,14 +20,18 @@ default_config = dict(
         palm_r_factor= 1,
         untouch_p_factor= 1,
         newpoints_r_factor= 1,
-        # knn_r_factor= 1,
-        # chamfer_use_gt=False,
+        knn_r_factor= 1,
+        chamfer_use_gt=False,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
         hidden_sizes= (64,64),
         min_log_std= -3,
         init_log_std= 0,
+        m_f= 1e4,
+        n_f= 1e-6,
+        in_ss= True,
+        out_ss= True,
         seed= seed,
     ),
     sample_method = "policy", # `action`:env.action_space.sample(), `policy`
@@ -37,7 +41,7 @@ default_config = dict(
 )
 
 def main(args):
-    experiment_title = "agent" #"sample_pointclouds"
+    experiment_title = "explore" #"sample_pointclouds"
 
     # set up variants
     variant_levels = list()
@@ -76,30 +80,30 @@ def main(args):
         # [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1],
         # [False, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1],
         # [False, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
-        # [False, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
-        # [False, 6, "down", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
+        [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
+        [True, 6, "down", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
         # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
         # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1],
-        [8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1],
+        # [8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1],
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1], # no mesh penalty
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 0, 1], # no chamfer
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 1, 0], # no knn
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 10, 1], # big chamfer reward
         # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1, 1],
-        [9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1],
+        # [9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1],
         # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.01], 10, 1, 10], # big mesh penalty and big knn reward
     ]
     dir_names = ["obj{}_{}".format(v[0],v[1]) for v in values]
     keys = [
-        # ("env_kwargs","chamfer_use_gt"),
+        ("env_kwargs","chamfer_use_gt"),
         ("env_kwargs", "obj_bid_idx"),
         ("env_kwargs", "forearm_orientation"),
         ("env_kwargs", "obj_orientation"),
         ("env_kwargs", "obj_relative_position"),
         ("env_kwargs", "mesh_p_factor"),
         ("env_kwargs", "chamfer_r_factor"),
-        # ("env_kwargs", "knn_r_factor"),
+        ("env_kwargs", "knn_r_factor"),
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
@@ -122,8 +126,8 @@ def main(args):
     values = [
         # ["action"],
         # ["policy"],
-        ["agent"],
-        # ["explore"],
+        # ["agent"],
+        ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]
