@@ -55,7 +55,7 @@ def run_experiment(log_dir, args):
             if "_p" in k or "_r" in k:
                 logger.log_scalar(k, v, i)
         if (i+1) % int(4e3) == 0:
-            pc = np.array(info["pointcloud"]) # (N, 3)
+            pc = info["pointcloud"] # (N, 3)
             # log pointcloud to tensorboard
             z_max, z_min = np.max(pc[:, 2]), np.min(pc[:, 2])
             colors = np.zeros_like(pc) # (N, 3)
@@ -69,6 +69,7 @@ def run_experiment(log_dir, args):
                 colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
                 global_step= i,
             )
+            np.save(os.path.join(log_dir, "pointcloud.np"), pc)
             
         if (i+1) <= 100:
             frame = env.env.env.sim.render(width=640, height=480,
