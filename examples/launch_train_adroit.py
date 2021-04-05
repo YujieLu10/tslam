@@ -52,6 +52,7 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 8,
         sample_mode = 'trajectories',
+        horizon= 1000, 
         num_traj = 150,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples'
         save_freq = 10,
