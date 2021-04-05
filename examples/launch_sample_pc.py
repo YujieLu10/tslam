@@ -20,6 +20,7 @@ default_config = dict(
         palm_r_factor= 1,
         untouch_p_factor= 1,
         newpoints_r_factor= 1,
+        knn_r_factor= 1,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -29,7 +30,7 @@ default_config = dict(
         seed= seed,
     ),
     sample_method = "action", # `action`, `policy`
-    total_timesteps = int(5e4),
+    total_timesteps = int(5e5),
     seed= seed,
 )
 
@@ -41,42 +42,42 @@ def main(args):
 
     # These are the settings which makes most contact points when
     # uniformly sample from action space
-    # values = [
-    #     [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [1, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [2, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [3, "up", [0.77, 0, 0],  [0, 0.5, 0.05], ],
-    #     [4, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [8, "down", [0.77, 0, 0],  [0, 0.55, 0.045], ],
-    #     [9, "down", [0.77, 0, 0],  [0, 0.55, 0.05], ],
-    # ]
-    # dir_names = ["obj{}".format(v[0]) for v in values]
-    # keys = [
-    #     ("env_kwargs", "obj_bid_idx"),
-    #     ("env_kwargs", "forearm_orientation"),
-    #     ("env_kwargs", "obj_orientation"),
-    #     ("env_kwargs", "obj_relative_position"),
-    # ] # each entry in the list is the string path to your config
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
-
     values = [
-        # [0,], # running 2490
-        # [1,],
-        # [2,],
-        # [3,],
-        # [4,],
-        # [5,],
-        # [6,],
-        # [7,],
-        # [8,],
-        # [9,],
+        # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], ], # hard 0
+        [2, "up", [0, 0, 0],  [0, 0.5, 0.05], ], # hard 1
+        [3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], ], # medium 0
+        [4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], ], # medium 1
+        # [5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], ],
+        # [6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], ],
+        # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
+        [8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], ], # simple 0
+        [9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], ], # simple 1
     ]
-    dir_names = ["obj{}".format(*v) for v in values]
-    keys = [("env_kwargs", "obj_bid_idx")] # each entry in the list is the string path to your config
+    dir_names = ["obj{}".format(v[0]) for v in values]
+    keys = [
+        ("env_kwargs", "obj_bid_idx"),
+        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "obj_orientation"),
+        ("env_kwargs", "obj_relative_position"),
+    ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    # values = [
+    #     [0,], # running 2490
+    #     [1,],
+    #     [2,],
+    #     [3,],
+    #     [4,],
+    #     [5,],
+    #     [6,],
+    #     [7,],
+    #     [8,],
+    #     [9,],
+    # ]
+    # dir_names = ["obj{}".format(*v) for v in values]
+    # keys = [("env_kwargs", "obj_bid_idx")] # each entry in the list is the string path to your config
+    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
         ["action"],
@@ -86,33 +87,33 @@ def main(args):
     keys = [("sample_method", ), ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
-    values = [
-        ["up"],
-        ["down"],
-    ]
-    dir_names = ["{}".format(*v) for v in values]
-    keys = [("env_kwargs", "forearm_orientation"), ]
-    variant_levels.append(VariantLevel(keys, values, dir_names))
+    # values = [
+    #     ["up"],
+    #     ["down"],
+    # ]
+    # dir_names = ["{}".format(*v) for v in values]
+    # keys = [("env_kwargs", "forearm_orientation"), ]
+    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
-    values = [
-        # [[0, 0, 0], ],
-        # [[0.77, 0, 0], ],
-        # [[1.57, 0, 0], ],
-    ]
-    dir_names = ["orient{}".format(v[0][0]) for v in values]
-    keys = [("env_kwargs", "obj_orientation"), ("env_kwargs", "obj_relative_position"),]
-    variant_levels.append(VariantLevel(keys, values, dir_names))
+    # values = [
+    #     [[0, 0, 0], ],
+    #     [[0.77, 0, 0], ],
+    #     [[1.57, 0, 0], ],
+    # ]
+    # dir_names = ["orient{}".format(v[0][0]) for v in values]
+    # keys = [("env_kwargs", "obj_orientation"), ]
+    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
-    values = [
-        [[0, 0.5, 0.05],  ],
-        [[0, 0.55, 0.05],  ],
-        [[0, 0.55, 0.045],  ],
-        [[0, 0.53, 0.045],  ],
-        [[0, 0.5, 0.07],  ],
-    ]
-    dir_names = ["dist{}-{}".format(v[0][1], v[0][2]) for v in values]
-    keys = [("env_kwargs", "obj_relative_position"),]
-    variant_levels.append(VariantLevel(keys, values, dir_names))
+    # values = [
+    #     [[0, 0.5, 0.05],  ],
+    #     [[0, 0.55, 0.05],  ],
+    #     [[0, 0.55, 0.045],  ],
+    #     [[0, 0.53, 0.045],  ],
+    #     [[0, 0.5, 0.07],  ],
+    # ]
+    # dir_names = ["dist{}-{}".format(v[0][1], v[0][2]) for v in values]
+    # keys = [("env_kwargs", "obj_relative_position"),]
+    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
     variants, log_dirs = make_variants(*variant_levels)
@@ -145,6 +146,8 @@ def main(args):
             n_gpus= 1,
             partition= "short",
             cuda_module= "cuda-10.0",
+            cmd_prefix= "source /etc/profile.d/modules.sh",
+            other_modules= ["gcc-5.0.0",],
         )
         run_on_slurm(
             script= "examples/run_sample_pc.py",
