@@ -11,13 +11,13 @@ default_config = dict(
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation= "up", # ("up", "down")
         # scale all reward/penalty to the scale of 1.0
-        chamfer_r_factor= 1,
-        mesh_p_factor= 1,
+        chamfer_r_factor= 0,
+        mesh_p_factor= 0,
         mesh_reconstruct_alpha= 0.01,
         palm_r_factor= 1,
         untouch_p_factor= 1,
         newpoints_r_factor= 1,
-        knn_r_factor= 1,
+        knn_r_factor= 0,
         chamfer_use_gt=False,
     ),
     policy_name = "MLP",
@@ -25,8 +25,8 @@ default_config = dict(
         hidden_sizes= (64,64),
         min_log_std= -3,
         init_log_std= None,
-        m_f= 1e4,
-        n_f= 1e-6,
+        m_f= 1,
+        n_f= 1,
         in_ss= True,
         out_ss= True,
         # seed= seed,
@@ -57,7 +57,7 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 16,
         sample_mode = 'trajectories',
-        num_traj = 150,
+        num_traj = 100,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples'
         save_freq = 5,
         evaluation_rollouts = 5,
@@ -80,13 +80,19 @@ def main(args):
 
     values = [
         # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        # [False, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 1, 1, 1e5, 1, True, False, 0.5],
+        # [True, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 100, 0, 1, 1, False, False, 0.25],
+        # [True, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 0, 100, 1, 1, False, False, 0.25],
         # [False, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1, 5e4, 1, True, True, 0.5],
         # [False, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 0, 1, 1, 5e4, 1, True, True, 0.5],
-        # [False, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1, 1e5, 1, True, False, 0.5],
-        [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 10, 100, 1e4, 1, False, False, 0.5],
-        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1e4, 1, False, False, 0.5],
-        [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 100, 10, 1e4, 1, False, False, 0.5],
+        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1, 1, False, False, 0],
+        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1, 1, False, False, -0.5],
+        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 0, 1, 1, False, False, 0.25],
+        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 0, 100, 1, 1, False, False, 0.25],
+        [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 0, 1, 1, False, False, 0.25],
+        [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 0, 100, 1, 1, False, False, 0.25],
+        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 10, 100, 1, 1, False, False, 0.25], # on-training
+        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1, 1, False, False, 0.25], # on-training
+        # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 100, 10, 1e4, 1, False, False, 0.5],
         # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1, 1e4, 1, False, False, 0.5],
         # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
         # [False, 8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1, 1e5, 1, True, True, 0.5],
@@ -103,7 +109,7 @@ def main(args):
         # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1, 1, 1e6, 1e-5, 0.5],
         # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.01], 10, 1, 10], # big mesh penalty and big knn reward
     ]
-    dir_names = ["obj{}_envv1_mpf{}_crf{}_krf{}_mf{}nf{}_in{}_out{}_logstd{}".format(v[1],v[5],v[6],v[7],v[8],v[9],v[10],v[11],v[12]) for v in values]
+    dir_names = ["obj{}_usegt{}_mpf{}_crf{}_krf{}_mf{}nf{}_in{}_out{}_logstd{}".format(v[1],v[0],v[5],v[6],v[7],v[8],v[9],v[10],v[11],v[12]) for v in values]
     keys = [
         ("env_kwargs","chamfer_use_gt"),
         ("env_kwargs", "obj_bid_idx"),

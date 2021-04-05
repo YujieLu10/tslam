@@ -13,7 +13,7 @@ from mjrl.utils.train_agent import train_agent
 
 
 def main(affinity_code, log_dir, run_ID, **kwargs):
-    affinity = affinity_from_code(affinity_code)
+    # affinity = affinity_from_code(affinity_code)
 
     args = load_variant(log_dir)
     args["policy_kwargs"]["seed"] = args["seed"]

@@ -45,7 +45,7 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "best_policy.pickle"), 'rb'))
+        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "best_policy_onlychamfer_gt.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
 
     gif_frames = list()
@@ -61,12 +61,12 @@ def run_experiment(log_dir, args):
         # logger.record_tabular("step", i, itr= i)
         # logger.record_tabular("total_reward", rew, itr= i)
         # logger.record_tabular("n_points", len(info["pointcloud"]), itr= i)
-        logger.log_scalar("step", i, i)
-        logger.log_scalar("total_reward", rew, i)
-        logger.log_scalar("n_points", len(info["pointcloud"]), i)
-        for k, v in info.items():
-            if "_p" in k or "_r" in k:
-                logger.log_scalar(k, v, i)
+        # logger.log_scalar("step", i, i)
+        # logger.log_scalar("total_reward", rew, i)
+        # logger.log_scalar("n_points", len(info["pointcloud"]), i)
+        # for k, v in info.items():
+        #     if "_p" in k or "_r" in k:
+        #         logger.log_scalar(k, v, i)
         if (i+1) % int(4e3) == 0:
             pc = np.array(info["pointcloud"]) # (N, 3)
             # log pointcloud to tensorboard
@@ -82,22 +82,22 @@ def run_experiment(log_dir, args):
                 colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
                 global_step= i,
             )
-        # if (i+1) <= 500 and (i+1) % 20 == 0:
-        #     # str(args["env_kwargs"]["forearm_orientation"])
-        #     pc_frame = np.array(info["pointcloud"])
-        #     np.savez_compressed(os.path.join("/home/jianrenw/prox/share/tslam/data/local/agent/pointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + str(args["env_kwargs"]["forearm_orientation"])+ "_step_" + str(i)) + ".npz",pcd=pc_frame)
-        #     # pc_frames.append(pc_frame)
-        #     ax = plt.axes(projection='3d')
-        #     ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
-        #     plt.savefig("{}.png".format(os.path.join("/home/jianrenw/prox/share/tslam/data/local/agent/pointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + str(args["env_kwargs"]["forearm_orientation"]) + "_step_" + str(i))))
-        #     plt.close()
+        if (i+1) == 1000:
+            # str(args["env_kwargs"]["forearm_orientation"])
+            pc_frame = np.array(info["pointcloud"])
+            np.savez_compressed(os.path.join("/home/jianrenw/prox/tslam/data/local/agent/20210402/newpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + str(args["env_kwargs"]["forearm_orientation"])+ "_step_" + str(i)) + ".npz",pcd=pc_frame)
+            # pc_frames.append(pc_frame)
+            ax = plt.axes(projection='3d')
+            ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
+            plt.savefig("{}.png".format(os.path.join("/home/jianrenw/prox/tslam/data/local/agent/20210402/newpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + str(args["env_kwargs"]["forearm_orientation"]) + "_step_" + str(i))))
+            plt.close()
 
-        if (i+1) <= 100:
+        if (i+1) <= 150:
             frame = env.env.env.sim.render(width=640, height=480,
                                 mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
-        if (i+1) == 100:
+        if (i+1) == 150:
             logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()

@@ -6,7 +6,7 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v2",
+    env_name = "adroit-v0",
     env_kwargs = dict(
         obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
@@ -36,12 +36,12 @@ default_config = dict(
     ),
     sample_method = "policy", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(5e2),
+    total_timesteps = int(1e3),
     seed= seed,
 )
 
 def main(args):
-    experiment_title = "explore" #"sample_pointclouds"
+    experiment_title = "agent" #"sample_pointclouds"
 
     # set up variants
     variant_levels = list()
@@ -72,16 +72,19 @@ def main(args):
     values = [
         # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
         # [False, 1, "down", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
-        # [False, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
-        # [False, 2, "down", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1],
+        # [True, 1, "down", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
+        # [True, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
+        # [True, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1],
         # [False, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1],
         # [False, 3, "down", [0.77, 0.97, 0],  [0, 0.5, 0.04], 10, 1, 1],
-        # [False, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 10, 1, 1],
+        # [True, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 10, 1, 1],
         # [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1],
-        # [False, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1],
+        # [True, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100],
+        [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 0, 100],
         # [False, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
-        [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
-        [True, 6, "down", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
+        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100],
+        # [True, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 10],
+        # [True, 6, "down", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
         # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
         # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
         # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1],
@@ -94,7 +97,7 @@ def main(args):
         # [9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1],
         # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.01], 10, 1, 10], # big mesh penalty and big knn reward
     ]
-    dir_names = ["obj{}_{}".format(v[0],v[1]) for v in values]
+    dir_names = ["obj{}_{}_{}".format(v[0],v[1],v[2]) for v in values]
     keys = [
         ("env_kwargs","chamfer_use_gt"),
         ("env_kwargs", "obj_bid_idx"),
@@ -126,8 +129,8 @@ def main(args):
     values = [
         # ["action"],
         # ["policy"],
-        # ["agent"],
-        ["explore"],
+        ["agent"],
+        # ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]

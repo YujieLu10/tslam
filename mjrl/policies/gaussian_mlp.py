@@ -9,8 +9,8 @@ class MLP:
                  hidden_sizes=(64,64),
                  min_log_std=-3,
                  init_log_std=0,
-                 m_f=1e4,
-                 n_f=1e-6,
+                 m_f=1,
+                 n_f=1,
                  in_ss=False,
                  out_ss=False,
                  seed=None):
@@ -112,13 +112,13 @@ class MLP:
     def get_action(self, observation):
         o = np.float32(observation.reshape(1, -1))
         self.obs_var.data = torch.from_numpy(o)
-        mean = self.model(self.obs_var).data.numpy().ravel() * self.mean_factor
+        mean = self.model(self.obs_var).data.numpy().ravel()
         if self.log_std is None:
             self.log_std_val = mean[..., self.m:]
             mean = mean[..., :self.m]
-        noise = np.exp(self.log_std_val) * self.noise_factor * np.random.randn(self.m)
+        noise = np.exp(self.log_std_val) * np.random.randn(self.m)
         action = mean + noise
-        # print(">>> mean{} noise{} action{}".format(mean, noise, action))
+        # print(">>> mean{}".format(mean))
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
 
     def get_action_eval(self, observation):
@@ -130,7 +130,7 @@ class MLP:
             mean = mean[..., :self.m]
         noise = np.exp(self.log_std_val) * np.random.randn(self.m)
         action = mean + noise
-        # print(">>> mean{} noise{} action{}".format(mean, noise, action))
+        # print(">>> mean{}".format(mean))
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
 
     def mean_LL(self, observations, actions, model=None, log_std=None):

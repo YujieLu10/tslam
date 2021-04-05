@@ -6,7 +6,7 @@ import torch.nn as nn
 class FCNetwork(nn.Module):
     def __init__(self, obs_dim, act_dim,
                  hidden_sizes=(64,64),
-                 nonlinearity='tanh',   # either 'tanh' or 'relu'
+                 nonlinearity='relu',   # either 'tanh' or 'relu'
                  in_shift = None,
                  in_scale = None,
                  out_shift = None,
@@ -21,7 +21,11 @@ class FCNetwork(nn.Module):
         # hidden layers
         self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
                          for i in range(len(self.layer_sizes) -1)])
+        self.fc_layers[0].weight = torch.nn.Parameter(torch.Tensor(5 * np.random.randn(64, obs_dim)))
+        # self.fc_layers[1].weight = torch.nn.Parameter(torch.Tensor(np.ones([64, 64])))
+        self.fc_layers[2].weight = torch.nn.Parameter(torch.Tensor(100 * np.random.randn(act_dim, 64)))
         self.nonlinearity = torch.relu if nonlinearity == 'relu' else torch.tanh
+        
 
     def set_transformations(self, in_shift=None, in_scale=None, out_shift=None, out_scale=None):
         # store native scales that can be used for resets
@@ -38,15 +42,16 @@ class FCNetwork(nn.Module):
     def forward(self, x):
         # TODO(Aravind): Remove clamping to CPU
         # This is a temp change that should be fixed shortly
+        
         if x.is_cuda:
             out = x.to('cpu')
         else:
             out = x
-        # print(">> out {} obs_dim{} self.out_scale{}".format(out.shape, self.obs_dim, self.out_scale.shape))
         out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
             out = self.fc_layers[i](out)
             out = self.nonlinearity(out)
         out = self.fc_layers[-1](out)
         out = out * self.out_scale + self.out_shift
+
         return out
