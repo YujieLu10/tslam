@@ -4,7 +4,7 @@ import torch.nn as nn
 
 
 class FCNetwork(nn.Module):
-    def __init__(self, obs_dim, act_dim,
+    def __init__(self, reinitialize, obs_dim, act_dim,
                  hidden_sizes=(64,64),
                  nonlinearity='relu',   # either 'tanh' or 'relu'
                  in_shift = None,
@@ -21,9 +21,10 @@ class FCNetwork(nn.Module):
         # hidden layers
         self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
                          for i in range(len(self.layer_sizes) -1)])
-        self.fc_layers[0].weight = torch.nn.Parameter(torch.Tensor(5 * np.random.randn(64, obs_dim)))
-        # self.fc_layers[1].weight = torch.nn.Parameter(torch.Tensor(np.ones([64, 64])))
-        self.fc_layers[2].weight = torch.nn.Parameter(torch.Tensor(100 * np.random.randn(act_dim, 64)))
+        if reinitialize:
+            self.fc_layers[0].weight = torch.nn.Parameter(torch.Tensor(5 * np.random.randn(64, obs_dim)))
+            # self.fc_layers[1].weight = torch.nn.Parameter(torch.Tensor(np.ones([64, 64])))
+            self.fc_layers[2].weight = torch.nn.Parameter(torch.Tensor(100 * np.random.randn(act_dim, 64)))
         self.nonlinearity = torch.relu if nonlinearity == 'relu' else torch.tanh
         
 

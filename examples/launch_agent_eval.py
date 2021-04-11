@@ -6,14 +6,14 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v0",
+    env_name = "adroit-v1",
     env_kwargs = dict(
         obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
-        forearm_orientation= "up", # ("up", "down")
+        forearm_orientation_name= "up", # ("up", "down")
         chamfer_r_factor= 1,
         mesh_p_factor= 1,
         mesh_reconstruct_alpha= 0.01,
@@ -22,6 +22,8 @@ default_config = dict(
         newpoints_r_factor= 1,
         knn_r_factor= 1,
         chamfer_use_gt=False,
+        forearm_orientation= [0, 0, 0], # forearm orientation
+        forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -30,13 +32,11 @@ default_config = dict(
         init_log_std= 0,
         m_f= 1e4,
         n_f= 1e-6,
-        in_ss= True,
-        out_ss= True,
         seed= seed,
     ),
     sample_method = "policy", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(1e3),
+    total_timesteps = int(1e5),
     seed= seed,
 )
 
@@ -45,29 +45,6 @@ def main(args):
 
     # set up variants
     variant_levels = list()
-
-    # These are the settings which makes most contact points when
-    # uniformly sample from action space
-    # values = [
-    #     [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [1, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [2, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [3, "up", [0.77, 0, 0],  [0, 0.5, 0.05], ],
-    #     [4, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [5, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [6, "up", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-    #     [8, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    #     [9, "down", [0.77, 0, 0],  [0, 0.5, 0.07], ],
-    # ]
-    # dir_names = ["obj{}".format(v[0]) for v in values]
-    # keys = [
-    #     ("env_kwargs", "obj_bid_idx"),
-    #     ("env_kwargs", "forearm_orientation"),
-    #     ("env_kwargs", "obj_orientation"),
-    #     ("env_kwargs", "obj_relative_position"),
-    # ] # each entry in the list is the string path to your config
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
         # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
@@ -80,7 +57,22 @@ def main(args):
         # [True, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 10, 1, 1],
         # [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1],
         # [True, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100],
-        [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 0, 100],
+
+        # [False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
+        # [False, 4, "up-middle", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.75, 0.17], 0, 10, 10],
+        # [False, 4, "up-front", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.65, 0.17], 0, 10, 10],
+        # [False, 4, "up-left", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0.03, -0.75, 0.17], 0, 10, 10],
+        # [False, 4, "up-right", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [-0.03, -0.75, 0.17], 0, 10, 10],
+        # [False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28], 0, 10, 10],
+        # [False, 4, "down-middle", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.75, 0.28], 0, 10, 10],
+        # [False, 4, "down-front", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.65, 0.28], 0, 10, 10],
+        # [False, 4, "down-left", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0.03, -0.75, 0.28], 0, 10, 10],
+        # [False, 4, "down-right", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [-0.03, -0.75, 0.28], 0, 10, 10],
+        [False, 4, "up-flip", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 0],  [0, 0.4, 0.28], 0, 10, 10],
+        [False, 4, "up-flip-back", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 0],  [0, 0.45, 0.28], 0, 10, 10],
+        [False, 4, "down-flip", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 3],  [0, 0.4, 0.17], 0, 10, 10],
+        [False, 4, "down-flip-back", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 3],  [0, 0.45, 0.17], 0, 10, 10],
+
         # [False, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
         # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100],
         # [True, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 10],
@@ -101,60 +93,26 @@ def main(args):
     keys = [
         ("env_kwargs","chamfer_use_gt"),
         ("env_kwargs", "obj_bid_idx"),
-        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "forearm_orientation_name"),
         ("env_kwargs", "obj_orientation"),
         ("env_kwargs", "obj_relative_position"),
+        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "forearm_relative_position"),
         ("env_kwargs", "mesh_p_factor"),
         ("env_kwargs", "chamfer_r_factor"),
         ("env_kwargs", "knn_r_factor"),
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
-    # values = [
-    #     # [0,], # running 2490
-    #     # [1,],
-    #     # [2,],
-    #     # [3,],
-    #     # [4,],
-    #     # [5,],
-    #     # [6,],
-    #     # [7,],
-    #     [8,],
-    #     [9,],
-    # ]
-    # dir_names = ["obj{}".format(*v) for v in values]
-    # keys = [("env_kwargs", "obj_bid_idx")] # each entry in the list is the string path to your config
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
-
     values = [
         # ["action"],
-        # ["policy"],
-        ["agent"],
+        ["policy"],
+        # ["agent"],
         # ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
-
-    # values = [
-    #     # ["up"],
-    #     ["down"],
-    # ]
-    # dir_names = ["{}".format(*v) for v in values]
-    # keys = [("env_kwargs", "forearm_orientation"), ]
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
-
-    # values = [
-    #     # [[0, 0, 0],  [0, 0.5, 0.07],  ],
-    #     # [[0.77, 0, 0],  [0, 0.55, 0.02],  ],
-    #     [[0.77, 0, 0],  [0, 0.55, 0.02],  ],
-    #     [[0.77, 0, 0],  [0, 0.55, 0.015],  ],
-    #     # [[1.57, 0, 0],  [0, 0.6, 0.04],  ],
-    #     # [[1.57, 0, 0],  [0, 0.6, 0.04],  ],
-    # ]
-    # dir_names = ["orient{}dist{}hdist{}".format(v[0][0], v[1][2], v[1][1]) for v in values]
-    # keys = [("env_kwargs", "obj_orientation"), ("env_kwargs", "obj_relative_position"),]
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
     variants, log_dirs = make_variants(*variant_levels)

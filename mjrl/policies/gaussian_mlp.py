@@ -11,8 +11,7 @@ class MLP:
                  init_log_std=0,
                  m_f=1,
                  n_f=1,
-                 in_ss=False,
-                 out_ss=False,
+                 reinitialize=False,
                  seed=None):
         """
         :param env_spec: specifications of the env (see utils/gym_env.py)
@@ -26,6 +25,7 @@ class MLP:
         self.min_log_std = min_log_std
         self.mean_factor = m_f
         self.noise_factor = n_f
+        self.reinitialize = reinitialize
 
         # Set seed
         # ------------------------
@@ -37,11 +37,7 @@ class MLP:
 
         # Policy network
         # ------------------------
-        self.in_shift = torch.randn(self.n)
-        self.in_scale = torch.randn(1)
-        self.out_shift = torch.randn(57)
-        self.out_scale = torch.randn(1)
-        self.model = FCNetwork(self.n, output_dim, hidden_sizes, self.in_shift if in_ss else None, self.in_scale if in_ss else None, self.out_shift if out_ss else None, self.out_scale if out_ss else None)
+        self.model = FCNetwork(self.reinitialize, self.n, output_dim, hidden_sizes)
         # make weights small
         for param in list(self.model.parameters())[-2:]:  # only last layer
            param.data = 1e-2 * param.data
@@ -53,7 +49,7 @@ class MLP:
 
         # Old Policy network
         # ------------------------
-        self.old_model = FCNetwork(self.n, output_dim, hidden_sizes, self.in_shift if in_ss else None, self.in_scale if in_ss else None, self.out_shift if out_ss else None, self.out_scale if out_ss else None)
+        self.old_model = FCNetwork(self.reinitialize, self.n, output_dim, hidden_sizes)
         self.old_params = list(self.old_model.parameters())
         self.old_log_std = None
         if not init_log_std is None:

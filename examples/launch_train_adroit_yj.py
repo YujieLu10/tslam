@@ -2,23 +2,26 @@ from exptools.launching.variant import VariantLevel, make_variants, update_confi
 import numpy as np
 
 default_config = dict(
-    env_name = "adroit-v0",
+    env_name = "adroit-v1",
     env_kwargs = dict(
         obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
-        forearm_orientation= "up", # ("up", "down")
+        forearm_orientation_name= "up", # ("up", "down")
         # scale all reward/penalty to the scale of 1.0
         chamfer_r_factor= 0,
         mesh_p_factor= 0,
         mesh_reconstruct_alpha= 0.01,
-        palm_r_factor= 1,
-        untouch_p_factor= 1,
-        newpoints_r_factor= 1,
+        palm_r_factor= 0,
+        untouch_p_factor= 0,
+        newpoints_r_factor= 0,
         knn_r_factor= 0,
-        chamfer_use_gt=False,
+        use_voxel= False,
+        ground_truth_type= "nope",
+        forearm_orientation= [0, 0, 0], # forearm orientation
+        forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -27,8 +30,7 @@ default_config = dict(
         init_log_std= None,
         m_f= 1,
         n_f= 1,
-        in_ss= True,
-        out_ss= True,
+        reinitialize= True,
         # seed= seed,
     ),
     baseline_kwargs = dict(
@@ -57,6 +59,7 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 16,
         sample_mode = 'trajectories',
+        horizon= 150, 
         num_traj = 100,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples'
         save_freq = 5,
@@ -65,7 +68,7 @@ default_config = dict(
         visualize_kwargs = dict(
             horizon=150,
             num_episodes= 1,
-            mode='exploration',
+            mode='evaluation',
             width= 640, height= 480,
             camera_name= "view_1",
             device_id= 0,
@@ -79,52 +82,48 @@ def main(args):
     variant_levels = list()
 
     values = [
-        # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        # [True, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 100, 0, 1, 1, False, False, 0.25],
-        # [True, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 0, 0, 100, 1, 1, False, False, 0.25],
-        # [False, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1, 5e4, 1, True, True, 0.5],
-        # [False, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 0, 1, 1, 5e4, 1, True, True, 0.5],
-        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1, 1, False, False, 0],
-        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1, 1, False, False, -0.5],
-        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 0, 1, 1, False, False, 0.25],
-        # [True, 4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 0, 100, 1, 1, False, False, 0.25],
-        [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 0, 1, 1, False, False, 0.25],
-        [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 0, 100, 1, 1, False, False, 0.25],
-        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 10, 100, 1, 1, False, False, 0.25], # on-training
-        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100, 1, 1, False, False, 0.25], # on-training
-        # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 100, 10, 1e4, 1, False, False, 0.5],
-        # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1, 1e4, 1, False, False, 0.5],
-        # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        # [False, 8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1, 1e5, 1, True, True, 0.5],
-        # [False, 8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1, 1e4, 1, False, False, 0.5],
-        # [False, 8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1, 1e4, 1e-6], # no mesh penalty
-        # [False, 8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1, 1e5, 1e-6], # no mesh penalty
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 0, 1], # no chamfer
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 1, 0], # no knn
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 10, 1], # big chamfer reward
-        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 10, 100, 1e4, 1, False, False, 0.5],
-        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 100, 100, 1e4, 1, False, False, 0.5],
-        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 200, 100, 1e4, 1, False, False, 0.5],
-        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 200, 200, 1e4, 1, False, False, 0.5],
-        # [False, 9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1, 1, 1e6, 1e-5, 0.5],
-        # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.01], 10, 1, 10], # big mesh penalty and big knn reward
+        ["sample"],
+        ["mesh"],
+        # ["nope"],
     ]
-    dir_names = ["obj{}_usegt{}_mpf{}_crf{}_krf{}_mf{}nf{}_in{}_out{}_logstd{}".format(v[1],v[0],v[5],v[6],v[7],v[8],v[9],v[10],v[11],v[12]) for v in values]
+    dir_names = ["gt{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
-        ("env_kwargs","chamfer_use_gt"),
+        ("env_kwargs", "ground_truth_type"),
+    ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
+        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-23
+        [True, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
+        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-27
+    ]
+    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi != 0) for vi in v)) for v in values]
+    keys = [
+        ("env_kwargs", "use_voxel"),
+        ("policy_kwargs", "reinitialize"),
         ("env_kwargs", "obj_bid_idx"),
-        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "forearm_orientation_name"),
         ("env_kwargs", "obj_orientation"),
         ("env_kwargs", "obj_relative_position"),
-        ("env_kwargs", "mesh_p_factor"),
+        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "forearm_relative_position"),
+    ] # each entry in the list is the string path to your config
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        [1, 0, 0.25],
+        [0, 1, 0.25],
+        # [10, 0, 0.25],
+        # [0, 10, 0.25],
+        # [100, 100, 0.25],
+    ]
+    dir_names = ["cf{}_knn{}_logstd{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    keys = [
         ("env_kwargs", "chamfer_r_factor"),
         ("env_kwargs", "knn_r_factor"),
-        ("policy_kwargs", "m_f"),
-        ("policy_kwargs", "n_f"),
-        ("policy_kwargs", "in_ss"),
-        ("policy_kwargs", "out_ss"),
         ("policy_kwargs", "init_log_std"),
-    ] # each entry in the list is the string path to your config
+    ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
