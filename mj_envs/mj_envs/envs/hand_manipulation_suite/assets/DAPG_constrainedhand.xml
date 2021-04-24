@@ -1,0 +1,124 @@
+<!-- ======================================================
+    Model       :: ADROIT Pen
+ 
+    Mujoco      :: Advanced physics simulation engine
+        Source      : www.roboti.us
+        Version     : 1.50
+        Released    : 17Jan'17
+        
+    Author      :: Vikash Kumar
+        Contacts    : vikash@cs.washington.edu
+        Last edits  : 17Jan'17
+
+    Designed for :: Demo Augmented Policy Gradient (DAPG)
+
+    Copyright   :: Vikash Kumar
+        Licensed under Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+====================================================== -->
+
+<mujoco model='ADROIT-pen(v1.5)'>
+    <asset>
+        <!-- Strange path here because `compiler` element included by `DAPG_assets.xml` at the last of this file. -->
+        <mesh name="plane" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_1.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2.stl" scale="0.015 0.015 0.015"/>
+        <!-- <mesh name="OShape" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape.stl" scale="0.008 0.008 0.008"/> -->
+        <mesh name="OShape1" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_1.stl" scale="0.01 0.01 0.01"/>
+        <mesh name="OShape2" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_2.stl" scale="0.01 0.01 0.01"/>
+        <mesh name="OShape3" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_3.stl" scale="0.01 0.01 0.01"/>
+        <mesh name="OShape4" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_4.stl" scale="0.01 0.01 0.01"/>
+        <mesh name="OShape5" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_5.stl" scale="0.01 0.01 0.01"/>
+        <mesh name="OShape6" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_6.stl" scale="0.01 0.01 0.01"/>
+        <mesh name="LShape" file="../../../../envs/hand_manipulation_suite/assets/stl/L-Shape.stl" scale="0.0004 0.0004 0.0004"/>
+        <mesh name="simpleShape" file="../../../../envs/hand_manipulation_suite/assets/stl/Simple_Shape.stl" scale="0.0008 0.0008 0.0008"/>
+        <mesh name="TShape" file="../../../../envs/hand_manipulation_suite/assets/stl/T_Shape.stl" scale="0.0015 0.0015 0.0015"/>
+        <mesh name="thinShape" file="../../../../envs/hand_manipulation_suite/assets/stl/thin_Shape.stl" scale="0.002 0.002 0.002"/>
+        <mesh name="VShape" file="../../../../envs/hand_manipulation_suite/assets/stl/V-Shape.stl" scale="0.006 0.006 0.006"/>
+    </asset>
+    <!-- ======= WORLD ======= -->
+    <worldbody>
+        <light directional='false' diffuse='.7 .7 .7' specular='0.03 0.03 0.03' pos='-1 -1.0 4.0' dir='1 1.0 -4'/>
+        <geom name='ground' size="1.5 1.5 0.25" pos="0 0 -1" type="plane" contype="1" conaffinity="0" material="groundplane" />
+        <camera name="fixed" pos="0 -0.7 0.7" quat="0.92388 0.382683 0 0" />
+        <!-- Cameras for the VIL paper -->
+        <camera name="vil_camera" pos="0 -1.2 1.2" quat="0.92388 0.382683 0 0" />
+        <camera name="view_1" pos="-0.8 -0.8 0.8" euler="0.785 -0.785 -0.785" />
+        <camera name="view_2" pos="0 0.5 0.2" euler="-1.57 0 3.14" />
+        <camera name="view_3" pos="0 0.2 -0.2" euler="-2.35 0 3.14" />
+        <camera name="view_4" pos="0.8 -0.8 0.8" euler="0.785 0.785 0.785" />
+        <camera name="view_5" pos="0 -0.25 -0.4" euler="-3.2 0 3.14" />
+ 
+        <!-- ======= TABLE ======= -->
+        <body name="table">
+            <!-- <geom size="0.5 0.5 0.025" type="plane" material="table2d" /> --> <!-- Plane has better contacts -->
+            <geom size="0.45 0.45 0.025" pos="0 0 -0.025" type="box" material="tablecube" />
+            <geom size="0.04 0.5" pos="0.4 0.4 -0.501" quat="0 1 0 0" type="cylinder" contype="0" conaffinity="0" />
+            <geom size="0.04 0.5" pos="-0.4 0.4 -0.501" quat="0 1 0 0" type="cylinder" contype="0" conaffinity="0" />
+            <geom size="0.04 0.5" pos="0.4 -0.4 -0.501" quat="0 1 0 0" type="cylinder" contype="0" conaffinity="0" />
+            <geom size="0.04 0.5" pos="-0.4 -0.4 -0.501" quat="0 1 0 0" type="cylinder" contype="0" conaffinity="0" />
+        </body>
+        
+        <!-- ======= MOCAP ======= -->
+        <body name="vive_tracker" pos="0 -0.35 0.25" mocap="true">
+            <inertial pos="0 0 0" mass="0.064" diaginertia="1.70667e-05 1.70667e-05 1.70667e-05" />
+            <geom size="0.03 0.01" type="cylinder" contype="0" conaffinity="0" group="3" rgba="0.3 0.3 0.3 0.3" />
+        </body>
+
+        <!-- ======= HAND =======pos="0 -0.7 0.2" euler="-1.57 0 0"pos="-0.02 -0.69 0.23" euler="-1.57 0 2" -->
+        <body name="forearm" pos="0 -0.7 0.16" euler="-1.57 0 0">
+            <inertial pos="0.001 -0.002 0.29" quat="0.982037 -0.0160006 0 -0.188007" mass="4" diaginertia="0.01 0.01 0.0075" />
+            <!-- <joint name="ARTx" pos="0 0 0" axis="1 0 0" type="slide" range="-0.015 0.015" damping="20" />
+            <joint name="ARTy" pos="0 0 0" axis="0 1 0" type="slide" range="-0.015 0.015" damping="20" />
+            <joint name="ARTz" pos="0 0 0" axis="0 0 1" type="slide" range="-0.015 0.015" damping="20" /> -->
+            <!-- <joint name="ARRx" pos="0 0 0" axis="1 0 0" range="-.025 .025" damping="20" />
+            <joint name="ARRy" pos="0 0 0" axis="0 1 0" range="-.01 .01" damping="20" /> -->
+            <!-- <joint name="ARRz" pos="0 0 0" axis="0 0 1" range="-.175 .175" damping="20" /> -->
+            <geom name="V_forearm" class="D_Vizual" pos="0 -.01 .181" euler="0 0 -1.57"  mesh="forearm_simple" />
+            <geom name="C_forearm1" class="DC_Hand" size="0.05 0.033" pos="0 0 0.29" type="capsule" rgba="0.4 0.5 0.6 0.1" />
+            <!-- ======= Adroit ======= -->
+            <include file="DAPG_Adroit_yjl.xml"/>
+        </body>
+
+        <!-- ======= Objects ======= -->
+        <!-- NOTE: these pos attribute does not matter, they will be set by the mujoco_py script in the experiment -->
+        <body name="Object1" pos="0.1 -0.25 -0.175">
+            <geom name="plane" type="mesh" mesh="plane"/>
+        </body>
+        <body name="Object2" pos="0 -0.1 0.2">
+            <geom name="glass" type="mesh" mesh="glass"/>
+        </body>
+        <!-- <body name="Object3" pos="-0.06 -0.25 -0.175">
+            <geom name="OShape" type="mesh" mesh="OShape"/>
+        </body> -->
+        <body name="Object3" pos="0 -0.25 -0.175">
+            <geom name="OShape1" type="mesh" mesh="OShape1"/>
+            <geom name="OShape2" type="mesh" mesh="OShape2"/>
+            <geom name="OShape3" type="mesh" mesh="OShape3"/>
+            <geom name="OShape4" type="mesh" mesh="OShape4"/>
+            <geom name="OShape5" type="mesh" mesh="OShape5"/>
+            <geom name="OShape6" type="mesh" mesh="OShape6"/>
+        </body>
+        <body name="Object4" pos="-0.05 -0.25 -0.175">
+            <geom name="LShape" type="mesh" mesh="LShape"/>
+        </body>
+        <body name="Object5" pos="0 -0.14 0.22" euler="-1.57 0 0">
+            <geom name="simpleShape" type="mesh" mesh="simpleShape"/>
+        </body>
+        <body name="Object6" pos="-0.15 -0.25 -0.175">
+            <geom name="TShape" type="mesh" mesh="TShape"/>
+        </body>
+        <body name="Object7" pos="-0.2 -0.25 -0.175">
+            <geom name="thinShape" type="mesh" mesh="thinShape"/>
+        </body>
+        <body name="Object8" pos="-0.25 -0.25 -0.175">
+            <geom name="VShape" type="mesh" mesh="VShape"/>
+        </body>
+        <body name="Object9" pos="-0.3 -0.25 -0.175">
+            <geom name="Egg" type="ellipsoid" size="0.035 0.03 0.02"/>
+        </body>
+        <body name="Object10" pos="-0.35 -0.25 -0.175">
+            <geom name="Cylinder" type="cylinder" size="0.02 0.02"/>
+        </body>
+    </worldbody>
+    
+    <include file='DAPG_assets.xml'/>
+</mujoco>
