@@ -75,7 +75,7 @@ def train_agent(job_name, agent,
                 gae_lambda = None,
                 num_cpu = 16,
                 sample_mode = 'trajectories',
-                horizon= int(1e6), 
+                horizon= int(150), 
                 num_traj = 50,
                 num_samples = 50000, # has precedence, used with sample_mode = 'samples'
                 save_freq = 10,

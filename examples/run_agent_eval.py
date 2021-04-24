@@ -62,15 +62,12 @@ def run_experiment(log_dir, args):
         elif args["sample_method"] == "agent":
             obs, rew, done, info = env.step(policy.get_action_eval(obs)[1]['evaluation'])
 
-        # logger.record_tabular("step", i, itr= i)
-        # logger.record_tabular("total_reward", rew, itr= i)
-        # logger.record_tabular("n_points", len(info["pointcloud"]), itr= i)
-        # logger.log_scalar("step", i, i)
-        # logger.log_scalar("total_reward", rew, i)
-        # logger.log_scalar("n_points", len(info["pointcloud"]), i)
-        # for k, v in info.items():
-        #     if "_p" in k or "_r" in k:
-        #         logger.log_scalar(k, v, i)
+        logger.log_scalar("step", i, i)
+        logger.log_scalar("total_reward", rew, i)
+        logger.log_scalar("n_points", len(info["pointcloud"]), i)
+        for k, v in info.items():
+            if "_p" in k or "_r" in k:
+                logger.log_scalar(k, v, i)
         if (i+1) % int(1e4) == 0:
             pc = np.array(info["pointcloud"]) # (N, 3)
             # log pointcloud to tensorboard
@@ -87,24 +84,24 @@ def run_experiment(log_dir, args):
                 global_step= i,
             )
             # np.savez_compressed(os.path.join(log_dir, str(i+1)+"pointcloud.npz"), pcd=pc)
-        if (i+1) % int(1e4) == 0:
+        if (i+1) % int(10) == 0:
             if not os.path.isdir(os.path.join(log_dir, "newpointcloud")):
                 os.mkdir(os.path.join(log_dir, "newpointcloud"))
             # str(args["env_kwargs"]["forearm_orientation"])
             pc_frame = np.array(info["pointcloud"])
-            np.savez_compressed(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "newpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + str(args["env_kwargs"]["forearm_orientation_name"])+ "_step_" + str(i)) + ".npz",pcd=pc_frame)
+            np.savez_compressed(os.path.join(log_dir, "newpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + "_step_" + str(i)) + ".npz",pcd=pc_frame)
             # pc_frames.append(pc_frame)
             ax = plt.axes(projection='3d')
             ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
-            plt.savefig("{}.png".format(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "newpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + str(args["env_kwargs"]["forearm_orientation_name"]) + "_step_" + str(i))))
+            plt.savefig("{}.png".format(os.path.join(log_dir, "newpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_step_" + str(i))))
             plt.close()
 
-        if (i+1) <= 500:
+        if (i+1) <= 100:
             frame = env.env.env.sim.render(width=640, height=480,
                                 mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
-        if (i+1) == 500:
+        if (i+1) == 100:
             logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()

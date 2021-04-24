@@ -22,6 +22,8 @@ default_config = dict(
         ground_truth_type= "nope",
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
+        reset_mode= "normal",
+        knn_k= 1,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -48,20 +50,20 @@ default_config = dict(
         clip_coef = 0.2,
         epochs = 10,
         mb_size = 64,
-        learn_rate = 3e-4,
+        learn_rate = 3e-3,
         # seed = seed,
         save_logs = True,
     ),
     train_agent_kwargs = dict(
         # seed = seed,
-        niter = 1000,
+        niter = 600,
         gamma = 0.995,
         gae_lambda = 0.97,
-        num_cpu = 16,
+        num_cpu = 8,
         sample_mode = 'trajectories',
         horizon= 150, 
-        num_traj = 100,
-        num_samples = 50000, # has precedence, used with sample_mode = 'samples'
+        num_traj = 150,
+        num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 5,
         evaluation_rollouts = 5,
         plot_keys = ['stoc_pol_mean'],
@@ -82,8 +84,19 @@ def main(args):
     variant_levels = list()
 
     values = [
+        ["normal"],
+        # ["intermediate"],
+        ["random"],
+    ]
+    dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    keys = [
+        ("env_kwargs", "reset_mode"),
+    ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
         ["sample"],
-        ["mesh"],
+        # ["mesh"],
         # ["nope"],
     ]
     dir_names = ["gt{}".format(*tuple(str(vi) for vi in v)) for v in values]
@@ -94,9 +107,11 @@ def main(args):
 
     values = [
         # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
-        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-23
+        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
+        [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
         [True, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
-        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-27
+        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
+        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
     ]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi != 0) for vi in v)) for v in values]
     keys = [
@@ -112,17 +127,19 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        [1, 0, 0.25],
-        [0, 1, 0.25],
+        [1, 0, 0.25, 1],
+        # [0, 1, 0.25, 1],
+        [0, 1, 0.25, 10],
         # [10, 0, 0.25],
         # [0, 10, 0.25],
         # [100, 100, 0.25],
     ]
-    dir_names = ["cf{}_knn{}_logstd{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["cf{}_knn{}_logstd{}_knnk{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "chamfer_r_factor"),
         ("env_kwargs", "knn_r_factor"),
         ("policy_kwargs", "init_log_std"),
+        ("env_kwargs", "knn_k"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 

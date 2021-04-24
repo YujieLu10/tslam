@@ -125,7 +125,7 @@ class GymEnv(object):
 
     # ===========================================
 
-    def visualize_policy(self, policy, horizon=1000, num_episodes=1, mode='exploration'):
+    def visualize_policy(self, policy, horizon=150, num_episodes=1, mode='exploration'):
         try:
             self.env.env.visualize_policy(policy, horizon, num_episodes, mode)
         except:
@@ -140,7 +140,7 @@ class GymEnv(object):
                     t = t+1
 
     def visualize_policy_offscreen(self, policy,
-            horizon=1000,
+            horizon=150,
             num_episodes= 1,
             mode='evaluation',
             **render_kwargs,

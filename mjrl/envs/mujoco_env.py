@@ -7,6 +7,7 @@ from os import path
 import gym
 import six
 import time as timer
+import random
 
 try:
     import mujoco_py
@@ -150,7 +151,7 @@ class MujocoEnv(gym.Env):
 
     # -----------------------------
 
-    def visualize_policy(self, policy, horizon=1000, num_episodes=1, mode='exploration'):
+    def visualize_policy(self, policy, horizon=150, num_episodes=1, mode='exploration'):
         self.mujoco_render_frames = True
         for ep in range(num_episodes):
             o = self.reset()
@@ -162,7 +163,7 @@ class MujocoEnv(gym.Env):
                 t = t+1
         self.mujoco_render_frames = False
 
-    def visualize_policy_offscreen(self, policy, horizon=1000,
+    def visualize_policy_offscreen(self, policy, horizon=150,
                                    num_episodes=1,
                                    frame_size=(640,480),
                                    mode='exploration',

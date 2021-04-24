@@ -65,7 +65,7 @@ class BatchREINFORCE:
     def train_step(self, N,
                    env=None,
                    sample_mode='trajectories',
-                   horizon=1e6,
+                   horizon=150,
                    gamma=0.995,
                    gae_lambda=0.97,
                    num_cpu='max',

@@ -102,7 +102,7 @@ def sample_paths(
         env,
         policy,
         eval_mode = False,
-        horizon = 1e6,
+        horizon = 150,
         base_seed = None,
         num_cpu = 1,
         max_process_time=30000,

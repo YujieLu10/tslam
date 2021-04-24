@@ -54,5 +54,9 @@ class FCNetwork(nn.Module):
             out = self.nonlinearity(out)
         out = self.fc_layers[-1](out)
         out = out * self.out_scale + self.out_shift
-
+        # if out[0][0] > -0.1:
+        #     out[0][0] = 1.5
+        # else:
+        #     out[0][0] = -1.5
+        # print(">>> out {}".format(out))
         return out
