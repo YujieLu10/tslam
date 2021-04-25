@@ -350,7 +350,7 @@ class MujocoEnv(gym.Env, utils.EzPickle, ObsVecDict):
     #     #return None
 
 
-    def visualize_policy(self, policy, horizon=1000, num_episodes=1, mode='exploration'):
+    def visualize_policy(self, policy, horizon=100, num_episodes=1, mode='exploration'):
         self.mujoco_render_frames = True
         for ep in range(num_episodes):
             o = self.reset()
@@ -369,7 +369,7 @@ class MujocoEnv(gym.Env, utils.EzPickle, ObsVecDict):
         self.mujoco_render_frames = False
 
 
-    def visualize_policy_offscreen(self, policy, horizon=1000,
+    def visualize_policy_offscreen(self, policy, horizon=100,
                                    num_episodes=1,
                                    frame_size=(640,480),
                                    mode='exploration',

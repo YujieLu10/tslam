@@ -18,12 +18,14 @@ default_config = dict(
         untouch_p_factor= 0,
         newpoints_r_factor= 0,
         knn_r_factor= 0,
+        new_voxel_r_factor= 0,
         use_voxel= False,
         ground_truth_type= "nope",
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
         reset_mode= "normal",
         knn_k= 1,
+        voxel_conf= ['2d', 16, 4, False],
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -86,7 +88,7 @@ def main(args):
     values = [
         ["normal"],
         # ["intermediate"],
-        ["random"],
+        # ["random"],
     ]
     dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
@@ -108,8 +110,8 @@ def main(args):
     values = [
         # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
         # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
-        [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
-        [True, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
+        [False, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
         # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
         # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
     ]
@@ -126,20 +128,19 @@ def main(args):
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
+    # voxel_conf= ['2d', 16, 4, False]
     values = [
-        [1, 0, 0.25, 1],
-        # [0, 1, 0.25, 1],
-        [0, 1, 0.25, 10],
-        # [10, 0, 0.25],
-        # [0, 10, 0.25],
-        # [100, 100, 0.25],
+        [0, 0, 10, 0.5, 5, ['2d', 16, 4, True]],
+        [0, 0, 1, 0.25, 5, ['2d', 16, 4, True]],
     ]
     dir_names = ["cf{}_knn{}_logstd{}_knnk{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "chamfer_r_factor"),
         ("env_kwargs", "knn_r_factor"),
+        ("env_kwargs", "new_voxel_r_factor"),
         ("policy_kwargs", "init_log_std"),
         ("env_kwargs", "knn_k"),
+        ("env_kwargs", "voxel_conf"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 

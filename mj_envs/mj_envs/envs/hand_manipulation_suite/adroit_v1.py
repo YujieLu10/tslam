@@ -30,12 +30,17 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             untouch_p_factor= 0,
             newpoints_r_factor= 0,
             knn_r_factor= 0,
+            new_voxel_r_factor= 0,
             ground_truth_type= "nope",
             use_voxel= False,
             forearm_orientation= [0, 0, 0], # forearm orientation
             forearm_relative_position= [0, 0.5, 0], # forearm position related to hand (z-value will be flipped when arm faced down)
             reset_mode= "normal",
             knn_k= 1, # k setting
+            voxel_conf= ['2d', 16, 4, False], # 2d/3d, voxelNum, 2d_sep, test_part
+            # voxel_num= 280,
+            # twod_sep= 2,
+            # test_part= False,
         ):
 
         self.forearm_orientation = forearm_orientation
@@ -58,6 +63,11 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.knn_r_factor = knn_r_factor
         self.ground_truth_type = ground_truth_type
         self.use_voxel = use_voxel
+        self.voxel_type = voxel_conf[0]
+        self.voxel_num = voxel_conf[1]
+        self.twod_sep = voxel_conf[2]
+        self.test_part = voxel_conf[3]
+        self.new_voxel_r_factor = new_voxel_r_factor
         
         self.obj_bid_idx = obj_bid_idx
         self.obj_name = [
@@ -86,7 +96,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         ]
         # dumy obj_bid_list, updated later in this method
         self.obj_bid_list = [0 for _ in range(len(self.obj_name))]
-        self.voxel_array = [0] * 280
+        self.voxel_array = [0] * self.voxel_num
         self.forearm_obj_bid = 0
         self.S_grasp_sid = 0
         self.ffknuckle_obj_bid = 0
@@ -137,9 +147,37 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         elif self.ground_truth_type == "sample":
             self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "groundtruth_obj4.npz"))['pcd']
         # confB
-        self.voxel_array = [0] * 280
+        self.voxel_array = [0] * self.voxel_num
         # confC
-        # self.voxel_array = [0] * 280
+        # self.voxel_array = [0] * self.voxel_num
+
+    def is_in_voxel_bound(self, posx, posy):
+        is_in_bound = False
+        if self.test_part:
+            is_in_bound = posx > 0 and posx < 0.125 and posy > -0.25 and posy < -0.025
+        else:
+            is_in_bound = posx > -0.125 and posx < 0.125 and posy > -0.25 and posy < -0.025
+        return is_in_bound
+
+    def get_2d_voxel_idx(self, posx, posy):
+        # for simple objectobj5(index in obj_list:4) only
+        # here we use 14 pose each 600 sampled points as ground truth
+        # center point xy(0, -0.14)
+        # corner points (-0.125,-0.25) (-0.125,-0.025) (0.125, -0.25) (0.125, -0.025)
+        # test left (0,-0.25) (0,-0.025) (0.125, -0.25) (0.125, -0.025)
+        unit_x, unit_y, idx_x, idx_y = 0, 0, 0, 0
+        if self.test_part:
+            unit_x = 0.125 / self.twod_sep
+            unit_y = 0.225 / self.twod_sep
+            idx_x = math.floor((posx - 0) / unit_x)
+            idx_y = math.floor((posy + 0.25) / unit_y)
+        else:
+            unit_x = 0.25 / self.twod_sep
+            unit_y = 0.225 / self.twod_sep
+            idx_x = math.floor((posx + 0.125) / unit_x)
+            idx_y = math.floor((posy + 0.25) / unit_y)
+        voxel_idx = idx_y * self.twod_sep + idx_x + 1
+        return voxel_idx
 
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
@@ -270,6 +308,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         min_pos_dist = None
         knn_r = 0
         newpoints_r = 0
+        new_voxel_r = 0
 
         previous_pos_list = self.previous_contact_points.copy()
         next_pos_list = self.previous_contact_points.copy()
@@ -320,13 +359,24 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             mesh_p = (-1) * (torch.mean(mesh_p[0]) + torch.mean(mesh_p[1]))
         else:
             mesh_p = 0
-        
+        # voxel obs and new voxel reward
+        if len(self.previous_contact_points) > 0:
+            for point in self.previous_contact_points:
+                if self.is_in_voxel_bound(point[0], point[1]):
+                    idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
+                    if len(self.voxel_array) == 0:
+                        self.voxel_array = [0] * self.voxel_num
+                    if self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
+                        new_voxel_r += 1
+                        self.voxel_array[min(idx, self.voxel_num-1)] = 1
+
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
         reward += self.chamfer_r_factor * chamfer_r
         reward += self.newpoints_r_factor * newpoints_r
         reward += self.mesh_p_factor * mesh_p
         reward += self.knn_r_factor * knn_r
+        reward += self.new_voxel_r_factor * new_voxel_r
         done = False
         info = dict(
             pointcloud= np.array(self.previous_contact_points),
@@ -335,8 +385,10 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             palm_r = palm_r,
             chamfer_r= chamfer_r,
             newpoints_r= newpoints_r,
+            new_voxel_r= new_voxel_r,
             mesh_p= mesh_p,
             knn_r= knn_r,
+            total_reward_r= reward,
             voxel_array= np.array(self.voxel_array),
             chamfer_loss_p= chamfer_loss,
         )
@@ -386,16 +438,9 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         thbase_xpos = self.data.body_xpos[self.thbase_obj_bid].ravel()
         # return np.concatenate([qp[:-6], palm_xpos, obj_init_xpos, palm_xpos-obj_init_xpos, ffknuckle_xpos, mfknuckle_xpos, rfknuckle_xpos, lfmetacarpal_xpos, thbase_xpos,np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         
-        if len(self.previous_contact_points) > 0:
-            for point in self.previous_contact_points:
-                idx = self.get_voxel_idx(point[0], point[1], point[2])
-                # confB
-                if len(self.voxel_array) == 0:
-                    self.voxel_array = [-1] * 280
-                self.voxel_array[min(idx, 279)] = 1
-
-        # final_observation = np.concatenate([qv[:-6], qv[:-6], np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qv[:-6], qv[:-6], np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
-        final_observation = np.concatenate([qv[:-6], np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp[:-6], np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+        # print("self.voxel_array {}".format(self.voxel_array))
+        final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+        # final_observation = np.concatenate([qv[:-6], np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp[:-6], np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         return final_observation
 
     def reset_model(self, obj_bid_idx= None):

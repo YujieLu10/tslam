@@ -178,15 +178,22 @@ def train_agent(job_name, agent,
                     policy= agent.policy,
                     **visualize_kwargs,
                 ) # (T, C, H, W)
+                video_explore, env_infos_explore = e.visualize_policy_explore(
+                    policy= agent.policy,
+                    **visualize_kwargs,
+                ) # (T, C, H, W)
                 pc_frame = np.array(env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)))
                 np.savez_compressed("pointcloud_"+str(i)+".npz",pcd=pc_frame)
                 # pc_frames.append(pc_frame)
-                ax = plt.axes(projection='3d')
-                ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
-                plt.savefig("{}.png".format('pointcloud' + str(i)))
+                ax = plt.axes()
+                # ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
+                ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
+                plt.savefig("{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
                 exptools.logging.logger.record_image("rendered", video[-1], i)
                 exptools.logging.logger.record_gif("rendered", video, i)
+                exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
+                exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
                 pc = env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)) # (N, 3)
                 colors = np.zeros_like(pc)
                 for pc_idx in range(pc.shape[0]):

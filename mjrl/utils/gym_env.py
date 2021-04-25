@@ -162,6 +162,29 @@ class GymEnv(object):
                 t = t+1
         return np.array(frames), env_infos
 
+    def visualize_policy_explore(self, policy,
+            horizon=150,
+            num_episodes= 1,
+            mode='exploration',
+            **render_kwargs,
+        ):
+        """ The only difference is this method returns a nparray with size (T, C, H, W) as video
+        """
+        frames = list()
+        env_infos = list()
+        for ep in range(num_episodes):
+            o = self.reset()
+            d = False
+            t = 0
+            while t < horizon and d is False:
+                a = policy.get_action(o)[0] # if mode == 'exploration' else policy.get_action(o)[1]['evaluation']
+                o, r, d, info = self.step(a)
+                frame = self.render_offscreen(mode= "offscreen", **render_kwargs)
+                frames.append(np.transpose(frame[::-1, :, :], (2,0,1)))
+                env_infos.append(info)
+                t = t+1
+        return np.array(frames), env_infos
+
     def evaluate_policy(self, policy,
                         num_episodes=5,
                         horizon=None,
