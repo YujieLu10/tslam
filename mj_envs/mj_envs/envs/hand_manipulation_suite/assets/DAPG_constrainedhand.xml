@@ -34,6 +34,38 @@
         <mesh name="thinShape" file="../../../../envs/hand_manipulation_suite/assets/stl/thin_Shape.stl" scale="0.002 0.002 0.002"/>
         <mesh name="VShape" file="../../../../envs/hand_manipulation_suite/assets/stl/V-Shape.stl" scale="0.006 0.006 0.006"/>
     </asset>
+
+    <!-- ======= SENSORS ======= -->
+    <sensor>
+        <touch site="S_grasp" name="S_grasp_sensor"/>
+        <touch site="Tch_ffmetacarpal" name="Tch_ffmetacarpal_sensor"/>
+        <touch site="Tch_mfmetacarpal" name="Tch_mfmetacarpal_sensor"/>
+        <touch site="Tch_rfmetacarpal" name="Tch_rfmetacarpal_sensor"/>
+        <touch site="Tch_thmetacarpal" name="Tch_thmetacarpal_sensor"/>
+        <touch site="Tch_palm" name="Tch_palm_sensor"/>
+        <touch site="Tch_ffproximal" name="Tch_ffproximal_sensor"/>
+        <touch site="Tch_ffmiddle" name="Tch_ffmiddle_sensor"/>
+        <touch site="S_fftip" name="S_fftip_sensor"/>
+        <touch site="Tch_fftip" name="Tch_fftip_sensor"/>
+        <touch site="Tch_mfproximal" name="Tch_mfproximal_sensor"/>
+        <touch site="Tch_mfmiddle" name="Tch_mfmiddle_sensor"/>
+        <touch site="S_mftip" name="S_mftip_sensor"/>
+        <touch site="Tch_mftip" name="Tch_mftip_sensor"/>
+        <touch site="Tch_rfproximal" name="Tch_rfproximal_sensor"/>
+        <touch site="Tch_rfmiddle" name="Tch_rfmiddle_sensor"/>
+        <touch site="S_rftip" name="S_rftip_sensor"/>
+        <touch site="Tch_rftip" name="Tch_rftip_sensor"/>
+        <touch site="Tch_lfmetacarpal" name="Tch_lfmetacarpal_sensor"/>
+        <touch site="Tch_lfproximal" name="Tch_lfproximal_sensor"/>
+        <touch site="Tch_lfmiddle" name="Tch_lfmiddle_sensor"/>
+        <touch site="S_lftip" name="S_lftip_sensor"/>
+        <touch site="Tch_lftip" name="Tch_lftip_sensor"/>
+        <touch site="Tch_thproximal" name="Tch_thproximal_sensor"/>
+        <touch site="Tch_thmiddle" name="Tch_thmiddle_sensor"/>
+        <touch site="S_thtip" name="S_thtip_sensor"/>
+        <touch site="Tch_thtip" name="Tch_thtip_sensor"/>
+    </sensor>
+
     <!-- ======= WORLD ======= -->
     <worldbody>
         <light directional='false' diffuse='.7 .7 .7' specular='0.03 0.03 0.03' pos='-1 -1.0 4.0' dir='1 1.0 -4'/>

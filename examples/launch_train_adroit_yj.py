@@ -26,6 +26,7 @@ default_config = dict(
         reset_mode= "normal",
         knn_k= 1,
         voxel_conf= ['2d', 16, 4, False],
+        sensor_obs= False,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -115,7 +116,7 @@ def main(args):
         # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
         # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
     ]
-    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi != 0) for vi in v)) for v in values]
+    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
@@ -130,10 +131,12 @@ def main(args):
 
     # voxel_conf= ['2d', 16, 4, False]
     values = [
-        [0, 0, 10, 0.5, 5, ['2d', 16, 4, True]],
-        [0, 0, 1, 0.25, 5, ['2d', 16, 4, True]],
+        [0, 0, 1, 0.5, 5, ['2d', 64, 8, False], True],
+        # [0, 0, 1, 0.5, 5, ['2d', 100, 10, False]],
+        # [0, 0, 1, 0.5, 5, ['2d', 144, 12, False]],
+        [0, 0, 1, 0.5, 5, ['2d', 256, 16, False], True],
     ]
-    dir_names = ["cf{}_knn{}_logstd{}_knnk{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "chamfer_r_factor"),
         ("env_kwargs", "knn_r_factor"),
@@ -141,6 +144,7 @@ def main(args):
         ("policy_kwargs", "init_log_std"),
         ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),
+        ("env_kwargs", "sensor_obs"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
