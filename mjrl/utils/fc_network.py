@@ -4,14 +4,15 @@ import torch.nn as nn
 
 
 class FCNetwork(nn.Module):
-    def __init__(self, reinitialize, obs_dim, act_dim,
+    def __init__(self, obs_dim, act_dim,
                  hidden_sizes=(64,64),
-                 nonlinearity='relu',   # either 'tanh' or 'relu'
+                 nonlinearity='tanh',   # either 'tanh' or 'relu'
                  in_shift = None,
                  in_scale = None,
                  out_shift = None,
                  out_scale = None):
         super(FCNetwork, self).__init__()
+
         self.obs_dim = obs_dim
         self.act_dim = act_dim
         assert type(hidden_sizes) == tuple
@@ -21,12 +22,7 @@ class FCNetwork(nn.Module):
         # hidden layers
         self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
                          for i in range(len(self.layer_sizes) -1)])
-        if reinitialize:
-            self.fc_layers[0].weight = torch.nn.Parameter(torch.Tensor(5 * np.random.randn(64, obs_dim)))
-            # self.fc_layers[1].weight = torch.nn.Parameter(torch.Tensor(np.ones([64, 64])))
-            self.fc_layers[2].weight = torch.nn.Parameter(torch.Tensor(100 * np.random.randn(act_dim, 64)))
         self.nonlinearity = torch.relu if nonlinearity == 'relu' else torch.tanh
-        
 
     def set_transformations(self, in_shift=None, in_scale=None, out_shift=None, out_scale=None):
         # store native scales that can be used for resets
@@ -43,7 +39,6 @@ class FCNetwork(nn.Module):
     def forward(self, x):
         # TODO(Aravind): Remove clamping to CPU
         # This is a temp change that should be fixed shortly
-        
         if x.is_cuda:
             out = x.to('cpu')
         else:
@@ -54,9 +49,4 @@ class FCNetwork(nn.Module):
             out = self.nonlinearity(out)
         out = self.fc_layers[-1](out)
         out = out * self.out_scale + self.out_shift
-        # if out[0][0] > -0.1:
-        #     out[0][0] = 1.5
-        # else:
-        #     out[0][0] = -1.5
-        # print(">>> out {}".format(out))
         return out

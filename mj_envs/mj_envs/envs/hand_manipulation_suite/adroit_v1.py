@@ -256,7 +256,6 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         # apply action and step
         a = np.clip(a, -1.0, 1.0)
         a = self.act_mid + a*self.act_rng
-        
         self.do_simulation(a, self.frame_skip)
 
         self.count_step += 1
@@ -390,24 +389,12 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         qv = self.data.qvel.ravel()
         obj_init_xpos = self.data.body_xpos[self.obj_bid_list[self.obj_bid_idx]].ravel()
         palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
-        # touch_points = len(self.previous_contact_points)
-        # touch_pos = self.previous_contact_points[touch_points-3:] if touch_points >= 3 else [0,0,0,0,0,0,0,0,0]
-
         # 6 extreme pos
         all_points = np.array(self.previous_contact_points)
         if len(all_points) > 0:
             extreme_points = np.concatenate((all_points[all_points[:, 0].argmin()], all_points[all_points[:, 1].argmin()], all_points[all_points[:, 2].argmin()], all_points[all_points[:, 0].argmax()], all_points[all_points[:, 1].argmax()], all_points[all_points[:, 2].argmax()]))
         else:
             extreme_points = (0.5 * np.random.randn(1, 18))
-        # 3 random pos
-        # touch_points = len(self.new_current_pos_list)
-        # touch_pos = self.new_current_pos_list[touch_points-3:] if touch_points >= 3 else [0,0,0,0,0,0,0,0,0]
-        # if touch_points >= 3:
-        #     touch_pos = random.sample(self.new_current_pos_list, 3)
-        # elif len(self.previous_contact_points) >= 3:
-        #     touch_pos = random.sample(self.previous_contact_points, 3)
-        # else:
-        #     touch_pos = (0.5 * np.random.randn(1, 9))
         
         new_touch_pos = random.sample(self.new_current_pos_list, min(6, len(self.new_current_pos_list))) if len(self.new_current_pos_list) > 0 else []
         old_touch_pos = random.sample(self.previous_contact_points, min(6 - len(new_touch_pos), len(self.previous_contact_points))) if 6 > len(self.new_current_pos_list) and len(self.previous_contact_points) > 0 else []
@@ -420,14 +407,13 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             touch_pos = np.append(touch_pos, old_touch_pos)
         if len(random_touch_pos) > 0:
             touch_pos = np.append(touch_pos, random_touch_pos)
-        # touch_pos = np.array(touch_pos)
+        
         
         ffknuckle_xpos = self.data.body_xpos[self.ffknuckle_obj_bid].ravel()
         mfknuckle_xpos = self.data.body_xpos[self.mfknuckle_obj_bid].ravel()
         rfknuckle_xpos = self.data.body_xpos[self.rfknuckle_obj_bid].ravel()
         lfmetacarpal_xpos = self.data.body_xpos[self.lfmetacarpal_obj_bid].ravel()
         thbase_xpos = self.data.body_xpos[self.thbase_obj_bid].ravel()
-        # return np.concatenate([qp[:-6], palm_xpos, obj_init_xpos, palm_xpos-obj_init_xpos, ffknuckle_xpos, mfknuckle_xpos, rfknuckle_xpos, lfmetacarpal_xpos, thbase_xpos,np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         impact_list = None
         for rid in self.sensor_rid_list:
             if impact_list is None:
@@ -439,7 +425,6 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             final_observation = np.concatenate([qp, qv, np.array(impact_list), np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.array(impact_list), np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         else:
             final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
-        # final_observation = np.concatenate([qv[:-6], np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp[:-6], np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         return final_observation
 
     def reset_model(self, obj_bid_idx= None):

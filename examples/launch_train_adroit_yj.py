@@ -131,10 +131,10 @@ def main(args):
 
     # voxel_conf= ['2d', 16, 4, False]
     values = [
-        [0, 0, 1, 0.5, 5, ['2d', 64, 8, False], True],
+        [0, 0, 1, 0.5, 5, ['2d', 64, 8, False], False],
         # [0, 0, 1, 0.5, 5, ['2d', 100, 10, False]],
         # [0, 0, 1, 0.5, 5, ['2d', 144, 12, False]],
-        [0, 0, 1, 0.5, 5, ['2d', 256, 16, False], True],
+        [0, 0, 1, 0.5, 5, ['2d', 256, 16, False], False],
     ]
     dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [

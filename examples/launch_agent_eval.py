@@ -14,17 +14,23 @@ default_config = dict(
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation_name= "up", # ("up", "down")
-        chamfer_r_factor= 1,
+        # scale all reward/penalty to the scale of 1.0
+        chamfer_r_factor= 0,
         mesh_p_factor= 0,
         mesh_reconstruct_alpha= 0.01,
         palm_r_factor= 0,
         untouch_p_factor= 0,
         newpoints_r_factor= 0,
         knn_r_factor= 0,
+        new_voxel_r_factor= 0,
         use_voxel= False,
         ground_truth_type= "nope",
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
+        reset_mode= "normal",
+        knn_k= 1,
+        voxel_conf= ['2d', 16, 4, False],
+        sensor_obs= False,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -38,7 +44,7 @@ default_config = dict(
     ),
     sample_method = "policy", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(110),
+    total_timesteps = int(150),
     seed= seed,
 )
 
@@ -47,6 +53,17 @@ def main(args):
 
     # set up variants
     variant_levels = list()
+
+    values = [
+        ["normal"],
+        # ["intermediate"],
+        # ["random"],
+    ]
+    dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    keys = [
+        ("env_kwargs", "reset_mode"),
+    ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
         ["sample"],
@@ -60,53 +77,14 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        # [False, 1, "down", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
-        # [True, 1, "down", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
-        # [True, 1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], 10, 1, 1],
-        # [True, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1],
-        # [False, 2, "up", [0, 0, 0],  [0, 0.5, 0.05], 0, 1, 1],
-        # [False, 3, "down", [0.77, 0.97, 0],  [0, 0.5, 0.04], 10, 1, 1],
-        # [True, 3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], 10, 1, 1],
-        # [False, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 1, 1],
-        # [True, 4, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100],
-
-        # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
-        [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
-        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
-        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-25
-        # [False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
-        # [False, 4, "up-middle", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.75, 0.17], 0, 10, 10],
-        # [False, 4, "up-front", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.65, 0.17], 0, 10, 10],
-        # [False, 4, "up-left", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0.03, -0.75, 0.17], 0, 10, 10],
-        # [False, 4, "up-right", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [-0.03, -0.75, 0.17], 0, 10, 10],
-        # [False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28], 0, 10, 10],
-        # [False, 4, "down-middle", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.75, 0.28], 0, 10, 10],
-        # [False, 4, "down-front", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.65, 0.28], 0, 10, 10],
-        # [False, 4, "down-left", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0.03, -0.75, 0.28], 0, 10, 10],
-        # [False, 4, "down-right", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [-0.03, -0.75, 0.28], 0, 10, 10],
-        # [False, 4, "up-flip", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 0],  [0, 0.4, 0.28], 0, 10, 10],
-        # [False, 4, "up-flip-back", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 0],  [0, 0.45, 0.28], 0, 10, 10],
-        # [False, 4, "down-flip", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 3],  [0, 0.4, 0.17], 0, 10, 10],
-        # [False, 4, "down-flip-back", [-1.57, 0, 0],  [0, -0.14, 0.22], [1.57, 0, 3],  [0, 0.45, 0.17], 0, 10, 10],
-
-        # [False, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 10, 1, 1],
-        # [True, 5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 100],
-        # [True, 5, "down", [1.57, 0, 0],  [0, 0.6, 0.04], 0, 100, 10],
-        # [True, 6, "down", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
-        # [False, 6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], 0, 1, 1],
-        # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1],
-        # [8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1],
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 0, 1, 1], # no mesh penalty
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 0, 1], # no chamfer
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 1, 0], # no knn
-        # [False, 8, "down", [0.77, 0, 0],  [0, 0.55, 0.02], 1, 10, 1], # big chamfer reward
-        # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1, 1],
-        # [9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], 0, 1],
-        # [False, 9, "down", [0.77, 0, 0],  [0, 0.55, 0.01], 10, 1, 10], # big mesh penalty and big knn reward
+        # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
+        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
+        [False, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
+        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
     ]
-    dir_names = ["obj{}_{}_{}".format(v[0],v[1],v[2]) for v in values]
+    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
@@ -119,25 +97,29 @@ def main(args):
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
+    # voxel_conf= ['2d', 16, 4, False]
     values = [
-        [0.1, 0, 0.25],
-        # [0, 1, 0.25],
-        # [10, 0, 0.25],
-        # [0, 10, 0.25],
-        # [100, 100, 0.25],
+        # [0, 0, 1, 0.5, 5, ['2d', 64, 8, False], False],
+        # [0, 0, 1, 0.5, 5, ['2d', 100, 10, False]],
+        # [0, 0, 1, 0.5, 5, ['2d', 144, 12, False]],
+        [0, 0, 1, 0.5, 5, ['2d', 256, 16, False], False],
     ]
-    dir_names = ["cf{}_knn{}_logstd{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "chamfer_r_factor"),
         ("env_kwargs", "knn_r_factor"),
+        ("env_kwargs", "new_voxel_r_factor"),
         ("policy_kwargs", "init_log_std"),
+        ("env_kwargs", "knn_k"),
+        ("env_kwargs", "voxel_conf"),
+        ("env_kwargs", "sensor_obs"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        # ["action"],
+        ["action"],
         # ["policy"],
-        ["agent"],
+        # ["agent"],
         # ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]
