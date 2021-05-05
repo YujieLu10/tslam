@@ -117,10 +117,10 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        ["action"],
+        # ["action"],
         # ["policy"],
         # ["agent"],
-        # ["explore"],
+        ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]

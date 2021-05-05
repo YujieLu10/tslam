@@ -1,6 +1,6 @@
 import logging
 logging.disable(logging.CRITICAL)
-
+import math
 from tabulate import tabulate
 from mjrl.utils.make_train_plots import make_train_plots
 from mjrl.utils.gym_env import GymEnv
@@ -189,6 +189,26 @@ def train_agent(job_name, agent,
                 # ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
                 plt.savefig("{}.png".format('2dpointcloud' + str(i)))
+                plt.close()
+                # 3d voxel visualization
+                voxel_array = np.array(env_infos[-1]["voxel_array"])
+                voxels = None
+                resolution = env_infos[-1]["resolution"]
+                if len(voxel_array) > 0:
+                    sep_x = math.ceil(0.25 / resolution)
+                    sep_y = math.ceil(0.225 / resolution)
+                    sep_z = math.ceil(0.04 / resolution)
+                    x, y, z = np.indices((sep_x, sep_y, sep_z))
+                    index_list = np.where(voxel_array>0)
+                    for index in index_list:
+                        idx_z = math.floor((index+1) / (sep_x * sep_y))
+                        idx_y = math.floor((index+1-idx_z * sep_x * sep_y) / sep_x)
+                        idx_x = index + 1 - idx_z * sep_x * sep_y - idx_y * sep_x
+                        cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+                        voxel = (voxel + cube) if voxel is not None else cube
+                ax = plt.figure().add_subplot(projection='3d')
+                ax.voxels(voxels, facecolors='grey', edgecolor='k')
+                plt.savefig("{}.png".format('voxel' + str(i)))
                 plt.close()
                 exptools.logging.logger.record_image("rendered", video[-1], i)
                 exptools.logging.logger.record_gif("rendered", video, i)

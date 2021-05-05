@@ -67,8 +67,8 @@ default_config = dict(
         horizon= 150, 
         num_traj = 150,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
-        save_freq = 5,
-        evaluation_rollouts = 5,
+        save_freq = 3,
+        evaluation_rollouts = 3,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
             horizon=150,
@@ -131,10 +131,8 @@ def main(args):
 
     # voxel_conf= ['2d', 16, 4, False]
     values = [
-        [0, 0, 1, 0.5, 5, ['2d', 64, 8, False], False],
-        # [0, 0, 1, 0.5, 5, ['2d', 100, 10, False]],
-        # [0, 0, 1, 0.5, 5, ['2d', 144, 12, False]],
-        [0, 0, 1, 0.5, 5, ['2d', 256, 16, False], False],
+        [0, 0, 1, 0.5, 5, ['3d', 0, 0.005, False], False],
+        [0, 0, 1, 0.5, 5, ['3d', 0, 0.01, False], False],
     ]
     dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [

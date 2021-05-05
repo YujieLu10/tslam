@@ -37,7 +37,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             forearm_relative_position= [0, 0.5, 0], # forearm position related to hand (z-value will be flipped when arm faced down)
             reset_mode= "normal",
             knn_k= 1, # k setting
-            voxel_conf= ['2d', 16, 4, False], # 2d/3d, voxelNum, 2d_sep, test_part
+            voxel_conf= ['2d', 0, 0.005, False], # 2d/3d, voxelNum, 2d_sep, test_part
             sensor_obs= False,
             # voxel_num= 280,
             # twod_sep= 2,
@@ -67,9 +67,9 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.ground_truth_type = ground_truth_type
         self.use_voxel = use_voxel
         self.voxel_type = voxel_conf[0]
-        self.voxel_num = voxel_conf[1]
         self.twod_sep = voxel_conf[2]
         self.test_part = voxel_conf[3]
+        self.voxel_num = int(self.get_voxel_len())
         self.new_voxel_r_factor = new_voxel_r_factor
         self.sensor_obs = sensor_obs
         
@@ -164,6 +164,23 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         else:
             is_in_bound = posx > -0.125 and posx < 0.125 and posy > -0.25 and posy < -0.025
         return is_in_bound
+    
+    def get_voxel_len(self):
+        if self.voxel_type == '2d':
+            sep_x, sep_y = 0, 0
+            if self.test_part:
+                sep_x = 0.125 / self.twod_sep
+                sep_y = 0.225 / self.twod_sep
+            else:
+                sep_x = 0.25 / self.twod_sep
+                sep_y = 0.225 / self.twod_sep
+            return math.ceil(sep_x) * math.ceil(sep_y)
+        else:
+            sep_x, sep_y, sep_z = 0, 0, 0
+            sep_x = math.ceil(0.25 / self.twod_sep)
+            sep_y = math.ceil(0.225 / self.twod_sep)
+            sep_z = math.ceil(0.04 / self.twod_sep)
+            return sep_x * sep_y * sep_z
 
     def get_2d_voxel_idx(self, posx, posy):
         # for simple objectobj5(index in obj_list:4) only
@@ -171,36 +188,31 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         # center point xy(0, -0.14)
         # corner points (-0.125,-0.25) (-0.125,-0.025) (0.125, -0.25) (0.125, -0.025)
         # test left (0,-0.25) (0,-0.025) (0.125, -0.25) (0.125, -0.025)
-        unit_x, unit_y, idx_x, idx_y = 0, 0, 0, 0
+        sep_x, sep_y, idx_x, idx_y = 0, 0, 0, 0
         if self.test_part:
-            unit_x = 0.125 / self.twod_sep
-            unit_y = 0.225 / self.twod_sep
-            idx_x = math.floor((posx - 0) / unit_x)
-            idx_y = math.floor((posy + 0.25) / unit_y)
+            sep_x = 0.125 / self.twod_sep
+            sep_y = 0.225 / self.twod_sep
+            idx_x = math.floor((posx - 0) / self.twod_sep)
+            idx_y = math.floor((posy + 0.25) / self.twod_sep)
         else:
-            unit_x = 0.25 / self.twod_sep
-            unit_y = 0.225 / self.twod_sep
-            idx_x = math.floor((posx + 0.125) / unit_x)
-            idx_y = math.floor((posy + 0.25) / unit_y)
-        voxel_idx = idx_y * self.twod_sep + idx_x + 1
+            sep_x = 0.25 / self.twod_sep
+            sep_y = 0.225 / self.twod_sep
+            idx_x = math.floor((posx + 0.125) / self.twod_sep)
+            idx_y = math.floor((posy + 0.25) / self.twod_sep)
+        voxel_idx = idx_y * math.ceil(sep_x) + idx_x + 1
         return voxel_idx
 
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
-        posx = max(min(posx, 0.1 - 1e-4), -0.1)
-        posy = max(min(posy, 0.16 - 1e-4), -0.12)
         posz = max(min(posz, 0.2 - 1e-4), 0.16)
-        # unit: 0.01 x 0.01 x 0.01
-        # confA: 1x1x1 -> 20x28x4
-        # confB: 2x2x2 -> 10x14x2
-        unit = 0.02
-        # confC: 4x4x4 -> 5x7x1
-        # unit = 0.04
-        idx_x = math.floor((posx + 0.1) / unit)
-        idx_y = math.floor((posy + 0.12) / unit)
-        idx_z = math.floor((posz - 0.16) / unit)
-        # confB
-        voxel_idx = idx_z * 10 * 14 + idx_y * 10 + idx_x
+        sep_x, sep_y, sep_z, idx_x, idx_y, idx_z = 0, 0, 0, 0, 0, 0
+        sep_x = 0.25 / self.twod_sep
+        sep_y = 0.225 / self.twod_sep
+        sep_z = 0.04 / self.twod_sep
+        idx_x = math.floor((posx + 0.125) / self.twod_sep)
+        idx_y = math.floor((posy + 0.25) / self.twod_sep)
+        idx_z = math.floor((posz - 0.16) / self.twod_sep)
+        voxel_idx = idx_z * math.ceil(sep_x) * math.ceil(sep_y) + idx_y * math.ceil(sep_x) + idx_x
         return voxel_idx
 
     def get_basic_reward(self, posA, posB):
@@ -359,7 +371,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
                     if self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
                         new_voxel_r += 1
                         self.voxel_array[min(idx, self.voxel_num-1)] = 1
-
+        voxel_occupancy = len(np.where(np.array(self.voxel_array)>0)) / len(np.array(self.voxel_array))
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
         reward += self.chamfer_r_factor * chamfer_r
@@ -381,6 +393,8 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             total_reward_r= reward,
             voxel_array= np.array(self.voxel_array),
             chamfer_loss_p= chamfer_loss,
+            resolution= self.twod_sep,
+            occupancy= voxel_occupancy,
         )
         return self.get_obs(), reward, done, info
 
