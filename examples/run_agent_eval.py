@@ -49,7 +49,7 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "best_policy.pickle"), 'rb'))
+        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "policy_531.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
 
     gif_frames = list()
@@ -59,14 +59,16 @@ def run_experiment(log_dir, args):
             obs, rew, done, info = env.step(policy.get_action(obs)[0])
         elif args["sample_method"] == "action":
             obs, rew, done, info = env.step(env.action_space.sample())
-        elif args["sample_method"] == "policy" or args["sample_method"] == "agent":
+        elif args["sample_method"] == "agent":
             obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
+        elif args["sample_method"] == "policy":
+            obs, rew, done, info = env.step(policy.get_action(obs)[0])
 
         logger.log_scalar("step", i, i)
         logger.log_scalar("total_reward", rew, i)
         logger.log_scalar("n_points", len(info["pointcloud"]), i)
         for k, v in info.items():
-            if "_p" in k or "_r" in k:
+            if "_p" in k or "_r" in k or "occupancy" in k:
                 logger.log_scalar(k, v, i)
         if (i+1) % int(1e4) == 0:
             pc = np.array(info["pointcloud"]) # (N, 3)
@@ -84,7 +86,7 @@ def run_experiment(log_dir, args):
                 global_step= i,
             )
             # np.savez_compressed(os.path.join(log_dir, str(i+1)+"pointcloud.npz"), pcd=pc)
-        if (i+1) % int(10) == 0:
+        if (i+1) % int(50) == 0:
             if not os.path.isdir(os.path.join(log_dir, "2dnewpointcloud")):
                 os.mkdir(os.path.join(log_dir, "2dnewpointcloud"))
             # str(args["env_kwargs"]["forearm_orientation"])
@@ -99,12 +101,12 @@ def run_experiment(log_dir, args):
             plt.savefig("{}.png".format(os.path.join(log_dir, "2dnewpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_step_" + str(i))))
             plt.close()
 
-        if (i+1) <= 150:
+        if (i+1) <= 300:
             frame = env.env.env.sim.render(width=640, height=480,
                                 mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
-        if (i+1) == 150:
+        if (i+1) == 300:
             logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()

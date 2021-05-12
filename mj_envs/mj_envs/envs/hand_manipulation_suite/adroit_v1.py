@@ -179,7 +179,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             sep_x, sep_y, sep_z = 0, 0, 0
             sep_x = math.ceil(0.25 / self.twod_sep)
             sep_y = math.ceil(0.225 / self.twod_sep)
-            sep_z = math.ceil(0.04 / self.twod_sep)
+            sep_z = math.ceil(0.1 / self.twod_sep)
             return sep_x * sep_y * sep_z
 
     def get_2d_voxel_idx(self, posx, posy):
@@ -204,11 +204,11 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
-        posz = max(min(posz, 0.2 - 1e-4), 0.16)
+        # posz = max(min(posz, 0.2 - 1e-4), 0.16)
         sep_x, sep_y, sep_z, idx_x, idx_y, idx_z = 0, 0, 0, 0, 0, 0
         sep_x = 0.25 / self.twod_sep
         sep_y = 0.225 / self.twod_sep
-        sep_z = 0.04 / self.twod_sep
+        sep_z = 0.1 / self.twod_sep
         idx_x = math.floor((posx + 0.125) / self.twod_sep)
         idx_y = math.floor((posy + 0.25) / self.twod_sep)
         idx_z = math.floor((posz - 0.16) / self.twod_sep)
@@ -311,6 +311,8 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         knn_r = 0
         newpoints_r = 0
         new_voxel_r = 0
+        chamfer_r = 0
+        chamfer_loss = 0
 
         previous_pos_list = self.previous_contact_points.copy()
         next_pos_list = self.previous_contact_points.copy()
@@ -319,7 +321,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             if pos not in next_pos_list:
                 next_pos_list.append(pos)  
             # new contact points
-            if pos not in self.previous_contact_points:
+            if pos not in self.previous_contact_points and self.knn_r_factor:
                 min_pos_dist = 1
                 pos_dist_list = []
                 for previous_pos in self.previous_contact_points:
@@ -337,10 +339,10 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         # similar points penalty
         # penalty_sim = similar_points_cnt * 5
         # penalty_sim = self.get_penalty()
-      
-        chamfer_loss = self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
-        chamfer_r = 1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
-        chamfer_r -= 300
+        if self.chamfer_r_factor:
+            chamfer_loss = self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
+            chamfer_r = 1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
+            chamfer_r -= 300
         self.previous_contact_points = next_pos_list.copy()
         #
         # start computing reward

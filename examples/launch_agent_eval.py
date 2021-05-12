@@ -44,7 +44,7 @@ default_config = dict(
     ),
     sample_method = "policy", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(150),
+    total_timesteps = int(300),
     seed= seed,
 )
 
@@ -79,7 +79,7 @@ def main(args):
     values = [
         # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
         # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
-        [False, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
         # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
         # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
         # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
@@ -99,10 +99,8 @@ def main(args):
 
     # voxel_conf= ['2d', 16, 4, False]
     values = [
-        # [0, 0, 1, 0.5, 5, ['2d', 64, 8, False], False],
-        # [0, 0, 1, 0.5, 5, ['2d', 100, 10, False]],
-        # [0, 0, 1, 0.5, 5, ['2d', 144, 12, False]],
-        [0, 0, 1, 0.5, 5, ['2d', 256, 16, False], False],
+        # [0, 0, 1, 0.5, 5, ['3d', 0, 0.02, False], False],
+        [0, 0, 1, 0.5, 5, ['3d', 0, 0.03, False], False],
     ]
     dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
@@ -119,8 +117,8 @@ def main(args):
     values = [
         # ["action"],
         # ["policy"],
-        # ["agent"],
-        ["explore"],
+        ["agent"],
+        # ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]
