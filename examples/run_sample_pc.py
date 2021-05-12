@@ -41,19 +41,37 @@ def run_experiment(log_dir, args):
         args["policy_kwargs"]["hidden_sizes"] = tuple(args["policy_kwargs"]["hidden_sizes"])
         policy = MLP(env.spec, **args["policy_kwargs"])
 
-    gif_frames = list()
+    # gif_frames = list()
     for i in range(args["total_timesteps"]):
-        if args["sample_method"] == "policy":
-            obs, rew, done, info = env.step(policy.get_action(obs)[0])
-        elif args["sample_method"] == "action":
-            obs, rew, done, info = env.step(env.action_space.sample())
+        if args["sample_method"] == "samplegt":
+            info = env.step(env.action_space.sample())
+            pc = info["pointcloud"] # (N, 3)
+            # log pointcloud to tensorboard
+            z_max, z_min = np.max(pc[:, 2]), np.min(pc[:, 2])
+            colors = np.zeros_like(pc) # (N, 3)
+            for pc_idx in range(pc.shape[0]):
+                h = pc[pc_idx, 2]
+                colors[pc_idx] = hsv_to_rgb(h/10, 100.0, 100.0)
+            logger.log_text("pc.shape {}".format(pc.shape))
+            logger.log_text("colors.shape {}".format(colors.shape))
+            logger.tb_writer.add_mesh("pointcloud",
+                vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
+                colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
+                global_step= i,
+            )
+            np.save(os.path.join(log_dir, "uniform_samplegt_pointcloud.npz"), pc)
+        else:   
+            if args["sample_method"] == "policy":
+                obs, rew, done, info = env.step(policy.get_action(obs)[0])
+            elif args["sample_method"] == "action":
+                obs, rew, done, info = env.step(env.action_space.sample())
 
-        logger.log_scalar("step", i, i)
-        logger.log_scalar("total_reward", rew, i)
-        logger.log_scalar("n_points", len(info["pointcloud"]), i)
-        for k, v in info.items():
-            if "_p" in k or "_r" in k:
-                logger.log_scalar(k, v, i)
+            logger.log_scalar("step", i, i)
+            logger.log_scalar("total_reward", rew, i)
+            logger.log_scalar("n_points", len(info["pointcloud"]), i)
+            for k, v in info.items():
+                if "_p" in k or "_r" in k:
+                    logger.log_scalar(k, v, i)
         if (i+1) % int(4e3) == 0:
             pc = info["pointcloud"] # (N, 3)
             # log pointcloud to tensorboard
@@ -71,13 +89,13 @@ def run_experiment(log_dir, args):
             )
             np.save(os.path.join(log_dir, "pointcloud.np"), pc)
             
-        if (i+1) <= 100:
-            frame = env.env.env.sim.render(width=640, height=480,
-                                mode='offscreen', camera_name="view_1", device_id=0)
-            frame = np.transpose(frame[::-1, :, :], (2,0,1))
-            gif_frames.append(frame)
-        if (i+1) == 100:
-            logger.log_gif("rendered", gif_frames, i)
+        # if (i+1) <= 100:
+        #     frame = env.env.env.sim.render(width=640, height=480,
+        #                         mode='offscreen', camera_name="view_1", device_id=0)
+        #     frame = np.transpose(frame[::-1, :, :], (2,0,1))
+        #     gif_frames.append(frame)
+        # if (i+1) == 100:
+        #     logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_data()
     

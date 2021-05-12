@@ -47,6 +47,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         self.sim = mujoco_env.get_sim(model_path=curr_dir+'/assets/DAPG_constrainedhand.xml')
 
+        self.obj_current_gt = None
         self.obj_orientation = obj_orientation
         self.obj_relative_position = obj_relative_position
         self.reset_mode = reset_mode
@@ -265,6 +266,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         return 0
 
     def step(self, a):
+        uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
         a = np.clip(a, -1.0, 1.0)
         a = self.act_mid + a*self.act_rng
@@ -383,7 +385,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         reward += self.new_voxel_r_factor * new_voxel_r
         done = False
         info = dict(
-            pointcloud= np.array(self.previous_contact_points),
+            pointcloud= np.array(uniform_samplegt), #np.array(self.previous_contact_points),
             goal_achieved= goal_achieved,
             untouched_p= untouched_p,
             palm_r = palm_r,

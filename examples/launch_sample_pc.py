@@ -6,114 +6,124 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v4",
+    env_name = "adroit-v1",
     env_kwargs = dict(
         obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
         new_point_threshold= 0.001, # minimum distance new point to all previous points
-        forearm_orientation= "up", # ("up", "down")
-        chamfer_r_factor= 1,
+        forearm_orientation_name= "up", # ("up", "down")
+        # scale all reward/penalty to the scale of 1.0
+        chamfer_r_factor= 0,
         mesh_p_factor= 0,
         mesh_reconstruct_alpha= 0.01,
-        palm_r_factor= 1,
-        untouch_p_factor= 1,
-        newpoints_r_factor= 1,
-        knn_r_factor= 1,
+        palm_r_factor= 0,
+        untouch_p_factor= 0,
+        newpoints_r_factor= 0,
+        knn_r_factor= 0,
+        new_voxel_r_factor= 0,
+        use_voxel= False,
+        ground_truth_type= "nope",
+        forearm_orientation= [0, 0, 0], # forearm orientation
+        forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
+        reset_mode= "normal",
+        knn_k= 1,
+        voxel_conf= ['2d', 16, 4, False],
+        sensor_obs= False,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
         hidden_sizes= (64,64),
         min_log_std= -3,
         init_log_std= 0,
+        m_f= 1e4,
+        n_f= 1e-6,
+        reinitialize= True,
         seed= seed,
     ),
-    sample_method = "action", # `action`, `policy`
-    total_timesteps = int(5e5),
+    sample_method = "policy", # `action`:env.action_space.sample(), `policy`
+    policy_path = "",
+    total_timesteps = int(300),
     seed= seed,
 )
 
 def main(args):
-    experiment_title = "sample_pointclouds"
+    experiment_title = "agent" #"sample_pointclouds"
 
     # set up variants
     variant_levels = list()
 
-    # These are the settings which makes most contact points when
-    # uniformly sample from action space
     values = [
-        # [0, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        [1, "up", [1.57, 0, 0],  [0, 0.6, 0.05], ], # hard 0
-        [2, "up", [0, 0, 0],  [0, 0.5, 0.05], ], # hard 1
-        [3, "up", [0.77, 0.97, 0],  [0, 0.5, 0.04], ], # medium 0
-        [4, "up", [1.57, 0, 0],  [0, 0.6, 0.04], ], # medium 1
-        # [5, "up", [1.57, 0, 0],  [0, 0.6, 0.04], ],
-        # [6, "up", [1.57, 0, 0],  [0, 0.6, 0.02], ],
-        # [7, "down", [0, 0, 0],  [0, 0.5, 0.05], ],
-        [8, "up", [0.77, 0, 0],  [0, 0.55, 0.02], ], # simple 0
-        [9, "up", [0.77, 0, 0],  [0, 0.55, 0.015], ], # simple 1
+        ["normal"],
+        # ["intermediate"],
+        # ["random"],
     ]
-    dir_names = ["obj{}".format(v[0]) for v in values]
+    dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
+        ("env_kwargs", "reset_mode"),
+    ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        # ["sample"],
+        ["mesh"],
+        # ["nope"],
+    ]
+    dir_names = ["gt{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    keys = [
+        ("env_kwargs", "ground_truth_type"),
+    ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    values = [
+        # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
+        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
+        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
+        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
+    ]
+    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    keys = [
+        ("env_kwargs", "use_voxel"),
+        ("policy_kwargs", "reinitialize"),
         ("env_kwargs", "obj_bid_idx"),
-        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "forearm_orientation_name"),
         ("env_kwargs", "obj_orientation"),
         ("env_kwargs", "obj_relative_position"),
+        ("env_kwargs", "forearm_orientation"),
+        ("env_kwargs", "forearm_relative_position"),
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
-    # values = [
-    #     [0,], # running 2490
-    #     [1,],
-    #     [2,],
-    #     [3,],
-    #     [4,],
-    #     [5,],
-    #     [6,],
-    #     [7,],
-    #     [8,],
-    #     [9,],
-    # ]
-    # dir_names = ["obj{}".format(*v) for v in values]
-    # keys = [("env_kwargs", "obj_bid_idx")] # each entry in the list is the string path to your config
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
+    # voxel_conf= ['2d', 16, 4, False]
+    values = [
+        # [0, 0, 1, 0.5, 5, ['3d', 0, 0.02, False], False],
+        [0, 0, 1, 0.5, 5, ['3d', 0, 0.03, False], False],
+    ]
+    dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    keys = [
+        ("env_kwargs", "chamfer_r_factor"),
+        ("env_kwargs", "knn_r_factor"),
+        ("env_kwargs", "new_voxel_r_factor"),
+        ("policy_kwargs", "init_log_std"),
+        ("env_kwargs", "knn_k"),
+        ("env_kwargs", "voxel_conf"),
+        ("env_kwargs", "sensor_obs"),
+    ]
+    variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        ["action"],
-        ["policy"],
+        # ["action"],
+        # ["policy"],
+        # ["agent"],
+        # ["explore"],
+        ["samplegt"],
     ]
     dir_names = ["{}".format(*v) for v in values]
     keys = [("sample_method", ), ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
-
-    # values = [
-    #     ["up"],
-    #     ["down"],
-    # ]
-    # dir_names = ["{}".format(*v) for v in values]
-    # keys = [("env_kwargs", "forearm_orientation"), ]
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
-
-    # values = [
-    #     [[0, 0, 0], ],
-    #     [[0.77, 0, 0], ],
-    #     [[1.57, 0, 0], ],
-    # ]
-    # dir_names = ["orient{}".format(v[0][0]) for v in values]
-    # keys = [("env_kwargs", "obj_orientation"), ]
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
-
-    # values = [
-    #     [[0, 0.5, 0.05],  ],
-    #     [[0, 0.55, 0.05],  ],
-    #     [[0, 0.55, 0.045],  ],
-    #     [[0, 0.53, 0.045],  ],
-    #     [[0, 0.5, 0.07],  ],
-    # ]
-    # dir_names = ["dist{}-{}".format(v[0][1], v[0][2]) for v in values]
-    # keys = [("env_kwargs", "obj_relative_position"),]
-    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # get all variants and their own log directory
     variants, log_dirs = make_variants(*variant_levels)
@@ -146,8 +156,6 @@ def main(args):
             n_gpus= 1,
             partition= "short",
             cuda_module= "cuda-10.0",
-            cmd_prefix= "source /etc/profile.d/modules.sh",
-            other_modules= ["gcc-5.0.0",],
         )
         run_on_slurm(
             script= "examples/run_sample_pc.py",
