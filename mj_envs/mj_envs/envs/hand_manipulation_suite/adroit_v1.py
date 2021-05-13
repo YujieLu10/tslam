@@ -266,7 +266,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         return 0
 
     def step(self, a):
-        uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
+        # uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
         a = np.clip(a, -1.0, 1.0)
         a = self.act_mid + a*self.act_rng
@@ -385,7 +385,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         reward += self.new_voxel_r_factor * new_voxel_r
         done = False
         info = dict(
-            pointcloud= np.array(uniform_samplegt), #np.array(self.previous_contact_points),
+            pointcloud= np.array(self.previous_contact_points), #np.array(uniform_samplegt),
             goal_achieved= goal_achieved,
             untouched_p= untouched_p,
             palm_r = palm_r,
