@@ -20,7 +20,30 @@
     <asset>
         <!-- Strange path here because `compiler` element included by `DAPG_assets.xml` at the last of this file. -->
         <mesh name="plane" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_1.stl" scale="0.015 0.015 0.015"/>
-        <mesh name="glass" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2.stl" scale="0.015 0.015 0.015"/>
+        <!-- <mesh name="glass" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2.stl" scale="0.015 0.015 0.015"/> -->
+        <mesh name="glass1" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_1.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass2" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_2.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass3" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_3.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass4" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_4.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass5" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_5.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass6" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_6.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass7" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_7.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass8" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_8.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass9" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_9.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass10" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_10.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass11" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_11.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass12" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_12.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass13" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_13.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass14" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_14.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass15" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_15.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass16" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_16.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass17" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_17.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass18" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_18.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass19" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_19.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass20" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_20.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass21" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_21.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass22" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_22.stl" scale="0.015 0.015 0.015"/>
+        <mesh name="glass23" file="../../../../envs/hand_manipulation_suite/assets/stl/C_Shape_2/C_Shape_2_hull_23.stl" scale="0.015 0.015 0.015"/>
         <!-- <mesh name="OShape" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape.stl" scale="0.008 0.008 0.008"/> -->
         <mesh name="OShape1" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_1.stl" scale="0.01 0.01 0.01"/>
         <mesh name="OShape2" file="../../../../envs/hand_manipulation_suite/assets/stl/D_Shape_hull_2.stl" scale="0.01 0.01 0.01"/>
@@ -115,8 +138,33 @@
         <body name="Object1" pos="0.1 -0.25 -0.175">
             <geom name="plane" type="mesh" mesh="plane"/>
         </body>
-        <body name="Object2" pos="0 -0.1 0.2">
+        <!-- <body name="Object2" pos="0 -0.1 0.2">
             <geom name="glass" type="mesh" mesh="glass"/>
+        </body> -->
+        <body name="Object2" pos="0 -0.1 0.2">
+            <geom name="glass1" type="mesh" mesh="glass1"/>
+            <geom name="glass2" type="mesh" mesh="glass2"/>
+            <geom name="glass3" type="mesh" mesh="glass3"/>
+            <geom name="glass4" type="mesh" mesh="glass4"/>
+            <geom name="glass5" type="mesh" mesh="glass5"/>
+            <geom name="glass6" type="mesh" mesh="glass6"/>
+            <geom name="glass7" type="mesh" mesh="glass7"/>
+            <geom name="glass8" type="mesh" mesh="glass8"/>
+            <geom name="glass9" type="mesh" mesh="glass9"/>
+            <geom name="glass10" type="mesh" mesh="glass10"/>
+            <geom name="glass11" type="mesh" mesh="glass11"/>
+            <geom name="glass12" type="mesh" mesh="glass12"/>
+            <geom name="glass13" type="mesh" mesh="glass13"/>
+            <geom name="glass14" type="mesh" mesh="glass14"/>
+            <geom name="glass15" type="mesh" mesh="glass15"/>
+            <geom name="glass16" type="mesh" mesh="glass16"/>
+            <geom name="glass17" type="mesh" mesh="glass17"/>
+            <geom name="glass18" type="mesh" mesh="glass18"/>
+            <geom name="glass19" type="mesh" mesh="glass19"/>
+            <geom name="glass20" type="mesh" mesh="glass20"/>
+            <geom name="glass21" type="mesh" mesh="glass21"/>
+            <geom name="glass22" type="mesh" mesh="glass22"/>
+            <geom name="glass23" type="mesh" mesh="glass23"/>
         </body>
         <!-- <body name="Object3" pos="-0.06 -0.25 -0.175">
             <geom name="OShape" type="mesh" mesh="OShape"/>

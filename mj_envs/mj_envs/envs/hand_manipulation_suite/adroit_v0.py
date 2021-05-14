@@ -14,7 +14,7 @@ chamfer_dist = ChamferDistance()
 ADD_BONUS_REWARDS = True
 
 class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
-    def __init__(self, 
+    def __init__(self,
             obj_bid_idx= 2,
             obj_orientation= [0, 0, 0], # object orientation
             obj_relative_position= [0, 0.5, 0], # object position related to hand (z-value will be flipped when arm faced down)
