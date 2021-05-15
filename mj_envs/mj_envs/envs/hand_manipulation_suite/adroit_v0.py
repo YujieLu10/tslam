@@ -50,7 +50,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.obj_bid_idx = obj_bid_idx
         self.obj_name = [
             "plane",
-            "glass",
+            ["glass1","glass2","glass3","glass4","glass5","glass6","glass7","glass8","glass9","glass10","glass11","glass12","glass13","glass14","glass15","glass16","glass17","glass18","glass19","glass20","glass21","glass22","glass23"],
             ["OShape1","OShape2","OShape3","OShape4","OShape5","OShape6"],
             "LShape",
             "simpleShape",
@@ -62,7 +62,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         ]
         self.mesh_name = [
             "plane",
-            "glass",
+            ["glass1","glass2","glass3","glass4","glass5","glass6","glass7","glass8","glass9","glass10","glass11","glass12","glass13","glass14","glass15","glass16","glass17","glass18","glass19","glass20","glass21","glass22","glass23"],
             ["OShape1","OShape2","OShape3","OShape4","OShape5","OShape6"],
             "LShape",
             "simpleShape",

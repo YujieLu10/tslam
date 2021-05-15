@@ -156,10 +156,11 @@ def train_agent(job_name, agent,
                         for env_info in env_infos:
                             rewards[k].append(env_info[k])
                     for env_info in env_infos:
-                        total_points.append(len(env_info["pointcloud"][-1]))
+                        total_points.append(len(env_info["pointcloud"]))
                 for k, v in rewards.items():
                     exptools.logging.logger.log_scalar_batch(k, v, i)
                 exptools.logging.logger.log_scalar_batch("total_num_points", total_points, i)
+            print(">>> finish evaluation rollouts")
 
         if i % save_freq == 0 and i > 0:
             if agent.save_logs:
@@ -215,22 +216,23 @@ def train_agent(job_name, agent,
                 exptools.logging.logger.record_gif("rendered", video, i)
                 exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
                 exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
-                pc = env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)) # (N, 3)
-                colors = np.zeros_like(pc)
-                for pc_idx in range(pc.shape[0]):
-                    h = pc[pc_idx, 2]
-                    colors[pc_idx] = hsv_to_rgb(h, 100.0, 100.0)
-                exptools.logging.logger.tb_writer.add_mesh("pointcloud",
-                    vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
-                    # colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
-                    global_step= i,
-                )
-                mesh = pv.PolyData(pc).delaunay_3d(alpha= env_kwargs["mesh_reconstruct_alpha"]).extract_geometry()
-                exptools.logging.logger.tb_writer.add_mesh("reconstruction",
-                    vertices= torch.from_numpy(np.expand_dims(mesh.points, 0)),
-                    faces= torch.from_numpy(np.expand_dims(mesh.faces.reshape(-1, 4)[:, 1:], 0)),
-                    global_step= i,
-                )
+                # pc = env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)) # (N, 3)
+                # colors = np.zeros_like(pc)
+                # for pc_idx in range(pc.shape[0]):
+                #     h = pc[pc_idx, 2]
+                #     colors[pc_idx] = hsv_to_rgb(h, 100.0, 100.0)
+                # exptools.logging.logger.tb_writer.add_mesh("pointcloud",
+                #     vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
+                #     # colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
+                #     global_step= i,
+                # )
+                # mesh = pv.PolyData(pc).delaunay_3d(alpha= env_kwargs["mesh_reconstruct_alpha"]).extract_geometry()
+                # exptools.logging.logger.tb_writer.add_mesh("reconstruction",
+                #     vertices= torch.from_numpy(np.expand_dims(mesh.points, 0)),
+                #     faces= torch.from_numpy(np.expand_dims(mesh.faces.reshape(-1, 4)[:, 1:], 0)),
+                #     global_step= i,
+                # )
+            print(">>> finish save_freq")
                 
 
         # print results to console
@@ -254,6 +256,7 @@ def train_agent(job_name, agent,
             exptools.logging.logger.log_scalar("EvaluationPol", mean_pol_perf, i)
             exptools.logging.logger.log_scalar("BestSampled", best_perf, i)
             exptools.logging.logger.dump_data()
+        print(">>> finish exptools save")
 
     # final save
     pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
@@ -261,3 +264,4 @@ def train_agent(job_name, agent,
         agent.logger.save_log('logs/')
         make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
     os.chdir(previous_dir)
+    print(">>> finish final save")

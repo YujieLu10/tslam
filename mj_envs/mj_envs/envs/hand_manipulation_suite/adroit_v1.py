@@ -77,7 +77,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.obj_bid_idx = obj_bid_idx
         self.obj_name = [
             "plane",
-            "glass",
+            ["glass1","glass2","glass3","glass4","glass5","glass6","glass7","glass8","glass9","glass10","glass11","glass12","glass13","glass14","glass15","glass16","glass17","glass18","glass19","glass20","glass21","glass22","glass23"],
             ["OShape1","OShape2","OShape3","OShape4","OShape5","OShape6"],
             "LShape",
             "simpleShape",
@@ -89,7 +89,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         ]
         self.mesh_name = [
             "plane",
-            "glass",
+            ["glass1","glass2","glass3","glass4","glass5","glass6","glass7","glass8","glass9","glass10","glass11","glass12","glass13","glass14","glass15","glass16","glass17","glass18","glass19","glass20","glass21","glass22","glass23"],
             ["OShape1","OShape2","OShape3","OShape4","OShape5","OShape6"],
             "LShape",
             "simpleShape",
@@ -366,12 +366,12 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         else:
             mesh_p = 0
         # voxel obs and new voxel reward
+        if len(self.voxel_array) == 0:
+            self.voxel_array = [0] * self.voxel_num
         if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
                 if self.is_in_voxel_bound(point[0], point[1]):
                     idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
-                    if len(self.voxel_array) == 0:
-                        self.voxel_array = [0] * self.voxel_num
                     if self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
                         new_voxel_r += 1
                         self.voxel_array[min(idx, self.voxel_num-1)] = 1
