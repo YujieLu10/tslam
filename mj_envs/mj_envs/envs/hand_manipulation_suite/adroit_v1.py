@@ -39,6 +39,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             knn_k= 1, # k setting
             voxel_conf= ['2d', 0, 0.005, False], # 2d/3d, voxelNum, 2d_sep, test_part
             sensor_obs= False,
+            obj_scale= 0.01,
             # voxel_num= 280,
             # twod_sep= 2,
             # test_part= False,

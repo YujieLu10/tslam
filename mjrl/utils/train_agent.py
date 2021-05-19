@@ -188,6 +188,7 @@ def train_agent(job_name, agent,
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
     if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
+    if os.path.isdir('voxel') == False: os.mkdir('voxel')
     if os.path.isdir('logs') == False and agent.save_logs == True: os.mkdir('logs')
     best_policy = copy.deepcopy(agent.policy)
     best_perf = -1e8
@@ -294,7 +295,7 @@ def train_agent(job_name, agent,
                 else:
                     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
-                obj_bid_idx = env_kwargs["env_kwargs"]
+                obj_bid_idx = env_kwargs["obj_bid_idx"]
                 obj_orientation = env_kwargs["obj_orientation"]
                 obj_relative_position = env_kwargs["obj_relative_position"]
                 obj_scale = env_kwargs["obj_scale"]

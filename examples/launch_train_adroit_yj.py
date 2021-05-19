@@ -27,6 +27,7 @@ default_config = dict(
         knn_k= 1,
         voxel_conf= ['2d', 16, 4, False],
         sensor_obs= False,
+        obj_scale= 0.01,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -109,11 +110,11 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        [True, False, 1, "up", [1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17]],
-        [True, False, 2, "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17]],
-        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
+        [True, False, 1, "up", [1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.015],
+        [True, False, 2, "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.01],
+        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.0008], #3-25
     ]
-    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
@@ -123,6 +124,7 @@ def main(args):
         ("env_kwargs", "obj_relative_position"),
         ("env_kwargs", "forearm_orientation"),
         ("env_kwargs", "forearm_relative_position"),
+        ("env_kwargs", "obj_scale"),
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
