@@ -68,6 +68,100 @@ def _load_latest_policy_and_logs(agent, *, policy_dir, logs_dir):
     # cannot find any saved policy
     raise RuntimeError("Log file exists, but cannot find any saved policy.")
 
+def save_voxel_visualization(obj_bid_idx, obj_orientation, obj_relative_position, obj_scale, pc_frame, iternum):
+    if obj_bid_idx == "1":
+        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/uniform_glass_o3d.npz")['pcd']
+    elif obj_bid_idx == "2":
+        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/uniform_donut_o3d.npz")['pcd']
+    else:
+        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/test_o3d.npz")['pcd']
+    data_scale = uniform_gt_data * obj_scale
+    data_rotate = data_scale.copy()
+    x = data_rotate[:, 0].copy()
+    y = data_rotate[:, 1].copy()
+    z = data_rotate[:, 2].copy()
+    x_theta = obj_orientation[0]
+    data_rotate[:, 0] = x
+    data_rotate[:, 1] = y*math.cos(x_theta) - z*math.sin(x_theta)
+    data_rotate[:, 2] = y*math.sin(x_theta) + z*math.cos(x_theta)
+    data_trans = data_rotate.copy()
+    data_trans[:, 0] += obj_relative_position[0]
+    data_trans[:, 1] -= obj_relative_position[1]
+    data_trans[:, 2] += obj_relative_position[2]
+
+    uniform_gt_data = data_trans.copy()
+    data = pc_frame
+    resolution = 0.01
+    sep_x = math.ceil(0.25 / resolution)
+    sep_y = math.ceil(0.225 / resolution)
+    sep_z = math.ceil(0.1 / resolution)
+    x, y, z = np.indices((sep_x, sep_y, sep_z))
+
+    cube1 = (x<0) & (y <1) & (z<1)
+    gtcube = (x<0) & (y <1) & (z<1)
+    voxels = cube1
+    gt_voxels = gtcube
+    # draw cuboids in the top left and bottom right corners, and a link between them
+    map_list = []
+    for idx,val in enumerate(data):
+        idx_x = math.floor((val[0] + 0.125) / resolution)
+        idx_y = math.floor((val[1] + 0.25) / resolution)
+        idx_z = math.floor((val[2] - 0.16) / resolution)
+        if idx_z > 6:
+            continue
+        name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+        if name not in map_list:
+            map_list.append(name)
+        cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+        # combine the objects into a single boolean array
+        voxels += cube
+
+    # draw gt
+    gt_map_list = []
+    for idx,val in enumerate(uniform_gt_data):
+        idx_x = math.floor((val[0] + 0.125) / resolution)
+        idx_y = math.floor((val[1] + 0.25) / resolution)
+        idx_z = math.floor((val[2] - 0.16) / resolution)
+        if idx_z > 6:
+            continue
+        name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+        if name not in gt_map_list:
+            gt_map_list.append(name)
+        cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+        # combine the objects into a single boolean array
+        gt_voxels += cube
+    # gt_obj4:668
+    occupancy = len(map_list) / len(gt_map_list)
+    # print(len(map_list) / sep_x / sep_y / sep_z )
+
+    obj_name = "obj{}".format(obj_bid_idx)
+    # set the colors of each object
+    vis_voxel = gt_voxels | voxels
+    colors = np.empty(vis_voxel.shape, dtype=object)
+    colors[gt_voxels] = 'white'
+    colors[voxels] = 'cyan'
+    # and plot everything
+    ax = plt.figure().add_subplot(projection='3d')
+    ax.set_zlim(1,20)
+    ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
+    # plt.savefig('uniform_gtbox_{}.png'.format(step))
+    plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
+    plt.close()
+
+    ax = plt.figure().add_subplot(projection='3d')
+    ax.set_zlim(1,20)
+    ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
+    # plt.savefig('uniform_gtbox_{}.png'.format(step))
+    plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
+    plt.close()
+
+    ax = plt.figure().add_subplot(projection='3d')
+    ax.set_zlim(1,20)
+    ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
+    # plt.savefig('uniform_gtbox_{}.png'.format(step))
+    plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
+    plt.close()
+
 def train_agent(job_name, agent,
                 seed = 0,
                 niter = 101,
@@ -92,6 +186,8 @@ def train_agent(job_name, agent,
     previous_dir = os.getcwd()
     os.chdir(job_name) # important! we are now in the directory to save data
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
+    if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
+    if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
     if os.path.isdir('logs') == False and agent.save_logs == True: os.mkdir('logs')
     best_policy = copy.deepcopy(agent.policy)
     best_perf = -1e8
@@ -110,11 +206,12 @@ def train_agent(job_name, agent,
     for i in range(i_start, niter):
         print("......................................................................................")
         print("ITERATION : %i " % i)
-
+        is_best_policy = False
         if train_curve[i-1] > best_perf:
-            if exptools: exptools.logging.logger.log_text("update best_polic")
+            if exptools: exptools.logging.logger.log_text("update best_policy")
             best_policy = copy.deepcopy(agent.policy)
             best_perf = train_curve[i-1]
+            is_best_policy = True
 
         N = num_traj if sample_mode == 'trajectories' else num_samples
         stats = agent.train_step(
@@ -162,7 +259,7 @@ def train_agent(job_name, agent,
                 exptools.logging.logger.log_scalar_batch("total_num_points", total_points, i)
             print(">>> finish evaluation rollouts")
 
-        if i % save_freq == 0 and i > 0:
+        if (i % save_freq == 0 and i > 0) or is_best_policy:
             if agent.save_logs:
                 agent.logger.save_log('logs/')
                 make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
@@ -184,56 +281,30 @@ def train_agent(job_name, agent,
                     **visualize_kwargs,
                 ) # (T, C, H, W)
                 pc_frame = np.array(env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)))
-                np.savez_compressed("pointcloud_"+str(i)+".npz",pcd=pc_frame)
+                if is_best_policy:
+                    np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
+                else:
+                    np.savez_compressed("pointcloudnpz/pointcloud_"+str(i)+".npz",pcd=pc_frame)
+                
                 # pc_frames.append(pc_frame)
                 ax = plt.axes()
-                # ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-                plt.savefig("{}.png".format('2dpointcloud' + str(i)))
+                if is_best_policy:
+                    plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
+                else:
+                    plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
+                obj_bid_idx = env_kwargs["env_kwargs"]
+                obj_orientation = env_kwargs["obj_orientation"]
+                obj_relative_position = env_kwargs["obj_relative_position"]
+                obj_scale = env_kwargs["obj_scale"]
                 # 3d voxel visualization
-                # voxel_array = np.array(env_infos[-1]["voxel_array"])
-                # voxels = None
-                # resolution = float(env_infos[-1]["resolution"])
-                # if len(voxel_array) > 0:
-                #     sep_x = math.ceil(0.25 / resolution)
-                #     sep_y = math.ceil(0.225 / resolution)
-                #     sep_z = math.ceil(0.04 / resolution)
-                #     x, y, z = np.indices((sep_x, sep_y, sep_z))
-                #     index_list = np.where(voxel_array>0)
-                #     for index,index_val in enumerate(index_list[0]):
-                #         idx_z = math.floor((index_val+1) / (sep_x * sep_y))
-                #         idx_y = math.floor((index_val+1-idx_z * sep_x * sep_y) / sep_x)
-                #         idx_x = index_val + 1 - idx_z * sep_x * sep_y - idx_y * sep_x
-                #         cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
-                #         voxels = (voxels + cube) if voxels is not None else cube
-                # ax = plt.figure().add_subplot(projection='3d')
-                # ax.voxels(voxels, facecolors='grey', edgecolor='k')
-                # plt.savefig("{}.png".format('voxel' + str(i)))
-                # plt.close()
+                save_voxel_visualization(obj_bid_idx, obj_orientation, obj_relative_position, obj_scale, pc_frame, i)
                 # =======================================================
                 exptools.logging.logger.record_image("rendered", video[-1], i)
                 exptools.logging.logger.record_gif("rendered", video, i)
                 exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
                 exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
-                # pc = env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)) # (N, 3)
-                # colors = np.zeros_like(pc)
-                # for pc_idx in range(pc.shape[0]):
-                #     h = pc[pc_idx, 2]
-                #     colors[pc_idx] = hsv_to_rgb(h, 100.0, 100.0)
-                # exptools.logging.logger.tb_writer.add_mesh("pointcloud",
-                #     vertices= torch.from_numpy(np.expand_dims(pc, axis= 0)),
-                #     # colors= torch.from_numpy(np.expand_dims(colors, axis= 0)),
-                #     global_step= i,
-                # )
-                # mesh = pv.PolyData(pc).delaunay_3d(alpha= env_kwargs["mesh_reconstruct_alpha"]).extract_geometry()
-                # exptools.logging.logger.tb_writer.add_mesh("reconstruction",
-                #     vertices= torch.from_numpy(np.expand_dims(mesh.points, 0)),
-                #     faces= torch.from_numpy(np.expand_dims(mesh.faces.reshape(-1, 4)[:, 1:], 0)),
-                #     global_step= i,
-                # )
-            print(">>> finish save_freq")
-                
 
         # print results to console
         if i == 0:
@@ -241,8 +312,6 @@ def train_agent(job_name, agent,
             print("Iter | Stoc Pol | Mean Pol | Best (Stoc) \n")
             result_file.write("Iter | Sampling Pol | Evaluation Pol | Best (Sampled) \n")
             result_file.close()
-        # print("[ %s ] %4i %5.2f %5.2f %5.2f " % (timer.asctime(timer.localtime(timer.time())),
-        #                                          i, train_curve[i], mean_pol_perf, best_perf))
         result_file = open('results.txt', 'a')
         result_file.write("%4i %5.2f %5.2f %5.2f \n" % (i, train_curve[i], mean_pol_perf, best_perf))
         result_file.close()
@@ -256,7 +325,6 @@ def train_agent(job_name, agent,
             exptools.logging.logger.log_scalar("EvaluationPol", mean_pol_perf, i)
             exptools.logging.logger.log_scalar("BestSampled", best_perf, i)
             exptools.logging.logger.dump_data()
-        print(">>> finish exptools save")
 
     # final save
     pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
