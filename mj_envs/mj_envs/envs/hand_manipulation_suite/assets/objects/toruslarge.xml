@@ -1,0 +1,30 @@
+
+<mujoco model="toruslarge">
+    <include file='../common.xml'/>
+    
+    <asset>
+        <mesh name="toruslarge" file="../meshes/grab/toruslarge/toruslarge.stl" scale="1 1 1" />
+        <mesh name="contact0" file="../meshes/grab/toruslarge/contact0.stl" scale="1 1 1" />
+        <mesh name="contact1" file="../meshes/grab/toruslarge/contact1.stl" scale="1 1 1" />
+        <mesh name="contact2" file="../meshes/grab/toruslarge/contact2.stl" scale="1 1 1" />
+        <mesh name="contact3" file="../meshes/grab/toruslarge/contact3.stl" scale="1 1 1" />
+        <mesh name="contact4" file="../meshes/grab/toruslarge/contact4.stl" scale="1 1 1" />
+    </asset>
+    
+    <worldbody>
+        <body name="object" pos="0.00 0.0 0.035" >
+            <!-- <joint name="OBJTx" pos="0 0 0" axis="1 0 0" type="slide" limited="false" damping="0" />
+            <joint name="OBJTy" pos="0 0 0" axis="0 1 0" type="slide" limited="false" damping="0" />
+            <joint name="OBJTz" pos="0 0 0" axis="0 0 1" type="slide" limited="false" damping="0" />
+            <joint name="OBJRx" pos="0 0 0" axis="1 0 0" limited="false" damping="0" />
+            <joint name="OBJRy" pos="0 0 0" axis="0 1 0" limited="false" damping="0" />
+            <joint name="OBJRz" pos="0 0 0" axis="0 0 1" limited="false" damping="0" /> -->
+            <geom name="toruslarge_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="toruslarge" rgba="1 0 0 1.0" />
+            <geom name="toruslarge_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0" />
+            <geom name="toruslarge_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 0" />
+            <geom name="toruslarge_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 0" />
+            <geom name="toruslarge_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 0" />
+            <geom name="toruslarge_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 0" />
+        </body>
+    </worldbody>
+</mujoco>

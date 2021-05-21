@@ -1,0 +1,18 @@
+
+<mujoco model="alarmclock">
+    <asset>
+        <mesh name="alarmclock" file="../meshes/grab/alarmclock/alarmclock.stl" scale="1 1 1" />
+        <mesh name="contact0" file="../meshes/grab/alarmclock/contact0.stl" scale="1 1 1" />
+        <mesh name="contact1" file="../meshes/grab/alarmclock/contact1.stl" scale="1 1 1" />
+        <mesh name="contact2" file="../meshes/grab/alarmclock/contact2.stl" scale="1 1 1" />
+    </asset>
+    
+    <worldbody>
+        <body name="object" pos="0.00 0.0 0.035" >
+            <geom name="alarmclock_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" mesh="alarmclock" rgba="1 0 0 1.0" />
+            <geom name="alarmclock_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0" />
+            <geom name="alarmclock_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 0" />
+            <geom name="alarmclock_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 0" />
+        </body>
+    </worldbody>
+</mujoco>

@@ -49,7 +49,7 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "policy_531.pickle"), 'rb'))
+        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/local/best_policy", str(args["env_kwargs"]["obj_name"]), "policy_18.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
 
     gif_frames = list()
@@ -91,14 +91,14 @@ def run_experiment(log_dir, args):
                 os.mkdir(os.path.join(log_dir, "2dnewpointcloud"))
             # str(args["env_kwargs"]["forearm_orientation"])
             pc_frame = np.array(info["pointcloud"])
-            np.savez_compressed(os.path.join(log_dir, "2dnewpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_orien_" + "_step_" + str(i)) + ".npz",pcd=pc_frame)
+            np.savez_compressed(os.path.join(log_dir, "2dnewpointcloud", "obj" + str(args["env_kwargs"]["obj_name"]) + "_orien_" + "_step_" + str(i)) + ".npz",pcd=pc_frame)
             # pc_frames.append(pc_frame)
             # ax = plt.axes(projection='3d')
             # ax.scatter(pc_frame[:, 0], pc_frame[:, 1], pc_frame[:, 2], c=pc_frame[:, 2], cmap='viridis', linewidth=0.5)
             # visualize 2d
             ax = plt.axes()
             ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-            plt.savefig("{}.png".format(os.path.join(log_dir, "2dnewpointcloud", "obj" + str(args["env_kwargs"]["obj_bid_idx"]) + "_step_" + str(i))))
+            plt.savefig("{}.png".format(os.path.join(log_dir, "2dnewpointcloud", "obj" + str(args["env_kwargs"]["obj_name"]) + "_step_" + str(i))))
             plt.close()
 
         if (i+1) <= 300:

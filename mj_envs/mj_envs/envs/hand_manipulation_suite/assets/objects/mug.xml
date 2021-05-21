@@ -1,0 +1,48 @@
+
+<mujoco model="mug">
+    <include file='../common.xml'/>
+    
+    <asset>
+        <mesh name="mug" file="../meshes/grab/mug/mug.stl" scale="1 1 1" />
+        <mesh name="contact0" file="../meshes/grab/mug/contact0.stl" scale="1 1 1" />
+        <mesh name="contact1" file="../meshes/grab/mug/contact1.stl" scale="1 1 1" />
+        <mesh name="contact2" file="../meshes/grab/mug/contact2.stl" scale="1 1 1" />
+        <mesh name="contact3" file="../meshes/grab/mug/contact3.stl" scale="1 1 1" />
+        <mesh name="contact4" file="../meshes/grab/mug/contact4.stl" scale="1 1 1" />
+        <mesh name="contact5" file="../meshes/grab/mug/contact5.stl" scale="1 1 1" />
+        <mesh name="contact6" file="../meshes/grab/mug/contact6.stl" scale="1 1 1" />
+        <mesh name="contact7" file="../meshes/grab/mug/contact7.stl" scale="1 1 1" />
+        <mesh name="contact8" file="../meshes/grab/mug/contact8.stl" scale="1 1 1" />
+        <mesh name="contact9" file="../meshes/grab/mug/contact9.stl" scale="1 1 1" />
+        <mesh name="contact10" file="../meshes/grab/mug/contact10.stl" scale="1 1 1" />
+        <mesh name="contact11" file="../meshes/grab/mug/contact11.stl" scale="1 1 1" />
+        <mesh name="contact12" file="../meshes/grab/mug/contact12.stl" scale="1 1 1" />
+        <mesh name="contact13" file="../meshes/grab/mug/contact13.stl" scale="1 1 1" />
+    </asset>
+    
+    <worldbody>
+        <body name="object" pos="0.00 0.0 0.035" >
+            <!-- <joint name="OBJTx" pos="0 0 0" axis="1 0 0" type="slide" limited="false" damping="0" />
+            <joint name="OBJTy" pos="0 0 0" axis="0 1 0" type="slide" limited="false" damping="0" />
+            <joint name="OBJTz" pos="0 0 0" axis="0 0 1" type="slide" limited="false" damping="0" />
+            <joint name="OBJRx" pos="0 0 0" axis="1 0 0" limited="false" damping="0" />
+            <joint name="OBJRy" pos="0 0 0" axis="0 1 0" limited="false" damping="0" />
+            <joint name="OBJRz" pos="0 0 0" axis="0 0 1" limited="false" damping="0" /> -->
+            <geom name="mug_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="mug" rgba="1 0 0 1.0" />
+            <geom name="mug_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact5" density="1250" type="mesh" mesh="contact5" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact6" density="1250" type="mesh" mesh="contact6" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact7" density="1250" type="mesh" mesh="contact7" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact8" density="1250" type="mesh" mesh="contact8" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact9" density="1250" type="mesh" mesh="contact9" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact10" density="1250" type="mesh" mesh="contact10" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact11" density="1250" type="mesh" mesh="contact11" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact12" density="1250" type="mesh" mesh="contact12" condim="4" rgba="0 1 0 0" />
+            <geom name="mug_contact13" density="1250" type="mesh" mesh="contact13" condim="4" rgba="0 1 0 0" />
+        </body>
+    </worldbody>
+</mujoco>

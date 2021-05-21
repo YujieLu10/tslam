@@ -32,14 +32,6 @@ register(
 )
 from mj_envs.envs.hand_manipulation_suite.relocate_v0 import RelocateEnvV0
 
-
-register(
-    id='adroit-v4',
-    entry_point='mj_envs.envs.hand_manipulation_suite:AdroitEnvV4',
-    max_episode_steps=int(1e3),
-)
-from mj_envs.envs.hand_manipulation_suite.adroit_v4 import AdroitEnvV4
-
 register(
     id='adroit-v0',
     entry_point='mj_envs.envs.hand_manipulation_suite:AdroitEnvV0',
@@ -53,10 +45,3 @@ register(
     max_episode_steps=int(1e3),
 )
 from mj_envs.envs.hand_manipulation_suite.adroit_v1 import AdroitEnvV1
-
-register(
-    id='adroit-v2',
-    entry_point='mj_envs.envs.hand_manipulation_suite:AdroitEnvV2',
-    max_episode_steps=int(1e3),
-)
-from mj_envs.envs.hand_manipulation_suite.adroit_v2 import AdroitEnvV2

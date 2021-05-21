@@ -6,9 +6,8 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v1",
+    env_name = "adroit-v0",
     env_kwargs = dict(
-        obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
@@ -31,6 +30,8 @@ default_config = dict(
         knn_k= 1,
         voxel_conf= ['2d', 16, 4, False],
         sensor_obs= False,
+        obj_scale= 0.01,
+        obj_name= "airplane",
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -44,7 +45,7 @@ default_config = dict(
     ),
     sample_method = "policy", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(300),
+    total_timesteps = int(3),
     seed= seed,
 )
 
@@ -77,23 +78,19 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        # [True, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]], #3-21
-        # [False, False, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
-        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
-        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17]], #3-25
-        # [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0, 10, 10],
-        # [False, True, 4, "down", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 3],  [0, -0.7, 0.28]],
+        [True, False, "heart", "up", [-1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
     ]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
-        ("env_kwargs", "obj_bid_idx"),
+        ("env_kwargs", "obj_name"),
         ("env_kwargs", "forearm_orientation_name"),
         ("env_kwargs", "obj_orientation"),
         ("env_kwargs", "obj_relative_position"),
         ("env_kwargs", "forearm_orientation"),
         ("env_kwargs", "forearm_relative_position"),
+        ("env_kwargs", "obj_scale"),
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 

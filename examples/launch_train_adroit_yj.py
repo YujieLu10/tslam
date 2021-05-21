@@ -2,9 +2,8 @@ from exptools.launching.variant import VariantLevel, make_variants, update_confi
 import numpy as np
 
 default_config = dict(
-    env_name = "adroit-v1",
+    env_name = "adroit-v0",
     env_kwargs = dict(
-        obj_bid_idx= 2,
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
         goal_threshold= int(8e3), # how many points touched to achieve the goal
@@ -28,6 +27,7 @@ default_config = dict(
         voxel_conf= ['2d', 16, 4, False],
         sensor_obs= False,
         obj_scale= 0.01,
+        obj_name= "airplane"
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -63,7 +63,7 @@ default_config = dict(
         niter = 600,
         gamma = 0.995,
         gae_lambda = 0.97,
-        num_cpu = 8,
+        num_cpu = 16,
         sample_mode = 'trajectories',
         horizon= 150, 
         num_traj = 150,
@@ -110,15 +110,15 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        [True, False, 1, "up", [1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.015],
-        [True, False, 2, "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.01],
-        [True, False, 4, "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.0008], #3-25
+        [True, False, "glass", "up", [1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.015],
+        [True, False, "donut", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.01],
+        [True, False, "heart", "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.0008],
     ]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
-        ("env_kwargs", "obj_bid_idx"),
+        ("env_kwargs", "obj_name"),
         ("env_kwargs", "forearm_orientation_name"),
         ("env_kwargs", "obj_orientation"),
         ("env_kwargs", "obj_relative_position"),
