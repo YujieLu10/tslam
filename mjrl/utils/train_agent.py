@@ -263,18 +263,19 @@ def train_agent(job_name, agent,
             if agent.save_logs:
                 agent.logger.save_log('logs/')
                 make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
+            obj_name = env_kwargs["obj_name"]
+            obj_orientation = env_kwargs["obj_orientation"]
+            obj_relative_position = env_kwargs["obj_relative_position"]
+            obj_scale = env_kwargs["obj_scale"]  
             policy_file = 'policy_%i.pickle' % i
             baseline_file = 'baseline_%i.pickle' % i
             pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
             pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
             pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
+            pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/local/best_policy/{}/best_policy.pickle'.format(obj_name), 'wb'))
             # pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
 
-            # save videos and pointcloud and reconstruted mesh
-            obj_name = env_kwargs["obj_name"]
-            obj_orientation = env_kwargs["obj_orientation"]
-            obj_relative_position = env_kwargs["obj_relative_position"]
-            obj_scale = env_kwargs["obj_scale"]            
+            # save videos and pointcloud and reconstruted mesh          
             if exptools:
                 video, env_infos = e.visualize_policy_offscreen(
                     policy= agent.policy,
@@ -335,4 +336,3 @@ def train_agent(job_name, agent,
         agent.logger.save_log('logs/')
         make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
     os.chdir(previous_dir)
-    print(">>> finish final save")

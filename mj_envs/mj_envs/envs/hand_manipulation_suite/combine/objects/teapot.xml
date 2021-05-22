@@ -1,0 +1,102 @@
+
+<mujoco model="teapot">
+    <include file='../common.xml'/>
+    
+    <asset>
+        <mesh name="teapot" file="../meshes/grab/teapot/teapot.stl" scale="1 1 1" />
+        <mesh name="contact0" file="../meshes/grab/teapot/contact0.stl" scale="1 1 1" />
+        <mesh name="contact1" file="../meshes/grab/teapot/contact1.stl" scale="1 1 1" />
+        <mesh name="contact2" file="../meshes/grab/teapot/contact2.stl" scale="1 1 1" />
+        <mesh name="contact3" file="../meshes/grab/teapot/contact3.stl" scale="1 1 1" />
+        <mesh name="contact4" file="../meshes/grab/teapot/contact4.stl" scale="1 1 1" />
+        <mesh name="contact5" file="../meshes/grab/teapot/contact5.stl" scale="1 1 1" />
+        <mesh name="contact6" file="../meshes/grab/teapot/contact6.stl" scale="1 1 1" />
+        <mesh name="contact7" file="../meshes/grab/teapot/contact7.stl" scale="1 1 1" />
+        <mesh name="contact8" file="../meshes/grab/teapot/contact8.stl" scale="1 1 1" />
+        <mesh name="contact9" file="../meshes/grab/teapot/contact9.stl" scale="1 1 1" />
+        <mesh name="contact10" file="../meshes/grab/teapot/contact10.stl" scale="1 1 1" />
+        <mesh name="contact11" file="../meshes/grab/teapot/contact11.stl" scale="1 1 1" />
+        <mesh name="contact12" file="../meshes/grab/teapot/contact12.stl" scale="1 1 1" />
+        <mesh name="contact13" file="../meshes/grab/teapot/contact13.stl" scale="1 1 1" />
+        <mesh name="contact14" file="../meshes/grab/teapot/contact14.stl" scale="1 1 1" />
+        <mesh name="contact15" file="../meshes/grab/teapot/contact15.stl" scale="1 1 1" />
+        <mesh name="contact16" file="../meshes/grab/teapot/contact16.stl" scale="1 1 1" />
+        <mesh name="contact17" file="../meshes/grab/teapot/contact17.stl" scale="1 1 1" />
+        <mesh name="contact18" file="../meshes/grab/teapot/contact18.stl" scale="1 1 1" />
+        <mesh name="contact19" file="../meshes/grab/teapot/contact19.stl" scale="1 1 1" />
+        <mesh name="contact20" file="../meshes/grab/teapot/contact20.stl" scale="1 1 1" />
+        <mesh name="contact21" file="../meshes/grab/teapot/contact21.stl" scale="1 1 1" />
+        <mesh name="contact22" file="../meshes/grab/teapot/contact22.stl" scale="1 1 1" />
+        <mesh name="contact23" file="../meshes/grab/teapot/contact23.stl" scale="1 1 1" />
+        <mesh name="contact24" file="../meshes/grab/teapot/contact24.stl" scale="1 1 1" />
+        <mesh name="contact25" file="../meshes/grab/teapot/contact25.stl" scale="1 1 1" />
+        <mesh name="contact26" file="../meshes/grab/teapot/contact26.stl" scale="1 1 1" />
+        <mesh name="contact27" file="../meshes/grab/teapot/contact27.stl" scale="1 1 1" />
+        <mesh name="contact28" file="../meshes/grab/teapot/contact28.stl" scale="1 1 1" />
+        <mesh name="contact29" file="../meshes/grab/teapot/contact29.stl" scale="1 1 1" />
+        <mesh name="contact30" file="../meshes/grab/teapot/contact30.stl" scale="1 1 1" />
+        <mesh name="contact31" file="../meshes/grab/teapot/contact31.stl" scale="1 1 1" />
+        <mesh name="contact32" file="../meshes/grab/teapot/contact32.stl" scale="1 1 1" />
+        <mesh name="contact33" file="../meshes/grab/teapot/contact33.stl" scale="1 1 1" />
+        <mesh name="contact34" file="../meshes/grab/teapot/contact34.stl" scale="1 1 1" />
+        <mesh name="contact35" file="../meshes/grab/teapot/contact35.stl" scale="1 1 1" />
+        <mesh name="contact36" file="../meshes/grab/teapot/contact36.stl" scale="1 1 1" />
+        <mesh name="contact37" file="../meshes/grab/teapot/contact37.stl" scale="1 1 1" />
+        <mesh name="contact38" file="../meshes/grab/teapot/contact38.stl" scale="1 1 1" />
+        <mesh name="contact39" file="../meshes/grab/teapot/contact39.stl" scale="1 1 1" />
+        <mesh name="contact40" file="../meshes/grab/teapot/contact40.stl" scale="1 1 1" />
+    </asset>
+    
+    <worldbody>
+        <body name="object" pos="0.00 0.0 0.035" >
+            <!-- <joint name="OBJTx" pos="0 0 0" axis="1 0 0" type="slide" limited="false" damping="0" />
+            <joint name="OBJTy" pos="0 0 0" axis="0 1 0" type="slide" limited="false" damping="0" />
+            <joint name="OBJTz" pos="0 0 0" axis="0 0 1" type="slide" limited="false" damping="0" />
+            <joint name="OBJRx" pos="0 0 0" axis="1 0 0" limited="false" damping="0" />
+            <joint name="OBJRy" pos="0 0 0" axis="0 1 0" limited="false" damping="0" />
+            <joint name="OBJRz" pos="0 0 0" axis="0 0 1" limited="false" damping="0" /> -->
+            <geom name="teapot_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="teapot" rgba="1 0 0 1.0" />
+            <geom name="teapot_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact5" density="1250" type="mesh" mesh="contact5" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact6" density="1250" type="mesh" mesh="contact6" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact7" density="1250" type="mesh" mesh="contact7" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact8" density="1250" type="mesh" mesh="contact8" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact9" density="1250" type="mesh" mesh="contact9" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact10" density="1250" type="mesh" mesh="contact10" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact11" density="1250" type="mesh" mesh="contact11" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact12" density="1250" type="mesh" mesh="contact12" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact13" density="1250" type="mesh" mesh="contact13" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact14" density="1250" type="mesh" mesh="contact14" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact15" density="1250" type="mesh" mesh="contact15" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact16" density="1250" type="mesh" mesh="contact16" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact17" density="1250" type="mesh" mesh="contact17" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact18" density="1250" type="mesh" mesh="contact18" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact19" density="1250" type="mesh" mesh="contact19" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact20" density="1250" type="mesh" mesh="contact20" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact21" density="1250" type="mesh" mesh="contact21" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact22" density="1250" type="mesh" mesh="contact22" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact23" density="1250" type="mesh" mesh="contact23" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact24" density="1250" type="mesh" mesh="contact24" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact25" density="1250" type="mesh" mesh="contact25" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact26" density="1250" type="mesh" mesh="contact26" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact27" density="1250" type="mesh" mesh="contact27" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact28" density="1250" type="mesh" mesh="contact28" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact29" density="1250" type="mesh" mesh="contact29" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact30" density="1250" type="mesh" mesh="contact30" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact31" density="1250" type="mesh" mesh="contact31" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact32" density="1250" type="mesh" mesh="contact32" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact33" density="1250" type="mesh" mesh="contact33" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact34" density="1250" type="mesh" mesh="contact34" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact35" density="1250" type="mesh" mesh="contact35" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact36" density="1250" type="mesh" mesh="contact36" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact37" density="1250" type="mesh" mesh="contact37" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact38" density="1250" type="mesh" mesh="contact38" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact39" density="1250" type="mesh" mesh="contact39" condim="4" rgba="0 1 0 0" />
+            <geom name="teapot_contact40" density="1250" type="mesh" mesh="contact40" condim="4" rgba="0 1 0 0" />
+        </body>
+    </worldbody>
+</mujoco>

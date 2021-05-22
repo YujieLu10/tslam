@@ -50,11 +50,11 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         ):
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         # xml add object node
-        if not os.path.isfile(os.path.join(curr_dir, "assets/DAPG_touch_{}.xml".format(obj_name))):
+        if not os.path.isfile(os.path.join(curr_dir, "combine/DAPG_touch_{}.xml".format(obj_name))):
             root = ElementTree.parse(os.path.join(curr_dir, "assets/DAPG_touchobject.xml")).getroot()
             root.find('include').attrib["file"] = "objects/{}.xml".format(obj_name)
             tree = ElementTree.ElementTree(root)
-            tree.write(os.path.join(curr_dir, "assets/DAPG_touch_{}.xml".format(obj_name)), encoding="utf-8", xml_declaration=False)
+            tree.write(os.path.join(curr_dir, "combine/DAPG_touch_{}.xml".format(obj_name)), encoding="utf-8", xml_declaration=False)
 
         # rawtext = ElementTree.tostring(root)
         # dom = minidom.parseString(rawtext)
@@ -62,7 +62,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         #     dom.writexml(f, indent="\t", newl="", encoding="utf-8")
 
         # get sim
-        self.sim = mujoco_env.get_sim(model_path=curr_dir+'/assets/DAPG_touch_{}.xml'.format(obj_name))
+        self.sim = mujoco_env.get_sim(model_path=curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name))
 
         self.obj_current_gt = None
         self.obj_orientation = obj_orientation
@@ -110,7 +110,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.act_rng = 0
 
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        mujoco_env.MujocoEnv.__init__(self, curr_dir+'/assets/DAPG_touch_{}.xml'.format(obj_name), 5)
+        mujoco_env.MujocoEnv.__init__(self, curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name), 5)
 
         # change actuator sensitivity
         self.sim.model.actuator_gainprm[self.sim.model.actuator_name2id('A_WRJ1'):self.sim.model.actuator_name2id('A_WRJ0')+1,:3] = np.array([10, 0, 0])
