@@ -12,7 +12,7 @@
     
     <worldbody>
         <body name="object" pos="0 -0.14 0.22" >
-            <geom name="donut_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" mesh="donut" rgba="1 0 0 1.0" />
+            <!--geom name="donut_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" mesh="donut" rgba="1 0 0 1.0" /-->
             <geom name="donut_contact1" mesh="contact1" type="mesh"/>									
             <geom name="donut_contact2" mesh="contact2" type="mesh"/>									
             <geom name="donut_contact3" mesh="contact3" type="mesh"/>									

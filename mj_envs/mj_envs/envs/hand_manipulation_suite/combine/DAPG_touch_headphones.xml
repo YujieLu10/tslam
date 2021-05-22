@@ -1,0 +1,80 @@
+<mujoco model="ADROIT-pen(v1.5)">																																									
+	<sensor>																																											
+		<touch name="S_grasp_sensor" site="S_grasp" />																																											
+		<touch name="Tch_ffmetacarpal_sensor" site="Tch_ffmetacarpal" />																																											
+		<touch name="Tch_mfmetacarpal_sensor" site="Tch_mfmetacarpal" />																																											
+		<touch name="Tch_rfmetacarpal_sensor" site="Tch_rfmetacarpal" />																																											
+		<touch name="Tch_thmetacarpal_sensor" site="Tch_thmetacarpal" />																																											
+		<touch name="Tch_palm_sensor" site="Tch_palm" />																																											
+		<touch name="Tch_ffproximal_sensor" site="Tch_ffproximal" />																																											
+		<touch name="Tch_ffmiddle_sensor" site="Tch_ffmiddle" />																																											
+		<touch name="S_fftip_sensor" site="S_fftip" />																																											
+		<touch name="Tch_fftip_sensor" site="Tch_fftip" />																																											
+		<touch name="Tch_mfproximal_sensor" site="Tch_mfproximal" />																																											
+		<touch name="Tch_mfmiddle_sensor" site="Tch_mfmiddle" />																																											
+		<touch name="S_mftip_sensor" site="S_mftip" />																																											
+		<touch name="Tch_mftip_sensor" site="Tch_mftip" />																																											
+		<touch name="Tch_rfproximal_sensor" site="Tch_rfproximal" />																																											
+		<touch name="Tch_rfmiddle_sensor" site="Tch_rfmiddle" />																																											
+		<touch name="S_rftip_sensor" site="S_rftip" />																																											
+		<touch name="Tch_rftip_sensor" site="Tch_rftip" />																																											
+		<touch name="Tch_lfmetacarpal_sensor" site="Tch_lfmetacarpal" />																																											
+		<touch name="Tch_lfproximal_sensor" site="Tch_lfproximal" />																																											
+		<touch name="Tch_lfmiddle_sensor" site="Tch_lfmiddle" />																																											
+		<touch name="S_lftip_sensor" site="S_lftip" />																																											
+		<touch name="Tch_lftip_sensor" site="Tch_lftip" />																																											
+		<touch name="Tch_thproximal_sensor" site="Tch_thproximal" />																																											
+		<touch name="Tch_thmiddle_sensor" site="Tch_thmiddle" />																																											
+		<touch name="S_thtip_sensor" site="S_thtip" />																																											
+		<touch name="Tch_thtip_sensor" site="Tch_thtip" />																																											
+	</sensor>																																											
+
+	<include file="objects/headphones.xml" />																																											
+
+
+	<worldbody>																																											
+		<light diffuse=".7 .7 .7" dir="1 1.0 -4" directional="false" pos="-1 -1.0 4.0" specular="0.03 0.03 0.03" />																																											
+		<geom conaffinity="0" contype="1" material="groundplane" name="ground" pos="0 0 -1" size="1.5 1.5 0.25" type="plane" />																																											
+		<camera name="fixed" pos="0 -0.7 0.7" quat="0.92388 0.382683 0 0" />																																											
+
+		<camera name="vil_camera" pos="0 -1.2 1.2" quat="0.92388 0.382683 0 0" />																																											
+		<camera euler="0.785 -0.785 -0.785" name="view_1" pos="-0.8 -0.8 0.8" />																																											
+		<camera euler="-1.57 0 3.14" name="view_2" pos="0 0.5 0.2" />																																											
+		<camera euler="-2.35 0 3.14" name="view_3" pos="0 0.2 -0.2" />																																											
+		<camera euler="0.785 0.785 0.785" name="view_4" pos="0.8 -0.8 0.8" />																																											
+		<camera euler="-3.2 0 3.14" name="view_5" pos="0 -0.25 -0.4" />																																											
+
+
+		<body name="table">																																											
+
+			<geom material="tablecube" pos="0 0 -0.025" size="0.45 0.45 0.025" type="box" />																																											
+			<geom conaffinity="0" contype="0" pos="0.4 0.4 -0.501" quat="0 1 0 0" size="0.04 0.5" type="cylinder" />																																											
+			<geom conaffinity="0" contype="0" pos="-0.4 0.4 -0.501" quat="0 1 0 0" size="0.04 0.5" type="cylinder" />																																											
+			<geom conaffinity="0" contype="0" pos="0.4 -0.4 -0.501" quat="0 1 0 0" size="0.04 0.5" type="cylinder" />																																											
+			<geom conaffinity="0" contype="0" pos="-0.4 -0.4 -0.501" quat="0 1 0 0" size="0.04 0.5" type="cylinder" />																																											
+		</body>																																											
+
+
+		<body mocap="true" name="vive_tracker" pos="0 -0.35 0.25">																																											
+			<inertial diaginertia="1.70667e-05 1.70667e-05 1.70667e-05" mass="0.064" pos="0 0 0" />																																											
+			<geom conaffinity="0" contype="0" group="3" rgba="0.3 0.3 0.3 0.3" size="0.03 0.01" type="cylinder" />																																											
+		</body>																																											
+
+
+		<body euler="-1.57 0 0" name="forearm" pos="0 -0.7 0.16">																																											
+			<inertial diaginertia="0.01 0.01 0.0075" mass="4" pos="0.001 -0.002 0.29" quat="0.982037 -0.0160006 0 -0.188007" />
+            <joint axis="1 0 0" damping="20" name="ARTx" pos="0 0 0" range="-0.25 0.25" type="slide" />
+            <joint axis="0 1 0" damping="20" name="ARTy" pos="0 0 0" range="0 0.2" type="slide" />
+            <joint axis="0 0 1" damping="20" name="ARTz" pos="0 0 0" range="-0.3 0.5" type="slide" />
+            <joint axis="1 0 0" damping="20" name="ARRx" pos="0 0 0" range="-.75 .75" />
+            <joint axis="0 1 0" damping="20" name="ARRy" pos="0 0 0" range="-.75 .75" />
+            <joint axis="0 0 1" damping="20" name="ARRz" pos="0 0 0" range="-.75 .75" />
+			<geom class="D_Vizual" euler="0 0 -1.57" mesh="forearm_simple" name="V_forearm" pos="0 -.01 .181" />																																											
+			<geom class="DC_Hand" name="C_forearm1" pos="0 0 0.29" rgba="0.4 0.5 0.6 0.1" size="0.05 0.033" type="capsule" />																																											
+
+			<include file="../assets/DAPG_Adroit_yjl.xml" />																																											
+		</body>																																																													
+	</worldbody>																																											
+
+	<include file="../assets/DAPG_assets.xml" />																																											
+</mujoco>

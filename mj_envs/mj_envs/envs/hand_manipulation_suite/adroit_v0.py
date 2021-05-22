@@ -139,7 +139,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # TODO: mesh list and mesh name list
         if self.ground_truth_type == "sample":
             # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
-            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "groundtruth_obj4.npz"))['pcd']
+            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(obj_name)))['pcd']
         # confB
         self.voxel_array = [0] * self.voxel_num
 

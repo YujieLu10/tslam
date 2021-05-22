@@ -141,7 +141,7 @@ def save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, o
     ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
     if is_best_policy:
-        plt.savefig('/home/jianrenw/prox/tslam/data/local/train_adroit/best_eval/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
     plt.close()
 
@@ -149,7 +149,7 @@ def save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, o
     ax.set_zlim(1,20)
     ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy:
-        plt.savefig('/home/jianrenw/prox/tslam/data/local/train_adroit/best_eval/iter-{}-{}-gt.png'.format(iternum, obj_name))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/iter-{}-{}-gt.png'.format(iternum, obj_name))    
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
 
@@ -157,7 +157,7 @@ def save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, o
     ax.set_zlim(1,20)
     ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy:
-        plt.savefig('/home/jianrenw/prox/tslam/data/local/train_adroit/best_eval/iter-{}-{}-exp.png'.format(iternum, obj_name))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/iter-{}-{}-exp.png'.format(iternum, obj_name))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
 
@@ -183,10 +183,12 @@ def train_agent(job_name, agent,
     if os.path.isdir(job_name) == False:
         os.mkdir(job_name)
     previous_dir = os.getcwd()
+    obj_name = env_kwargs["obj_name"]
     os.chdir(job_name) # important! we are now in the directory to save data
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
     if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
+    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}'.format(obj_name)) == False: os.mkdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}'.format(obj_name))
     if os.path.isdir('voxel') == False: os.mkdir('voxel')
     if os.path.isdir('logs') == False and agent.save_logs == True: os.mkdir('logs')
     best_policy = copy.deepcopy(agent.policy)
@@ -263,7 +265,6 @@ def train_agent(job_name, agent,
             if agent.save_logs:
                 agent.logger.save_log('logs/')
                 make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
-            obj_name = env_kwargs["obj_name"]
             obj_orientation = env_kwargs["obj_orientation"]
             obj_relative_position = env_kwargs["obj_relative_position"]
             obj_scale = env_kwargs["obj_scale"]  
@@ -272,7 +273,7 @@ def train_agent(job_name, agent,
             pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
             pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
             pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
-            pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/local/best_policy/{}/best_policy.pickle'.format(obj_name), 'wb'))
+            pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/best_policy.pickle'.format(obj_name), 'wb'))
             # pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
 
             # save videos and pointcloud and reconstruted mesh          
@@ -288,7 +289,7 @@ def train_agent(job_name, agent,
                 pc_frame = np.array(env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)))
                 if is_best_policy:
                     np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
-                    np.savez_compressed("/home/jianrenw/prox/tslam/data/local/train_adroit/best_eval/obj{}-alpha_pointcloud_{}.npz".format(obj_name, str(i)), pcd=pc_frame)
+                    np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/obj{}-alpha_pointcloud_{}.npz".format(obj_name, str(i)), pcd=pc_frame)
                 else:
                     np.savez_compressed("pointcloudnpz/pointcloud_"+str(i)+".npz",pcd=pc_frame)
                 
@@ -297,7 +298,7 @@ def train_agent(job_name, agent,
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
                 if is_best_policy:
                     plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
-                    plt.savefig("/home/jianrenw/prox/tslam/data/local/train_adroit/best_eval/obj{}-alpha_2dpointcloud{}.png".format(obj_name, str(i)))
+                    plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/obj{}-alpha_2dpointcloud{}.png".format(obj_name, str(i)))
                 else:
                     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()

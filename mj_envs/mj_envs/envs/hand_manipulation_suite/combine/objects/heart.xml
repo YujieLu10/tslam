@@ -7,8 +7,8 @@
     
     <worldbody>
         <body name="object" pos="0 -0.14 0.22" >
-            <geom name="heart_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" mesh="heart" rgba="1 0 0 1.0" />
-            <geom name="heart_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0"/>
+            <!--geom name="heart_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" mesh="heart" rgba="1 0 0 1.0" /-->
+            <geom name="heart_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 1"/>
         </body>
     </worldbody>
 </mujoco>

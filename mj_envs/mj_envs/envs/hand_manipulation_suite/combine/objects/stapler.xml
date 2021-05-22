@@ -1,6 +1,6 @@
 
 <mujoco model="stapler">
-    <include file='../common.xml'/>
+    
     
     <asset>
         <mesh name="stapler" file="../meshes/grab/stapler/stapler.stl" scale="1 1 1" />
@@ -19,12 +19,12 @@
             <joint name="OBJRx" pos="0 0 0" axis="1 0 0" limited="false" damping="0" />
             <joint name="OBJRy" pos="0 0 0" axis="0 1 0" limited="false" damping="0" />
             <joint name="OBJRz" pos="0 0 0" axis="0 0 1" limited="false" damping="0" /> -->
-            <geom name="stapler_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="stapler" rgba="1 0 0 1.0" />
-            <geom name="stapler_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0" />
-            <geom name="stapler_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 0" />
-            <geom name="stapler_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 0" />
-            <geom name="stapler_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 0" />
-            <geom name="stapler_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 0" />
+            <!--geom name="stapler_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="stapler" rgba="1 0 0 1.0" /-->
+            <geom name="stapler_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 1" />
+            <geom name="stapler_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 1" />
+            <geom name="stapler_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 1" />
+            <geom name="stapler_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 1" />
+            <geom name="stapler_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 1" />
         </body>
     </worldbody>
 </mujoco>

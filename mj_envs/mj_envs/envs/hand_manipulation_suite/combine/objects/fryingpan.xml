@@ -1,6 +1,6 @@
 
 <mujoco model="fryingpan">
-    <include file='../common.xml'/>
+    
     
     <asset>
         <mesh name="fryingpan" file="../meshes/grab/fryingpan/fryingpan.stl" scale="1 1 1" />
@@ -37,30 +37,30 @@
             <joint name="OBJRx" pos="0 0 0" axis="1 0 0" limited="false" damping="0" />
             <joint name="OBJRy" pos="0 0 0" axis="0 1 0" limited="false" damping="0" />
             <joint name="OBJRz" pos="0 0 0" axis="0 0 1" limited="false" damping="0" /> -->
-            <geom name="fryingpan_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="fryingpan" rgba="1 0 0 1.0" />
-            <geom name="fryingpan_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact5" density="1250" type="mesh" mesh="contact5" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact6" density="1250" type="mesh" mesh="contact6" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact7" density="1250" type="mesh" mesh="contact7" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact8" density="1250" type="mesh" mesh="contact8" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact9" density="1250" type="mesh" mesh="contact9" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact10" density="1250" type="mesh" mesh="contact10" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact11" density="1250" type="mesh" mesh="contact11" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact12" density="1250" type="mesh" mesh="contact12" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact13" density="1250" type="mesh" mesh="contact13" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact14" density="1250" type="mesh" mesh="contact14" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact15" density="1250" type="mesh" mesh="contact15" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact16" density="1250" type="mesh" mesh="contact16" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact17" density="1250" type="mesh" mesh="contact17" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact18" density="1250" type="mesh" mesh="contact18" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact19" density="1250" type="mesh" mesh="contact19" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact20" density="1250" type="mesh" mesh="contact20" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact21" density="1250" type="mesh" mesh="contact21" condim="4" rgba="0 1 0 0" />
-            <geom name="fryingpan_contact22" density="1250" type="mesh" mesh="contact22" condim="4" rgba="0 1 0 0" />
+            <!--geom name="fryingpan_visual" type="mesh" contype="0" conaffinity="0" mass="0" group="1" material="MatObject" mesh="fryingpan" rgba="1 0 0 1.0" /-->
+            <geom name="fryingpan_contact0" density="1250" type="mesh" mesh="contact0" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact1" density="1250" type="mesh" mesh="contact1" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact2" density="1250" type="mesh" mesh="contact2" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact3" density="1250" type="mesh" mesh="contact3" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact4" density="1250" type="mesh" mesh="contact4" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact5" density="1250" type="mesh" mesh="contact5" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact6" density="1250" type="mesh" mesh="contact6" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact7" density="1250" type="mesh" mesh="contact7" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact8" density="1250" type="mesh" mesh="contact8" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact9" density="1250" type="mesh" mesh="contact9" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact10" density="1250" type="mesh" mesh="contact10" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact11" density="1250" type="mesh" mesh="contact11" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact12" density="1250" type="mesh" mesh="contact12" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact13" density="1250" type="mesh" mesh="contact13" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact14" density="1250" type="mesh" mesh="contact14" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact15" density="1250" type="mesh" mesh="contact15" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact16" density="1250" type="mesh" mesh="contact16" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact17" density="1250" type="mesh" mesh="contact17" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact18" density="1250" type="mesh" mesh="contact18" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact19" density="1250" type="mesh" mesh="contact19" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact20" density="1250" type="mesh" mesh="contact20" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact21" density="1250" type="mesh" mesh="contact21" condim="4" rgba="0 1 0 1" />
+            <geom name="fryingpan_contact22" density="1250" type="mesh" mesh="contact22" condim="4" rgba="0 1 0 1" />
         </body>
     </worldbody>
 </mujoco>
