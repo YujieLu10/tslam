@@ -107,6 +107,6 @@ ENV/
 *.DS_Store
 
 # workspace files
-data/
+data/local/
 .vscode
 .vs
