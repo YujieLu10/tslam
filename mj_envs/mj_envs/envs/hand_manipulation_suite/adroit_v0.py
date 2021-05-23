@@ -64,6 +64,8 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # get sim
         self.sim = mujoco_env.get_sim(model_path=curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name))
 
+        self.obj_name = obj_name
+        self.obj_scale = obj_scale
         self.obj_current_gt = None
         self.obj_orientation = obj_orientation
         self.obj_relative_position = obj_relative_position
@@ -87,12 +89,17 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.voxel_type = voxel_conf[0]
         self.twod_sep = voxel_conf[2]
         self.test_part = voxel_conf[3]
-        self.voxel_num = int(self.get_voxel_len())
         self.new_voxel_r_factor = new_voxel_r_factor
         self.sensor_obs = sensor_obs
         
-        self.touch_obj_bid = 0
+        if self.ground_truth_type == "sample":
+            # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
+            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(obj_name)))['pcd']
+        self.generate_uniform_gt_voxel()
+        self.voxel_num = len(self.gt_map_list)
         self.voxel_array = [0] * self.voxel_num
+
+        self.touch_obj_bid = 0
         self.forearm_obj_bid = 0
         self.S_grasp_sid = 0
         self.ffknuckle_obj_bid = 0
@@ -136,12 +143,6 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         
         self.sensor_rid_list = [self.sim.model.sensor_name2id('S_grasp_sensor'), self.sim.model.sensor_name2id('Tch_ffmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_mfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_rfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_thmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_palm_sensor'), self.sim.model.sensor_name2id('Tch_ffproximal_sensor'), self.sim.model.sensor_name2id('Tch_ffmiddle_sensor'), self.sim.model.sensor_name2id('S_fftip_sensor'), self.sim.model.sensor_name2id('Tch_fftip_sensor'), self.sim.model.sensor_name2id('Tch_mfproximal_sensor'), self.sim.model.sensor_name2id('Tch_mfmiddle_sensor'), self.sim.model.sensor_name2id('S_mftip_sensor'), self.sim.model.sensor_name2id('Tch_mftip_sensor'), self.sim.model.sensor_name2id('Tch_rfproximal_sensor'), self.sim.model.sensor_name2id('Tch_rfmiddle_sensor'), self.sim.model.sensor_name2id('S_rftip_sensor'), self.sim.model.sensor_name2id('Tch_rftip_sensor'), self.sim.model.sensor_name2id('Tch_lfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_lfproximal_sensor'), self.sim.model.sensor_name2id('Tch_lfmiddle_sensor'), self.sim.model.sensor_name2id('S_lftip_sensor'), self.sim.model.sensor_name2id('Tch_lftip_sensor'), self.sim.model.sensor_name2id('Tch_thproximal_sensor'), self.sim.model.sensor_name2id('Tch_thmiddle_sensor'), self.sim.model.sensor_name2id('S_thtip_sensor'), self.sim.model.sensor_name2id('Tch_thtip_sensor')]
 
-        # TODO: mesh list and mesh name list
-        if self.ground_truth_type == "sample":
-            # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
-            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(obj_name)))['pcd']
-        # confB
-        self.voxel_array = [0] * self.voxel_num
 
     def is_in_voxel_bound(self, posx, posy):
         is_in_bound = False
@@ -188,18 +189,54 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         voxel_idx = idx_y * math.ceil(sep_x) + idx_x + 1
         return voxel_idx
 
+    def generate_uniform_gt_voxel(self):
+        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(self.obj_name))['pcd']
+        data_scale = uniform_gt_data * self.obj_scale
+        data_rotate = data_scale.copy()
+        x = data_rotate[:, 0].copy()
+        y = data_rotate[:, 1].copy()
+        z = data_rotate[:, 2].copy()
+        x_theta = self.obj_orientation[0]
+        data_rotate[:, 0] = x
+        data_rotate[:, 1] = y*math.cos(x_theta) - z*math.sin(x_theta)
+        data_rotate[:, 2] = y*math.sin(x_theta) + z*math.cos(x_theta)
+        data_trans = data_rotate.copy()
+        data_trans[:, 0] += self.obj_relative_position[0]
+        data_trans[:, 1] += self.obj_relative_position[1]
+        data_trans[:, 2] += self.obj_relative_position[2]
+
+        uniform_gt_data = data_trans.copy()
+        resolution = self.twod_sep
+        sep_x = math.ceil(0.25 / resolution)
+        sep_y = math.ceil(0.225 / resolution)
+        sep_z = math.ceil(0.1 / resolution)
+        x, y, z = np.indices((sep_x, sep_y, sep_z))
+
+        gtcube = (x<0) & (y <1) & (z<1)
+        gt_voxels = gtcube
+        gt_map_list = []
+        for idx,val in enumerate(uniform_gt_data):
+            idx_x = math.floor((val[0] + 0.125) / resolution)
+            idx_y = math.floor((val[1] + 0.25) / resolution)
+            idx_z = math.floor((val[2] - 0.16) / resolution)
+            name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+            if name not in gt_map_list:
+                gt_map_list.append(name)
+            cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+            # combine the objects into a single boolean array
+            gt_voxels += cube
+        self.gt_map_list = gt_map_list.copy()
+        self.voxel_array = [0] * len(gt_map_list)
+
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
         # posz = max(min(posz, 0.2 - 1e-4), 0.16)
-        sep_x, sep_y, sep_z, idx_x, idx_y, idx_z = 0, 0, 0, 0, 0, 0
-        sep_x = 0.25 / self.twod_sep
-        sep_y = 0.225 / self.twod_sep
-        sep_z = 0.1 / self.twod_sep
-        idx_x = math.floor((posx + 0.125) / self.twod_sep)
-        idx_y = math.floor((posy + 0.25) / self.twod_sep)
-        idx_z = math.floor((posz - 0.16) / self.twod_sep)
-        voxel_idx = idx_z * math.ceil(sep_x) * math.ceil(sep_y) + idx_y * math.ceil(sep_x) + idx_x
-        return voxel_idx
+        resolution = self.twod_sep
+        idx_x = math.floor((posx + 0.125) / resolution)
+        idx_y = math.floor((posy + 0.25) / resolution)
+        idx_z = math.floor((posz - 0.16) / resolution)
+        name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+        return self.gt_map_list.index(name) if name in self.gt_map_list else -1
 
     def get_basic_reward(self, posA, posB):
         dist = np.linalg.norm(posA-posB)
@@ -355,11 +392,11 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             self.voxel_array = [0] * self.voxel_num
         if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
-                if self.is_in_voxel_bound(point[0], point[1]):
-                    idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
-                    if self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
-                        new_voxel_r += 1
-                        self.voxel_array[min(idx, self.voxel_num-1)] = 1
+                # if self.is_in_voxel_bound(point[0], point[1]):
+                idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
+                if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
+                    new_voxel_r += 1
+                    self.voxel_array[min(idx, self.voxel_num-1)] = 1
         voxel_occupancy = len(np.where(np.array(self.voxel_array)>0)) / len(np.array(self.voxel_array))
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
@@ -448,6 +485,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
 
         # clear each episode
         self.count_step = 0
+        self.voxel_array = [0] * self.voxel_num
         self.previous_contact_points = []
         self.new_current_pos_list = []
         self.sim.forward()

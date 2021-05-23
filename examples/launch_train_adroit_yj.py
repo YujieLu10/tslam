@@ -66,14 +66,14 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 8,
         sample_mode = 'trajectories',
-        horizon= 150, 
-        num_traj = 150,
+        horizon= 200, 
+        num_traj = 50,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 3,
         evaluation_rollouts = 3,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
-            horizon=150,
+            horizon=200,
             num_episodes= 1,
             mode='evaluation',
             width= 640, height= 480,
@@ -89,9 +89,9 @@ def main(args):
     variant_levels = list()
 
     values = [
-        ["normal"],
+        # ["normal"],
         # ["intermediate"],
-        # ["random"],
+        ["random"],
     ]
     dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
@@ -119,17 +119,17 @@ def main(args):
         [True, False, "apple", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "banana", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "binoculars", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "body", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        # [True, False, "body", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.001],
         [True, False, "bowl", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "camera", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "coffeemug", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "cubelarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "cubemedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "cubemiddle", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        # [True, False, "cubelarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        # [True, False, "cubemedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        # [True, False, "cubemiddle", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "cubesmall", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "cup", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "cylinderlarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "cylindermedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        # [True, False, "cylinderlarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        # [True, False, "cylindermedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "cylindersmall", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "doorknob", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "duck", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
@@ -173,7 +173,7 @@ def main(args):
         [True, False, "wristwatch", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
     ]
     idx = int(args.obj_idx_start)
-    values = values[idx*6:min((idx+1)*6, len(values) - 1)]
+    values = values[idx*2:min((idx+1)*2, len(values) - 1)]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
@@ -191,7 +191,10 @@ def main(args):
     # voxel_conf= ['2d', 16, 4, False]
     values = [
         #[0, 0, 1, 0.5, 5, ['3d', 0, 0.04, False], False],
-        [0, 0, 1, 0.5, 5, ['3d', 0, 0.03, False], False],
+        [0, 0, 0, 0.5, 5, ['3d', 0, 0.01, False], False],
+        [1, 0, 0, 0.5, 5, ['3d', 0, 0.01, False], False],
+        [0, 1, 0, 0.5, 5, ['3d', 0, 0.01, False], False],
+        [0, 0, 1, 0.5, 5, ['3d', 0, 0.01, False], False],
     ]
     dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [

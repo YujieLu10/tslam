@@ -141,7 +141,7 @@ def save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, o
     ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
     if is_best_policy:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}-overlap-{}.png'.format(obj_name, occupancy))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
     plt.close()
 
@@ -149,7 +149,7 @@ def save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, o
     ax.set_zlim(1,20)
     ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/iter-{}-{}-gt.png'.format(iternum, obj_name))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}-gt.png'.format(obj_name))    
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
 
@@ -157,7 +157,7 @@ def save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, o
     ax.set_zlim(1,20)
     ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/iter-{}-{}-exp.png'.format(iternum, obj_name))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}-exp.png'.format(obj_name))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
 
@@ -261,7 +261,7 @@ def train_agent(job_name, agent,
                 exptools.logging.logger.log_scalar_batch("total_num_points", total_points, i)
             print(">>> finish evaluation rollouts")
 
-        if (i % save_freq == 0 and i > 0) or is_best_policy:
+        if (i % save_freq == 0 and i > 0):
             if agent.save_logs:
                 agent.logger.save_log('logs/')
                 make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
@@ -270,10 +270,10 @@ def train_agent(job_name, agent,
             obj_scale = env_kwargs["obj_scale"]  
             policy_file = 'policy_%i.pickle' % i
             baseline_file = 'baseline_%i.pickle' % i
-            pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
-            pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
-            pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
-            pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/best_policy.pickle'.format(obj_name), 'wb'))
+            # pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
+            # pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
+            # pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
+
             # pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
 
             # save videos and pointcloud and reconstruted mesh          
@@ -287,9 +287,14 @@ def train_agent(job_name, agent,
                     **visualize_kwargs,
                 ) # (T, C, H, W)
                 pc_frame = np.array(env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)))
+
+                # 3d voxel visualization
+                save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, obj_scale, pc_frame, i, is_best_policy)
+                if is_best_policy:
+                    pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/best_policy.pickle'.format(obj_name), 'wb'))
                 if is_best_policy:
                     np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
-                    np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/obj{}-alpha_pointcloud_{}.npz".format(obj_name, str(i)), pcd=pc_frame)
+                    np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/obj{}-alpha_pointcloud.npz".format(obj_name), pcd=pc_frame)
                 else:
                     np.savez_compressed("pointcloudnpz/pointcloud_"+str(i)+".npz",pcd=pc_frame)
                 
@@ -298,13 +303,10 @@ def train_agent(job_name, agent,
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
                 if is_best_policy:
                     plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
-                    plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/obj{}-alpha_2dpointcloud{}.png".format(obj_name, str(i)))
+                    plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/obj{}-alpha_2dpointcloud.png".format(obj_name))
                 else:
                     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
-
-                # 3d voxel visualization
-                save_voxel_visualization(obj_name, obj_orientation, obj_relative_position, obj_scale, pc_frame, i, is_best_policy)
                 # =======================================================
                 exptools.logging.logger.record_image("rendered", video[-1], i)
                 exptools.logging.logger.record_gif("rendered", video, i)
