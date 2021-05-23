@@ -89,10 +89,12 @@ def main(args):
     variant_levels = list()
 
     values = [
-        # ["normal"],
-        # ["intermediate"],
+        ["normal"],
+        ["intermediate"],
         ["random"],
     ]
+    reset_idx = int(args.reset_idx)
+    values = values[reset_idx:(reset_idx+1)]
     dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "reset_mode"),
@@ -264,6 +266,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--obj_idx_start', help= 'obj_idx_start',
+        type= int, default= 0,
+    )
+    parser.add_argument(
+        '--reset_idx', help= 'reset_idx',
         type= int, default= 0,
     )
 

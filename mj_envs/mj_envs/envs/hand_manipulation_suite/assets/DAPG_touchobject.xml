@@ -64,11 +64,7 @@
 		<body euler="-1.57 0 0" name="forearm" pos="0 -0.7 0.16">																																											
 			<inertial diaginertia="0.01 0.01 0.0075" mass="4" pos="0.001 -0.002 0.29" quat="0.982037 -0.0160006 0 -0.188007" />
             <joint name="ARTx" pos="0 0 0" axis="1 0 0" type="slide" range="-0.25 0.25" damping="20" />
-            <joint name="ARTy" pos="0 0 0" axis="0 1 0" type="slide" range="0 0.2" damping="20" />
             <joint name="ARTz" pos="0 0 0" axis="0 0 1" type="slide" range="-0.3 0.5" damping="20" />
-            <joint name="ARRx" pos="0 0 0" axis="1 0 0" range="-.75 .75" damping="20" />
-            <joint name="ARRy" pos="0 0 0" axis="0 1 0" range="-.75 .75" damping="20" />
-            <joint name="ARRz" pos="0 0 0" axis="0 0 1" range="-.75 .75" damping="20" />
 			<geom class="D_Vizual" euler="0 0 -1.57" mesh="forearm_simple" name="V_forearm" pos="0 -.01 .181" />																																											
 			<geom class="DC_Hand" name="C_forearm1" pos="0 0 0.29" rgba="0.4 0.5 0.6 0.1" size="0.05 0.033" type="capsule" />																																											
 
