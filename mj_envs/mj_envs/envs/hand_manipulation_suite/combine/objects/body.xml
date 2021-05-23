@@ -3,22 +3,22 @@
     
     
     <asset>
-        <mesh name="body" file="../meshes/grab/body/body.stl" scale="1 1 1" />
-        <mesh name="contact0" file="../meshes/grab/body/contact0.stl" scale="1 1 1" />
-        <mesh name="contact1" file="../meshes/grab/body/contact1.stl" scale="1 1 1" />
-        <mesh name="contact2" file="../meshes/grab/body/contact2.stl" scale="1 1 1" />
-        <mesh name="contact3" file="../meshes/grab/body/contact3.stl" scale="1 1 1" />
-        <mesh name="contact4" file="../meshes/grab/body/contact4.stl" scale="1 1 1" />
-        <mesh name="contact5" file="../meshes/grab/body/contact5.stl" scale="1 1 1" />
-        <mesh name="contact6" file="../meshes/grab/body/contact6.stl" scale="1 1 1" />
-        <mesh name="contact7" file="../meshes/grab/body/contact7.stl" scale="1 1 1" />
-        <mesh name="contact8" file="../meshes/grab/body/contact8.stl" scale="1 1 1" />
-        <mesh name="contact9" file="../meshes/grab/body/contact9.stl" scale="1 1 1" />
-        <mesh name="contact10" file="../meshes/grab/body/contact10.stl" scale="1 1 1" />
-        <mesh name="contact11" file="../meshes/grab/body/contact11.stl" scale="1 1 1" />
-        <mesh name="contact12" file="../meshes/grab/body/contact12.stl" scale="1 1 1" />
-        <mesh name="contact13" file="../meshes/grab/body/contact13.stl" scale="1 1 1" />
-        <mesh name="contact14" file="../meshes/grab/body/contact14.stl" scale="1 1 1" />
+        <mesh name="body" file="../meshes/grab/body/body.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact0" file="../meshes/grab/body/contact0.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact1" file="../meshes/grab/body/contact1.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact2" file="../meshes/grab/body/contact2.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact3" file="../meshes/grab/body/contact3.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact4" file="../meshes/grab/body/contact4.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact5" file="../meshes/grab/body/contact5.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact6" file="../meshes/grab/body/contact6.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact7" file="../meshes/grab/body/contact7.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact8" file="../meshes/grab/body/contact8.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact9" file="../meshes/grab/body/contact9.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact10" file="../meshes/grab/body/contact10.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact11" file="../meshes/grab/body/contact11.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact12" file="../meshes/grab/body/contact12.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact13" file="../meshes/grab/body/contact13.stl" scale="0.001 0.001 0.001" />
+        <mesh name="contact14" file="../meshes/grab/body/contact14.stl" scale="0.001 0.001 0.001" />
     </asset>
     
     <worldbody>
