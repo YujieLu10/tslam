@@ -10,6 +10,7 @@ from mjrl.policies.gaussian_mlp import MLP
 from mjrl.baselines.mlp_baseline import MLPBaseline
 from mjrl.algos.ppo_clip import PPO
 from mjrl.utils.train_agent import train_agent
+from mjrl.utils.train_generic_agent import train_generic_agent
 
 
 def main(affinity_code, log_dir, run_ID, **kwargs):
@@ -35,12 +36,20 @@ def run_experiment(log_dir, args):
     baseline = MLPBaseline(env_spec= env.spec, **args["baseline_kwargs"])
     agent = PPO(env, policy, baseline, **args["algo_kwargs"])
 
-    train_agent(
-        job_name= log_dir, # using this interface to guide the algorithm log files into our designated log_dir
-        agent= agent,
-        env_kwargs= args["env_kwargs"],
-        **args["train_agent_kwargs"],
-    )
+    if args["env_kwargs"]["generic"]:
+        train_generic_agent(
+            job_name= log_dir, # using this interface to guide the algorithm log files into our designated log_dir
+            agent= agent,
+            env_kwargs= args["env_kwargs"],
+            **args["train_agent_kwargs"],
+        )
+    else:
+        train_agent(
+            job_name= log_dir, # using this interface to guide the algorithm log files into our designated log_dir
+            agent= agent,
+            env_kwargs= args["env_kwargs"],
+            **args["train_agent_kwargs"],
+        )
     
 if __name__ == "__main__":
     main(*sys.argv[1:])

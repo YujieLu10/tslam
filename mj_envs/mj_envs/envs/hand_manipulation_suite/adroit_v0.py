@@ -14,8 +14,8 @@ import heapq
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-from chamfer_distance import ChamferDistance
-chamfer_dist = ChamferDistance()
+# from chamfer_distance import ChamferDistance
+# chamfer_dist = ChamferDistance()
 
 ADD_BONUS_REWARDS = True
 
@@ -43,26 +43,39 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             voxel_conf= ['2d', 0, 0.005, False], # 2d/3d, voxelNum, 2d_sep, test_part
             sensor_obs= False,
             obj_scale= 0.01,
-            obj_name= "airplane"
+            obj_name= "airplane",
+            generic= False,
+            base_rotation= False,
             # voxel_num= 280,
             # twod_sep= 2,
             # test_part= False,
         ):
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         # xml add object node
-        if not os.path.isfile(os.path.join(curr_dir, "combine/DAPG_touch_{}.xml".format(obj_name))):
-            root = ElementTree.parse(os.path.join(curr_dir, "assets/DAPG_touchobject.xml")).getroot()
+        self.generic = generic
+        if base_rotation:
+            model_prename = "DAPG_rotate_touch"
+        else:
+            model_prename = "DAPG_touch"
+        print(">>> log obj_name {}".format(obj_name))
+        if obj_name == "generic":
+            obj_name = "airplane"
+        if not os.path.isfile(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name))):
+            root = ElementTree.parse(os.path.join(curr_dir, "assets/{}object.xml").format(model_prename)).getroot()
             root.find('include').attrib["file"] = "objects/{}.xml".format(obj_name)
             tree = ElementTree.ElementTree(root)
-            tree.write(os.path.join(curr_dir, "combine/DAPG_touch_{}.xml".format(obj_name)), encoding="utf-8", xml_declaration=False)
+            tree.write(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name)), encoding="utf-8", xml_declaration=False)
+
+        self.model_path_name = curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)
 
         # rawtext = ElementTree.tostring(root)
         # dom = minidom.parseString(rawtext)
         # with open(os.path.join(curr_dir, "assets/DAPG_touchobject.xml"), "w") as f:
         #     dom.writexml(f, indent="\t", newl="", encoding="utf-8")
-
+        
         # get sim
-        self.sim = mujoco_env.get_sim(model_path=curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name))
+        # print("{} isfile:{}".format(("{}_{}.xml").format(model_prename, obj_name), os.path.isfile(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name)))))
+        self.sim = mujoco_env.get_sim(model_path=self.model_path_name)
 
         self.obj_name = obj_name
         self.obj_scale = obj_scale
@@ -117,7 +130,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.act_rng = 0
 
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        mujoco_env.MujocoEnv.__init__(self, curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name), 5)
+        mujoco_env.MujocoEnv.__init__(self, self.model_path_name, 5)
 
         # change actuator sensitivity
         self.sim.model.actuator_gainprm[self.sim.model.actuator_name2id('A_WRJ1'):self.sim.model.actuator_name2id('A_WRJ0')+1,:3] = np.array([10, 0, 0])
@@ -269,17 +282,17 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             chamfer_reward += self.loss_transform(chamfer_distance_loss) * 10
         return chamfer_reward
 
-    def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
-        chamfer_distance_loss = 0.0
-        if "nope" not in self.ground_truth_type:
-            if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-                gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
-                chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
-        else:
-            if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-                dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
-                chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
-        return chamfer_distance_loss
+    # def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
+    #     chamfer_distance_loss = 0.0
+    #     if "nope" not in self.ground_truth_type:
+    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+    #             gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
+    #             chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
+    #     else:
+    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+    #             dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
+    #             chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
+    #     return chamfer_distance_loss
 
     def get_knn_reward(self):
         return 0
@@ -364,7 +377,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # penalty_sim = similar_points_cnt * 5
         # penalty_sim = self.get_penalty()
         if self.chamfer_r_factor:
-            chamfer_loss = self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
+            chamfer_loss = 0#self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
             chamfer_r = 1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
             chamfer_r -= 300
         self.previous_contact_points = next_pos_list.copy()
@@ -374,19 +387,19 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         goal_achieved = (len(self.previous_contact_points) > self.goal_threshold)
         if "nope" not in self.ground_truth_type and is_touched and self.previous_contact_points != [] and previous_pos_list != [] and chamfer_loss < 0.06:
             goal_achieved = True
-
-        if self.mesh_p_factor and len(self.previous_contact_points) > 0:
-            pv_cloud = pv.PolyData(np.array(self.previous_contact_points))
-            pv_volume = pv_cloud.delaunay_3d(alpha= self.mesh_reconstruct_alpha)
-            pv_shell = pv_volume.extract_geometry()
-            reconstruct_points = pv_shell.points
-            mesh_p = chamfer_dist(
-                torch.FloatTensor([reconstruct_points]),
-                torch.FloatTensor([self.previous_contact_points]),
-            )
-            mesh_p = (-1) * (torch.mean(mesh_p[0]) + torch.mean(mesh_p[1]))
-        else:
-            mesh_p = 0
+        mesh_p = 0
+        # if self.mesh_p_factor and len(self.previous_contact_points) > 0:
+        #     pv_cloud = pv.PolyData(np.array(self.previous_contact_points))
+        #     pv_volume = pv_cloud.delaunay_3d(alpha= self.mesh_reconstruct_alpha)
+        #     pv_shell = pv_volume.extract_geometry()
+        #     reconstruct_points = pv_shell.points
+        #     mesh_p = chamfer_dist(
+        #         torch.FloatTensor([reconstruct_points]),
+        #         torch.FloatTensor([self.previous_contact_points]),
+        #     )
+        #     mesh_p = (-1) * (torch.mean(mesh_p[0]) + torch.mean(mesh_p[1]))
+        # else:
+        #     mesh_p = 0
         # voxel obs and new voxel reward
         if len(self.voxel_array) == 0:
             self.voxel_array = [0] * self.voxel_num
@@ -457,12 +470,16 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         if self.sensor_obs:
             final_observation = np.concatenate([qp, qv, np.array(impact_list), np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.array(impact_list), np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         else:
-            final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+            if self.generic:
+                final_observation = np.concatenate([qp, qv, self.voxel_array[0:200] if len(self.voxel_array) > 200 else np.array(np.pad(self.voxel_array, (0,200 - len(self.voxel_array)), 'constant', constant_values=0))]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+            else:
+                final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         return final_observation
 
-    def reset_model(self, obj_bid_idx= None):
+    def reset_model(self):
+        self.count_step = 0
         current_reset = False
-        if self.reset_mode == "random" and random.randint(0,9) > 7:
+        if self.reset_mode == "random" and random.randint(0,9) > 6:
             current_reset = True
         elif self.reset_mode == "normal":
             current_reset = True
@@ -484,9 +501,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.set_state(qp, qv)
 
         # clear each episode
-        self.count_step = 0
         self.voxel_array = [0] * self.voxel_num
-        self.previous_contact_points = []
         self.new_current_pos_list = []
         self.sim.forward()
         return self.get_obs()

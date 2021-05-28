@@ -161,7 +161,7 @@ def sample_data_batch(
         env_kwargs=None,
         sample_paths_kwargs= dict(),
         ):
-
+    print(">>> sample data batch")
     num_cpu = 1 if num_cpu is None else num_cpu
     num_cpu = mp.cpu_count() if num_cpu == 'max' else num_cpu
     assert type(num_cpu) == int

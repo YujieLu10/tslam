@@ -68,7 +68,8 @@ def _load_latest_policy_and_logs(agent, *, policy_dir, logs_dir):
     # cannot find any saved policy
     raise RuntimeError("Log file exists, but cannot find any saved policy.")
 
-def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, pc_frame, iternum, is_best_policy):
+def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
+    obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, generic, rotate = env_args[0], env_args[1], env_args[2], env_args[3], env_args[4], env_args[5], env_args[6], env_args[7]
     uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
@@ -92,10 +93,8 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     sep_z = math.ceil(0.1 / resolution)
     x, y, z = np.indices((sep_x, sep_y, sep_z))
 
-    cube1 = (x<0) & (y <1) & (z<1)
-    gtcube = (x<0) & (y <1) & (z<1)
-    voxels = cube1
-    gt_voxels = gtcube
+    voxels = None
+    gt_voxels = None
 
     # draw gt
     gt_map_list = []
@@ -103,14 +102,14 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
         idx_x = math.floor((val[0] + 0.125) / resolution)
         idx_y = math.floor((val[1] + 0.25) / resolution)
         idx_z = math.floor((val[2] - 0.16) / resolution)
-        if idx_z > 6:
-            continue
+        # if idx_z > 6:
+        #     continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in gt_map_list:
             gt_map_list.append(name)
         cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
         # combine the objects into a single boolean array
-        gt_voxels += cube
+        gt_voxels = cube if gt_voxels is None else (gt_voxels + cube)
 
     # draw cuboids in the top left and bottom right corners, and a link between them
     map_list = []
@@ -118,28 +117,48 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
         idx_x = math.floor((val[0] + 0.125) / resolution)
         idx_y = math.floor((val[1] + 0.25) / resolution)
         idx_z = math.floor((val[2] - 0.16) / resolution)
-        if idx_z > 6:
-            continue
+        # if idx_z > 6:
+        #     continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in map_list and name in gt_map_list:
             map_list.append(name)
         cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
         # combine the objects into a single boolean array
-        voxels += cube
+        voxels = cube if voxels is None else (voxels + cube)
 
     # gt_obj4:668
     occupancy = len(map_list) / len(gt_map_list)
     # print(len(map_list) / sep_x / sep_y / sep_z )
 
     is_best_reconstruct = True
-    files = os.listdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/'.format(obj_name, reset_mode_conf, reward_conf))
+    files = os.listdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf))
     for file in files:
         if "overlap" in file and "png" in file:
             file_str = str(file)
             previous_occup = file_str[(file_str.index("-")+1):file_str.index(".png")]
             if occupancy < float(previous_occup):
                 is_best_reconstruct = False
-    # obj_name = "obj{}".format(obj_name)
+
+    gt_colors = np.empty(gt_voxels.shape, dtype=object)
+    gt_colors[gt_voxels] = 'cyan'
+    ax = plt.figure().add_subplot(projection='3d')
+    ax.set_zlim(1,20)
+    ax.voxels(gt_voxels, facecolors=gt_colors, edgecolor='g', alpha=.4, linewidth=.05)
+    if is_best_policy or is_best_reconstruct:
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_gt.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf))    
+    plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
+    plt.close()
+
+    exp_colors = np.empty(voxels.shape, dtype=object)
+    exp_colors[voxels] = 'white'
+    ax = plt.figure().add_subplot(projection='3d')
+    ax.set_zlim(1,20)
+    ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
+    if is_best_policy or is_best_reconstruct:
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_bp{}_br{}_exp.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
+    plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
+    plt.close()
+
     # set the colors of each object
     vis_voxel = gt_voxels | voxels
     colors = np.empty(vis_voxel.shape, dtype=object)
@@ -152,28 +171,19 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_overlap-{}.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_bp{}_br{}_overlap-{}.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
-    plt.close()
-
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
-    ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/gt.png'.format(obj_name, reset_mode_conf, reward_conf))    
-    plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
-    plt.close()
-
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
-    ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_exp.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
-    plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
     return is_best_reconstruct, occupancy
 
-def train_agent(job_name, agent,
+def log_gif(log_dir, tag, data, step= None, duration= 0.1, **kwargs):
+    filename = os.join(log_dir, "gif_{}_{}.gif".format(tag, step))
+    if isinstance(data, np.ndarray) or (len(data) > 0 and len(data[0].shape)) == 3:
+        imageio.mimwrite(filename, [np.transpose(d, (1,2,0)) for d in data], format= "GIF", duration= duration)
+    else:
+        imageio.mimwrite(filename, data, format= "GIF", duration= duration)
+
+def train_generic_agent(job_name, agent,
                 seed = 0,
                 niter = 101,
                 gamma = 0.995,
@@ -195,21 +205,26 @@ def train_agent(job_name, agent,
     if os.path.isdir(job_name) == False:
         os.mkdir(job_name)
     previous_dir = os.getcwd()
+    obj_to_scale_map = {'duck':1, 'watch':1, 'doorknob':1, 'headphones':1, 'bowl':1, 'cubesmall':1, 'spheremedium':1, 'train':1, 'piggybank':1, 'cubemedium':1, 'cubelarge':1, 'elephant':1, 'flute':1, 'wristwatch':1, 'pyramidmedium':1, 'gamecontroller':1, 'toothbrush':1, 'pyramidsmall':1, 'body':0.001, 'cylinderlarge':1, 'cylindermedium':1, 'cylindersmall':1, 'fryingpan':0.8, 'stanfordbunny':1, 'scissors':1, 'pyramidlarge':1, 'stapler':1, 'flashlight':1, 'mug':1, 'hand':1, 'stamp':1, 'rubberduck':1, 'binoculars':1, 'apple':1, 'mouse':1, 'eyeglasses':1, 'airplane':1, 'coffeemug':1, 'cup':1, 'toothpaste':1, 'torusmedium':1, 'cubemiddle':1, 'phone':1, 'torussmall':1, 'spheresmall':1, 'knife':1, 'banana':1, 'teapot':1, 'hammer':1, 'alarmclock':1, 'waterbottle':1, 'camera':1, 'table':1, 'wineglass':1, 'lightbulb':1, 'spherelarge':1, 'toruslarge':1, 'glass':0.015, 'heart':0.0006, 'donut':0.01}
     obj_name = env_kwargs["obj_name"]
+    is_generic = env_kwargs["generic"]
+    is_rotate = env_kwargs["base_rotation"]
     reset_mode_conf = env_kwargs["reset_mode"]
     reward_conf = "cf{}knn{}voxel{}".format(env_kwargs["chamfer_r_factor"], env_kwargs["knn_r_factor"], env_kwargs["new_voxel_r_factor"])
     os.chdir(job_name) # important! we are now in the directory to save data
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
     if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
-    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf))
-    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf))
+    if not obj_name == "generic":
+        if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
+        if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
     if os.path.isdir('voxel') == False: os.mkdir('voxel')
     if os.path.isdir('logs') == False and agent.save_logs == True: os.mkdir('logs')
     best_policy = copy.deepcopy(agent.policy)
     best_perf = -1e8
     train_curve = best_perf*np.ones(niter)
     mean_pol_perf = 0.0
+
     e = GymEnv(agent.env.env_id, env_kwargs)
 
     # Load from any existing checkpoint, policy, statistics, etc.
@@ -223,6 +238,14 @@ def train_agent(job_name, agent,
     for i in range(i_start, niter):
         print("......................................................................................")
         print("ITERATION : %i " % i)
+        if is_generic:
+            obj_name = os.listdir('/home/jianrenw/prox/tslam/mj_envs/mj_envs/envs/hand_manipulation_suite/combine/objects')[i%60][:-4]
+            env_kwargs["obj_name"] = obj_name
+            env_kwargs["obj_scale"] = obj_to_scale_map[obj_name]
+            if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
+            if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
+            # e = GymEnv(agent.env.env_id, env_kwargs)
+
         is_best_policy = False
         if train_curve[i-1] > best_perf:
             if exptools: exptools.logging.logger.log_text("update best_policy")
@@ -242,7 +265,6 @@ def train_agent(job_name, agent,
             sample_paths_kwargs= sample_paths_kwargs,
         )
         train_curve[i] = stats[0]
-
         if evaluation_rollouts is not None and evaluation_rollouts > 0:
             print("Performing evaluation rollouts ........")
             eval_paths = sample_paths(
@@ -257,6 +279,7 @@ def train_agent(job_name, agent,
             mean_pol_perf = np.mean([np.sum(path['rewards']) for path in eval_paths])
             if agent.save_logs:
                 agent.logger.log_kv('eval_score', mean_pol_perf)
+                print(">>> log_scalar")
                 if exptools: exptools.logging.logger.log_scalar('eval_score', mean_pol_perf, i)
             if exptools:
                 env_infos = [path["env_infos"] for path in eval_paths] # a list of dict
@@ -275,14 +298,14 @@ def train_agent(job_name, agent,
                     exptools.logging.logger.log_scalar_batch(k, v, i)
                 exptools.logging.logger.log_scalar_batch("total_num_points", total_points, i)
             print(">>> finish evaluation rollouts")
-
+        
         if (i % save_freq == 0 and i > 0):
             if agent.save_logs:
                 agent.logger.save_log('logs/')
                 make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
             obj_orientation = env_kwargs["obj_orientation"]
             obj_relative_position = env_kwargs["obj_relative_position"]
-            obj_scale = env_kwargs["obj_scale"]  
+            obj_scale = env_kwargs["obj_scale"] 
             policy_file = 'policy_%i.pickle' % i
             baseline_file = 'baseline_%i.pickle' % i
             # pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
@@ -304,12 +327,12 @@ def train_agent(job_name, agent,
                 pc_frame = np.array(env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)))
 
                 # 3d voxel visualization
-                is_best_reconstruct, occupancy = save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, pc_frame, i, is_best_policy)
+                is_best_reconstruct, occupancy = save_voxel_visualization([obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, is_generic, is_rotate], pc_frame, i, is_best_policy)
                 if is_best_policy or is_best_reconstruct:
-                    pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}/bp{}_br{}_best_policy.pickle'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
+                    pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}/bp{}_br{}_best_policy.pickle'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
                 if is_best_policy or is_best_reconstruct:
-                    np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
-                    np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
+                    np.savez_compressed("pointcloudnpz/{}_alpha_pointcloud_".format(obj_name)+str(i)+".npz",pcd=pc_frame)
+                    np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/npz_bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
                 # else:
                 #     np.savez_compressed("pointcloudnpz/pointcloud_"+str(i)+".npz",pcd=pc_frame)
                 
@@ -317,30 +340,32 @@ def train_agent(job_name, agent,
                 ax = plt.axes()
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
                 if is_best_policy or is_best_reconstruct:
-                    plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
-                    plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
+                    plt.savefig("2dpointcloud/{}_alpha_{}.png".format(obj_name, '2dpointcloud' + str(i)))
+                    plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/npz_bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
                 # else:
                 #     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
                 # =======================================================
-                exptools.logging.logger.record_image("rendered", video[-1], i)
-                exptools.logging.logger.record_gif("rendered", video, i)
-                exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
-                exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
+                exptools.logging.logger.record_image("{}_rendered".format(obj_name), video[-1], i)
+                exptools.logging.logger.record_gif("{}_rendered".format(obj_name), video, i)
+                # exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
+                # exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
+                if is_best_policy or is_best_reconstruct:
+                    log_gif("/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/gif_bp{}_br{}_alpha_overlap-{}.png".format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), "{}_rendered".format(obj_name), video[-1], i)
 
         # print results to console
-        if i == 0:
-            result_file = open('results.txt', 'w')
-            print("Iter | Stoc Pol | Mean Pol | Best (Stoc) \n")
-            result_file.write("Iter | Sampling Pol | Evaluation Pol | Best (Sampled) \n")
-            result_file.close()
-        result_file = open('results.txt', 'a')
-        result_file.write("%4i %5.2f %5.2f %5.2f \n" % (i, train_curve[i], mean_pol_perf, best_perf))
-        result_file.close()
-        if agent.save_logs:
-            print_data = sorted(filter(lambda v: np.asarray(v[1]).size == 1,
-                                       agent.logger.get_current_log().items()))
-            print(tabulate(print_data))
+        # if i == 0:
+        #     result_file = open('results.txt', 'w')
+        #     print("Iter | Stoc Pol | Mean Pol | Best (Stoc) \n")
+        #     result_file.write("Iter | Sampling Pol | Evaluation Pol | Best (Sampled) \n")
+        #     result_file.close()
+        # result_file = open('results.txt', 'a')
+        # result_file.write("%4i %5.2f %5.2f %5.2f \n" % (i, train_curve[i], mean_pol_perf, best_perf))
+        # result_file.close()
+        # if agent.save_logs:
+        #     print_data = sorted(filter(lambda v: np.asarray(v[1]).size == 1,
+        #                                agent.logger.get_current_log().items()))
+        #     print(tabulate(print_data))
         if exptools:
             exptools.logging.logger.log_scalar("Iter", i, i)
             exptools.logging.logger.log_scalar("SamplingPol", train_curve[i], i)

@@ -28,7 +28,9 @@ default_config = dict(
         voxel_conf= ['2d', 16, 4, False],
         sensor_obs= False,
         obj_scale= 0.01,
-        obj_name= "airplane"
+        obj_name= "airplane",
+        generic= False,
+        base_rotation= False,
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -61,13 +63,13 @@ default_config = dict(
     ),
     train_agent_kwargs = dict(
         # seed = seed,
-        niter = 600,
+        niter = 10000,
         gamma = 0.995,
         gae_lambda = 0.97,
         num_cpu = 8,
         sample_mode = 'trajectories',
         horizon= 200, 
-        num_traj = 50,
+        num_traj = 200,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 3,
         evaluation_rollouts = 3,
@@ -93,8 +95,8 @@ def main(args):
         ["intermediate"],
         ["random"],
     ]
-    reset_idx = int(args.reset_idx)
-    values = values[reset_idx:(reset_idx+1)]
+    reset = int(args.reset)
+    values = values[reset:(reset+1)]
     dir_names = ["reset{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "reset_mode"),
@@ -102,36 +104,38 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        ["sample"],
+        ["sample", True, True],
         # ["mesh"],
         # ["nope"],
     ]
-    dir_names = ["gt{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["gt{}_gene{}_rot{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
         ("env_kwargs", "ground_truth_type"),
+        ("env_kwargs", "generic"),
+        ("env_kwargs", "base_rotation"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
         [True, False, "glass", "up", [1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.015],
         [True, False, "donut", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.01],
-        [True, False, "heart", "up", [-1.57, 0, 0],  [0, -0.14, 0.22], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.0008],
+        [True, False, "heart", "up", [-1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.0006],
         [True, False, "airplane", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "alarmclock", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "apple", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "banana", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "binoculars", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        # [True, False, "body", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.001],
+        [True, False, "body", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.001],
         [True, False, "bowl", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "camera", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "coffeemug", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        # [True, False, "cubelarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        # [True, False, "cubemedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        # [True, False, "cubemiddle", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "cubelarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "cubemedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "cubemiddle", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "cubesmall", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "cup", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        # [True, False, "cylinderlarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        # [True, False, "cylindermedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "cylinderlarge", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "cylindermedium", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "cylindersmall", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "doorknob", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "duck", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
@@ -139,7 +143,7 @@ def main(args):
         [True, False, "eyeglasses", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "flashlight", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "flute", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "fryingpan", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "fryingpan", "up", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.8],
         [True, False, "gamecontroller", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "hammer", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "hand", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
@@ -171,12 +175,15 @@ def main(args):
         [True, False, "train", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "watch", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "waterbottle", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "wineglass", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "wineglass", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1], #58
         [True, False, "wristwatch", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
     ]
-    idx = int(args.obj_idx_start)
-    values = values[idx*2:min((idx+1)*2, len(values) - 1)]
-    dir_names = ["voxel{}_rw{}_obj{}_orien{}_{}_{}_{}_{}_{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    idx = int(args.obj)
+    if idx == -1:
+        values = [[True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],]
+    else:
+        values = values[idx*2:min((idx+1)*2, len(values) - 1)]
+    dir_names = ["voxel{}_rw{}_obj{}_orien{}".format(*tuple(str(vi) for vi in v[0:4])) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
@@ -193,10 +200,10 @@ def main(args):
     # voxel_conf= ['2d', 16, 4, False]
     values = [
         #[0, 0, 1, 0.5, 5, ['3d', 0, 0.04, False], False],
-        [0, 0, 0, 0.5, 5, ['3d', 0, 0.01, False], False],
-        [1, 0, 0, 0.5, 5, ['3d', 0, 0.01, False], False],
-        [0, 1, 0, 0.5, 5, ['3d', 0, 0.01, False], False],
-        [0, 0, 1, 0.5, 5, ['3d', 0, 0.01, False], False],
+        # [0, 0, 0, 0.5, 5, ['3d', 0, 0.02, False], False],
+        # [1, 0, 0, 0.5, 5, ['3d', 0, 0.02, False], False],
+        # [0, 1, 0, 0.5, 5, ['3d', 0, 0.02, False], False],
+        [0, 0, 1, 0.5, 5, ['3d', 0, 0.02, False], False],
     ]
     dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_sensor{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
@@ -265,11 +272,11 @@ if __name__ == "__main__":
         choices= ["slurm", "local"],
     )
     parser.add_argument(
-        '--obj_idx_start', help= 'obj_idx_start',
+        '--obj', help= 'obj',
         type= int, default= 0,
     )
     parser.add_argument(
-        '--reset_idx', help= 'reset_idx',
+        '--reset', help= 'reset',
         type= int, default= 0,
     )
 

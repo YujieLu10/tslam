@@ -72,7 +72,7 @@ class BatchREINFORCE:
                    env_kwargs=None,
                    sample_paths_kwargs= dict(),
                    ):
-
+        print(">>> train step {}".format(self.env.env_id))
         # Clean up input arguments
         env = self.env.env_id if env is None else env
         if sample_mode != 'trajectories' and sample_mode != 'samples':
@@ -110,7 +110,6 @@ class BatchREINFORCE:
             time_sampling = timer.time() - ts
             self.logger.log_kv('time_sampling', time_sampling)
             if exptools: exptools.logging.logger.log_scalar("time_sampling", time_sampling)
-
         self.seed = self.seed + N if self.seed is not None else self.seed
 
         # compute returns
@@ -121,6 +120,7 @@ class BatchREINFORCE:
         eval_statistics = self.train_from_paths(paths)
         eval_statistics.append(N)
         # log number of samples
+        print(">>> save logs")
         if self.save_logs:
             num_samples = np.sum([p["rewards"].shape[0] for p in paths])
             self.logger.log_kv('num_samples', num_samples)

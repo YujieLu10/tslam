@@ -10,14 +10,17 @@ import pyvista as pv
 import torch
 import math
 import heapq
-from chamfer_distance import ChamferDistance
-chamfer_dist = ChamferDistance()
+
+from xml.etree import ElementTree
+from xml.dom import minidom
+
+# from chamfer_distance import ChamferDistance
+# chamfer_dist = ChamferDistance()
 
 ADD_BONUS_REWARDS = True
 
 class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self, 
-            obj_bid_idx= 2,
             obj_orientation= [0, 0, 0], # object orientation
             obj_relative_position= [0, 0.5, 0], # object position related to hand (z-value will be flipped when arm faced down)
             goal_threshold= int(8e3), # how many points touched to achieve the goal
@@ -40,14 +43,31 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             voxel_conf= ['2d', 0, 0.005, False], # 2d/3d, voxelNum, 2d_sep, test_part
             sensor_obs= False,
             obj_scale= 0.01,
+            obj_name= "airplane"
             # voxel_num= 280,
             # twod_sep= 2,
             # test_part= False,
         ):
-        # get sim
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        self.sim = mujoco_env.get_sim(model_path=curr_dir+'/assets/DAPG_constrainedhand.xml')
+        # xml add object node
+        print(">>> log obj_name {}".format(obj_name))
 
+        if not os.path.isfile(os.path.join(curr_dir, "combine/DAPG_touch_{}.xml".format(obj_name))):
+            root = ElementTree.parse(os.path.join(curr_dir, "assets/DAPG_touchobject.xml")).getroot()
+            root.find('include').attrib["file"] = "objects/{}.xml".format(obj_name)
+            tree = ElementTree.ElementTree(root)
+            tree.write(os.path.join(curr_dir, "combine/DAPG_touch_{}.xml".format(obj_name)), encoding="utf-8", xml_declaration=False)
+
+        # rawtext = ElementTree.tostring(root)
+        # dom = minidom.parseString(rawtext)
+        # with open(os.path.join(curr_dir, "assets/DAPG_touchobject.xml"), "w") as f:
+        #     dom.writexml(f, indent="\t", newl="", encoding="utf-8")
+
+        # get sim
+        self.sim = mujoco_env.get_sim(model_path=curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name))
+
+        self.obj_name = obj_name
+        self.obj_scale = obj_scale
         self.obj_current_gt = None
         self.obj_orientation = obj_orientation
         self.obj_relative_position = obj_relative_position
@@ -71,38 +91,17 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.voxel_type = voxel_conf[0]
         self.twod_sep = voxel_conf[2]
         self.test_part = voxel_conf[3]
-        self.voxel_num = int(self.get_voxel_len())
         self.new_voxel_r_factor = new_voxel_r_factor
         self.sensor_obs = sensor_obs
         
-        self.obj_bid_idx = obj_bid_idx
-        self.obj_name = [
-            "plane",
-            ["glass1","glass2","glass3","glass4","glass5","glass6","glass7","glass8","glass9","glass10","glass11","glass12","glass13","glass14","glass15","glass16","glass17","glass18","glass19","glass20","glass21","glass22","glass23"],
-            ["OShape1","OShape2","OShape3","OShape4","OShape5","OShape6"],
-            "LShape",
-            "simpleShape",
-            "TShape",
-            "thinShape",
-            "VShape",
-            "Egg",
-            "Cylinder",
-        ]
-        self.mesh_name = [
-            "plane",
-            ["glass1","glass2","glass3","glass4","glass5","glass6","glass7","glass8","glass9","glass10","glass11","glass12","glass13","glass14","glass15","glass16","glass17","glass18","glass19","glass20","glass21","glass22","glass23"],
-            ["OShape1","OShape2","OShape3","OShape4","OShape5","OShape6"],
-            "LShape",
-            "simpleShape",
-            "TShape",
-            "thinShape",
-            "VShape",
-            "Egg",
-            "Cylinder",
-        ]
-        # dumy obj_bid_list, updated later in this method
-        self.obj_bid_list = [0 for _ in range(len(self.obj_name))]
+        if self.ground_truth_type == "sample":
+            # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
+            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(obj_name)))['pcd']
+        self.generate_uniform_gt_voxel()
+        self.voxel_num = len(self.gt_map_list)
         self.voxel_array = [0] * self.voxel_num
+
+        self.touch_obj_bid = 0
         self.forearm_obj_bid = 0
         self.S_grasp_sid = 0
         self.ffknuckle_obj_bid = 0
@@ -120,7 +119,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.act_rng = 0
 
         curr_dir = os.path.dirname(os.path.abspath(__file__))
-        mujoco_env.MujocoEnv.__init__(self, curr_dir+'/assets/DAPG_constrainedhand.xml', 5)
+        mujoco_env.MujocoEnv.__init__(self, curr_dir+'/combine/DAPG_touch_{}.xml'.format(obj_name), 5)
 
         # change actuator sensitivity
         self.sim.model.actuator_gainprm[self.sim.model.actuator_name2id('A_WRJ1'):self.sim.model.actuator_name2id('A_WRJ0')+1,:3] = np.array([10, 0, 0])
@@ -141,23 +140,11 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.rfknuckle_obj_bid = self.sim.model.body_name2id('rfknuckle')
         self.lfmetacarpal_obj_bid = self.sim.model.body_name2id('lfmetacarpal')
         self.thbase_obj_bid = self.sim.model.body_name2id('thbase')
+        self.touch_obj_bid = self.sim.model.body_name2id('object')
         # self.grasp_sensor_rid, self.Tch_ffmetacarpal_sensor_rid, self.Tch_mfmetacarpal_sensor_rid, self.Tch_rfmetacarpal_sensor_rid, self.Tch_thmetacarpal_sensor_rid, self.Tch_palm_sensor_rid, self.Tch_ffproximal_sensor_rid, self.Tch_ffmiddle_sensor_rid, self.S_fftip_sensor_rid, self.Tch_fftip_sensor_rid, self.Tch_mfproximal_sensor_rid, self.Tch_mfmiddle_sensor_rid, self.S_mftip_sensor_rid, self.Tch_mftip_sensor_rid, self.Tch_rfproximal_sensor_rid, self.Tch_rfmiddle_sensor_rid, self.S_rftip_sensor_rid, self.Tch_rftip_sensor_rid, self.Tch_lfmetacarpal_sensor_rid, self.Tch_lfproximal_sensor_rid, self.Tch_lfmiddle_sensor_rid, self.S_lftip_sensor_rid, self.Tch_lftip_sensor_rid, self.Tch_thproximal_sensor_rid, self.Tch_thmiddle_sensor_rid, self.S_thtip_sensor_rid, self.Tch_thtip_sensor_rid 
         
         self.sensor_rid_list = [self.sim.model.sensor_name2id('S_grasp_sensor'), self.sim.model.sensor_name2id('Tch_ffmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_mfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_rfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_thmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_palm_sensor'), self.sim.model.sensor_name2id('Tch_ffproximal_sensor'), self.sim.model.sensor_name2id('Tch_ffmiddle_sensor'), self.sim.model.sensor_name2id('S_fftip_sensor'), self.sim.model.sensor_name2id('Tch_fftip_sensor'), self.sim.model.sensor_name2id('Tch_mfproximal_sensor'), self.sim.model.sensor_name2id('Tch_mfmiddle_sensor'), self.sim.model.sensor_name2id('S_mftip_sensor'), self.sim.model.sensor_name2id('Tch_mftip_sensor'), self.sim.model.sensor_name2id('Tch_rfproximal_sensor'), self.sim.model.sensor_name2id('Tch_rfmiddle_sensor'), self.sim.model.sensor_name2id('S_rftip_sensor'), self.sim.model.sensor_name2id('Tch_rftip_sensor'), self.sim.model.sensor_name2id('Tch_lfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_lfproximal_sensor'), self.sim.model.sensor_name2id('Tch_lfmiddle_sensor'), self.sim.model.sensor_name2id('S_lftip_sensor'), self.sim.model.sensor_name2id('Tch_lftip_sensor'), self.sim.model.sensor_name2id('Tch_thproximal_sensor'), self.sim.model.sensor_name2id('Tch_thmiddle_sensor'), self.sim.model.sensor_name2id('S_thtip_sensor'), self.sim.model.sensor_name2id('Tch_thtip_sensor')]
 
-        # update obj_bid_list to make it actually working
-        self.obj_bid_list = [
-            (self.sim.model.body_name2id('Object{}'.format(idx+1)) if 'Object{}'.format(idx+1) in self.sim.model._body_name2id else 0) \
-                for idx in range(len(self.obj_name))
-        ]
-        # TODO: mesh list and mesh name list
-        if self.ground_truth_type == "mesh":
-            self.obj_mesh_current_name = self.mesh_name[self.obj_bid_idx]
-            self.obj_current_gt = self.model.mesh_vert[self.model.mesh_vertadr[self.sim.model.mesh_name2id(self.obj_mesh_current_name)]:self.model.mesh_vertadr[self.sim.model.mesh_name2id(self.obj_mesh_current_name)]+self.model.mesh_vertnum[self.sim.model.mesh_name2id(self.obj_mesh_current_name)]]
-        elif self.ground_truth_type == "sample":
-            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "groundtruth_obj4.npz"))['pcd']
-        # confB
-        self.voxel_array = [0] * self.voxel_num
 
     def is_in_voxel_bound(self, posx, posy):
         is_in_bound = False
@@ -204,18 +191,54 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         voxel_idx = idx_y * math.ceil(sep_x) + idx_x + 1
         return voxel_idx
 
+    def generate_uniform_gt_voxel(self):
+        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(self.obj_name))['pcd']
+        data_scale = uniform_gt_data * self.obj_scale
+        data_rotate = data_scale.copy()
+        x = data_rotate[:, 0].copy()
+        y = data_rotate[:, 1].copy()
+        z = data_rotate[:, 2].copy()
+        x_theta = self.obj_orientation[0]
+        data_rotate[:, 0] = x
+        data_rotate[:, 1] = y*math.cos(x_theta) - z*math.sin(x_theta)
+        data_rotate[:, 2] = y*math.sin(x_theta) + z*math.cos(x_theta)
+        data_trans = data_rotate.copy()
+        data_trans[:, 0] += self.obj_relative_position[0]
+        data_trans[:, 1] += self.obj_relative_position[1]
+        data_trans[:, 2] += self.obj_relative_position[2]
+
+        uniform_gt_data = data_trans.copy()
+        resolution = self.twod_sep
+        sep_x = math.ceil(0.25 / resolution)
+        sep_y = math.ceil(0.225 / resolution)
+        sep_z = math.ceil(0.1 / resolution)
+        x, y, z = np.indices((sep_x, sep_y, sep_z))
+
+        gtcube = (x<0) & (y <1) & (z<1)
+        gt_voxels = gtcube
+        gt_map_list = []
+        for idx,val in enumerate(uniform_gt_data):
+            idx_x = math.floor((val[0] + 0.125) / resolution)
+            idx_y = math.floor((val[1] + 0.25) / resolution)
+            idx_z = math.floor((val[2] - 0.16) / resolution)
+            name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+            if name not in gt_map_list:
+                gt_map_list.append(name)
+            cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+            # combine the objects into a single boolean array
+            gt_voxels += cube
+        self.gt_map_list = gt_map_list.copy()
+        self.voxel_array = [0] * len(gt_map_list)
+
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
         # posz = max(min(posz, 0.2 - 1e-4), 0.16)
-        sep_x, sep_y, sep_z, idx_x, idx_y, idx_z = 0, 0, 0, 0, 0, 0
-        sep_x = 0.25 / self.twod_sep
-        sep_y = 0.225 / self.twod_sep
-        sep_z = 0.1 / self.twod_sep
-        idx_x = math.floor((posx + 0.125) / self.twod_sep)
-        idx_y = math.floor((posy + 0.25) / self.twod_sep)
-        idx_z = math.floor((posz - 0.16) / self.twod_sep)
-        voxel_idx = idx_z * math.ceil(sep_x) * math.ceil(sep_y) + idx_y * math.ceil(sep_x) + idx_x
-        return voxel_idx
+        resolution = self.twod_sep
+        idx_x = math.floor((posx + 0.125) / resolution)
+        idx_y = math.floor((posy + 0.25) / resolution)
+        idx_z = math.floor((posz - 0.16) / resolution)
+        name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+        return self.gt_map_list.index(name) if name in self.gt_map_list else -1
 
     def get_basic_reward(self, posA, posB):
         dist = np.linalg.norm(posA-posB)
@@ -248,17 +271,17 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             chamfer_reward += self.loss_transform(chamfer_distance_loss) * 10
         return chamfer_reward
 
-    def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
-        chamfer_distance_loss = 0.0
-        if "nope" not in self.ground_truth_type:
-            if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-                gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
-                chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
-        else:
-            if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-                dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
-                chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
-        return chamfer_distance_loss
+    # def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
+    #     chamfer_distance_loss = 0.0
+    #     if "nope" not in self.ground_truth_type:
+    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+    #             gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
+    #             chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
+    #     else:
+    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+    #             dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
+    #             chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
+    #     return chamfer_distance_loss
 
     def get_knn_reward(self):
         return 0
@@ -274,7 +297,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.do_simulation(a, self.frame_skip)
 
         self.count_step += 1
-        obj_init_xpos  = self.data.body_xpos[self.obj_bid_list[self.obj_bid_idx]].ravel()
+        obj_init_xpos  = self.data.body_xpos[self.touch_obj_bid].ravel()
         palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
         ffknuckle_xpos = self.data.site_xpos[self.ffknuckle_obj_bid].ravel()
         mfknuckle_xpos = self.data.site_xpos[self.mfknuckle_obj_bid].ravel()
@@ -299,7 +322,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         for contact in self.data.contact:
             if self.sim.model.geom_id2name(contact.geom1) is None or self.sim.model.geom_id2name(contact.geom2) is None:
                 continue
-            if self.sim.model.geom_id2name(contact.geom1) in self.obj_name[self.obj_bid_idx] or self.sim.model.geom_id2name(contact.geom2) in self.obj_name[self.obj_bid_idx]:#["handle", "neck", "head"]:
+            if "contact" in self.sim.model.geom_id2name(contact.geom1) or "contact" in self.sim.model.geom_id2name(contact.geom2):
                 current_pos_list.append(contact.pos.tolist())
                 is_touched = True
         
@@ -343,7 +366,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         # penalty_sim = similar_points_cnt * 5
         # penalty_sim = self.get_penalty()
         if self.chamfer_r_factor:
-            chamfer_loss = self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
+            chamfer_loss = 0#self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
             chamfer_r = 1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
             chamfer_r -= 300
         self.previous_contact_points = next_pos_list.copy()
@@ -353,29 +376,17 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         goal_achieved = (len(self.previous_contact_points) > self.goal_threshold)
         if "nope" not in self.ground_truth_type and is_touched and self.previous_contact_points != [] and previous_pos_list != [] and chamfer_loss < 0.06:
             goal_achieved = True
-
-        if self.mesh_p_factor and len(self.previous_contact_points) > 0:
-            pv_cloud = pv.PolyData(np.array(self.previous_contact_points))
-            pv_volume = pv_cloud.delaunay_3d(alpha= self.mesh_reconstruct_alpha)
-            pv_shell = pv_volume.extract_geometry()
-            reconstruct_points = pv_shell.points
-            mesh_p = chamfer_dist(
-                torch.FloatTensor([reconstruct_points]),
-                torch.FloatTensor([self.previous_contact_points]),
-            )
-            mesh_p = (-1) * (torch.mean(mesh_p[0]) + torch.mean(mesh_p[1]))
-        else:
-            mesh_p = 0
+        mesh_p = 0
         # voxel obs and new voxel reward
         if len(self.voxel_array) == 0:
             self.voxel_array = [0] * self.voxel_num
         if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
-                if self.is_in_voxel_bound(point[0], point[1]):
-                    idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
-                    if self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
-                        new_voxel_r += 1
-                        self.voxel_array[min(idx, self.voxel_num-1)] = 1
+                # if self.is_in_voxel_bound(point[0], point[1]):
+                idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
+                if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
+                    new_voxel_r += 1
+                    self.voxel_array[min(idx, self.voxel_num-1)] = 1
         voxel_occupancy = len(np.where(np.array(self.voxel_array)>0)) / len(np.array(self.voxel_array))
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
@@ -406,7 +417,6 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
     def get_obs(self):
         qp = self.data.qpos.ravel()
         qv = self.data.qvel.ravel()
-        obj_init_xpos = self.data.body_xpos[self.obj_bid_list[self.obj_bid_idx]].ravel()
         palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
         # 6 extreme pos
         all_points = np.array(self.previous_contact_points)
@@ -426,39 +436,30 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             touch_pos = np.append(touch_pos, old_touch_pos)
         if len(random_touch_pos) > 0:
             touch_pos = np.append(touch_pos, random_touch_pos)
-        
-        
-        ffknuckle_xpos = self.data.body_xpos[self.ffknuckle_obj_bid].ravel()
-        mfknuckle_xpos = self.data.body_xpos[self.mfknuckle_obj_bid].ravel()
-        rfknuckle_xpos = self.data.body_xpos[self.rfknuckle_obj_bid].ravel()
-        lfmetacarpal_xpos = self.data.body_xpos[self.lfmetacarpal_obj_bid].ravel()
-        thbase_xpos = self.data.body_xpos[self.thbase_obj_bid].ravel()
+
         impact_list = None
         for rid in self.sensor_rid_list:
             if impact_list is None:
                 impact_list = np.clip(self.sim.data.sensordata[rid], [-1.0], [1.0])
             else:
                 impact_list = np.append(impact_list, np.clip(self.sim.data.sensordata[rid], [-1.0], [1.0]))
-
         if self.sensor_obs:
             final_observation = np.concatenate([qp, qv, np.array(impact_list), np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.array(impact_list), np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         else:
-            final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+            final_observation = np.concatenate([qp, qv, self.voxel_array[0:200] if len(self.voxel_array) > 200 else np.array(np.pad(self.voxel_array, (0,200 - len(self.voxel_array)), 'constant', constant_values=0))]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         return final_observation
 
-    def reset_model(self, obj_bid_idx= None):
+    def reset_model(self):
+        self.count_step = 0
         current_reset = False
-        if self.reset_mode == "random" and random.randint(0,9) > 7:
+        if self.reset_mode == "random" and random.randint(0,9) > 6:
             current_reset = True
         elif self.reset_mode == "normal":
             current_reset = True
 
-        obj_pos = [0,0,-2.0]
-        for obj_bid in self.obj_bid_list:
-            self.model.body_pos[obj_bid] = np.array(obj_pos)
         # set target object pose
-        self.model.body_pos[self.obj_bid_list[self.obj_bid_idx]] = self.obj_relative_position
-        self.model.body_quat[self.obj_bid_list[self.obj_bid_idx]] = euler2quat(self.obj_orientation)
+        self.model.body_pos[self.touch_obj_bid] = self.obj_relative_position
+        self.model.body_quat[self.touch_obj_bid] = euler2quat(self.obj_orientation)
         # set arm pose
         self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)
         self.model.body_pos[self.forearm_obj_bid] = self.forearm_relative_position
@@ -468,20 +469,13 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             return self.get_obs()
 
         # reset model
-        if obj_bid_idx is not None:
-            assert 0 <= obj_bid_idx and obj_bid_idx < len(self.obj_bid_list)
-            self.obj_bid_idx = obj_bid_idx
         qp = self.init_qpos.copy()
         qv = self.init_qvel.copy()
         self.set_state(qp, qv)
 
         # clear each episode
-        self.count_step = 0
-        self.previous_contact_points = []
+        self.voxel_array = [0] * self.voxel_num
         self.new_current_pos_list = []
-
-        # self.obj_current_gt = list(np.array(self.obj_current_gt) + np.array([self.obj_relative_position]).repeat(len(self.obj_current_gt), axis=0))
-
         self.sim.forward()
         return self.get_obs()
 
@@ -493,7 +487,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         qv = self.data.qvel.ravel().copy()
         forearm_orien = self.model.body_quat[self.forearm_obj_bid].ravel().copy()
         forearm_pos = self.model.body_pos[self.forearm_obj_bid].ravel().copy()
-        obj_init_pos = self.model.body_pos[self.obj_bid_list[self.obj_bid_idx]].ravel().copy()
+        obj_init_pos = self.model.body_pos[self.touch_obj_bid].ravel().copy()
         ffknuckle_pos = self.model.body_pos[self.ffknuckle_obj_bid].ravel().copy()
         mfknuckle_pos = self.model.body_pos[self.mfknuckle_obj_bid].ravel().copy()
         rfknuckle_pos = self.model.body_pos[self.rfknuckle_obj_bid].ravel().copy()
@@ -518,7 +512,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.set_state(qp, qv)
         self.model.body_quat[self.forearm_obj_bid] = forearm_orien
         self.model.body_pos[self.forearm_obj_bid] = forearm_pos
-        self.model.body_pos[self.obj_bid_list[self.obj_bid_idx]] = obj_init_pos
+        self.model.body_pos[self.touch_obj_bid] = obj_init_pos
         self.model.body_pos[self.ffknuckle_obj_bid] = ffknuckle_pos
         self.model.body_pos[self.mfknuckle_obj_bid] = mfknuckle_pos
         self.model.body_pos[self.rfknuckle_obj_bid] = rfknuckle_pos
