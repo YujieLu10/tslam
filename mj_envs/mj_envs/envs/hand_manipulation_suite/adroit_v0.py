@@ -57,16 +57,13 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             model_prename = "DAPG_rotate_touch"
         else:
             model_prename = "DAPG_touch"
-        print(">>> log obj_name {}".format(obj_name))
-        if obj_name == "generic":
-            obj_name = "airplane"
-        if not os.path.isfile(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name))):
+        if not generic and not os.path.isfile(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name))):
             root = ElementTree.parse(os.path.join(curr_dir, "assets/{}object.xml").format(model_prename)).getroot()
             root.find('include').attrib["file"] = "objects/{}.xml".format(obj_name)
             tree = ElementTree.ElementTree(root)
             tree.write(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name)), encoding="utf-8", xml_declaration=False)
-
-        self.model_path_name = curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)
+        
+        self.model_path_name = (curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)) if not generic else (curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic"))
 
         # rawtext = ElementTree.tostring(root)
         # dom = minidom.parseString(rawtext)
@@ -104,13 +101,10 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.test_part = voxel_conf[3]
         self.new_voxel_r_factor = new_voxel_r_factor
         self.sensor_obs = sensor_obs
-        
-        if self.ground_truth_type == "sample":
-            # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
-            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(obj_name)))['pcd']
-        self.generate_uniform_gt_voxel()
-        self.voxel_num = len(self.gt_map_list)
+
+        self.voxel_num = 200
         self.voxel_array = [0] * self.voxel_num
+        self.gt_map_list = []
 
         self.touch_obj_bid = 0
         self.forearm_obj_bid = 0
@@ -123,6 +117,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.sensor_rid_list = [0] * 27
         
         self.count_step = 0
+        self.obj_iter = 0
         self.previous_contact_points = []
         self.new_current_pos_list = []
         # scales
@@ -151,7 +146,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.rfknuckle_obj_bid = self.sim.model.body_name2id('rfknuckle')
         self.lfmetacarpal_obj_bid = self.sim.model.body_name2id('lfmetacarpal')
         self.thbase_obj_bid = self.sim.model.body_name2id('thbase')
-        self.touch_obj_bid = self.sim.model.body_name2id('object')
+        self.touch_obj_bid = self.sim.model.body_name2id('{}object'.format(self.obj_name if self.obj_name != "generic" else "airplane"))
         # self.grasp_sensor_rid, self.Tch_ffmetacarpal_sensor_rid, self.Tch_mfmetacarpal_sensor_rid, self.Tch_rfmetacarpal_sensor_rid, self.Tch_thmetacarpal_sensor_rid, self.Tch_palm_sensor_rid, self.Tch_ffproximal_sensor_rid, self.Tch_ffmiddle_sensor_rid, self.S_fftip_sensor_rid, self.Tch_fftip_sensor_rid, self.Tch_mfproximal_sensor_rid, self.Tch_mfmiddle_sensor_rid, self.S_mftip_sensor_rid, self.Tch_mftip_sensor_rid, self.Tch_rfproximal_sensor_rid, self.Tch_rfmiddle_sensor_rid, self.S_rftip_sensor_rid, self.Tch_rftip_sensor_rid, self.Tch_lfmetacarpal_sensor_rid, self.Tch_lfproximal_sensor_rid, self.Tch_lfmiddle_sensor_rid, self.S_lftip_sensor_rid, self.Tch_lftip_sensor_rid, self.Tch_thproximal_sensor_rid, self.Tch_thmiddle_sensor_rid, self.S_thtip_sensor_rid, self.Tch_thtip_sensor_rid 
         
         self.sensor_rid_list = [self.sim.model.sensor_name2id('S_grasp_sensor'), self.sim.model.sensor_name2id('Tch_ffmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_mfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_rfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_thmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_palm_sensor'), self.sim.model.sensor_name2id('Tch_ffproximal_sensor'), self.sim.model.sensor_name2id('Tch_ffmiddle_sensor'), self.sim.model.sensor_name2id('S_fftip_sensor'), self.sim.model.sensor_name2id('Tch_fftip_sensor'), self.sim.model.sensor_name2id('Tch_mfproximal_sensor'), self.sim.model.sensor_name2id('Tch_mfmiddle_sensor'), self.sim.model.sensor_name2id('S_mftip_sensor'), self.sim.model.sensor_name2id('Tch_mftip_sensor'), self.sim.model.sensor_name2id('Tch_rfproximal_sensor'), self.sim.model.sensor_name2id('Tch_rfmiddle_sensor'), self.sim.model.sensor_name2id('S_rftip_sensor'), self.sim.model.sensor_name2id('Tch_rftip_sensor'), self.sim.model.sensor_name2id('Tch_lfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_lfproximal_sensor'), self.sim.model.sensor_name2id('Tch_lfmiddle_sensor'), self.sim.model.sensor_name2id('S_lftip_sensor'), self.sim.model.sensor_name2id('Tch_lftip_sensor'), self.sim.model.sensor_name2id('Tch_thproximal_sensor'), self.sim.model.sensor_name2id('Tch_thmiddle_sensor'), self.sim.model.sensor_name2id('S_thtip_sensor'), self.sim.model.sensor_name2id('Tch_thtip_sensor')]
@@ -240,6 +235,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             gt_voxels += cube
         self.gt_map_list = gt_map_list.copy()
         self.voxel_array = [0] * len(gt_map_list)
+        self.voxel_num = len(gt_map_list)
 
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
@@ -306,7 +302,6 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         a = np.clip(a, -1.0, 1.0)
         a = self.act_mid + a*self.act_rng
         self.do_simulation(a, self.frame_skip)
-
         self.count_step += 1
         obj_init_xpos  = self.data.body_xpos[self.touch_obj_bid].ravel()
         palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
@@ -401,7 +396,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # else:
         #     mesh_p = 0
         # voxel obs and new voxel reward
-        if len(self.voxel_array) == 0:
+        if self.voxel_array is not None and len(self.voxel_array) == 0:
             self.voxel_array = [0] * self.voxel_num
         if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
@@ -410,7 +405,8 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
                 if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
                     new_voxel_r += 1
                     self.voxel_array[min(idx, self.voxel_num-1)] = 1
-        voxel_occupancy = len(np.where(np.array(self.voxel_array)>0)) / len(np.array(self.voxel_array))
+        denominator = len(np.array(self.voxel_array))
+        voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
         reward += self.chamfer_r_factor * chamfer_r
@@ -437,7 +433,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         )
         return self.get_obs(), reward, done, info
 
-    def get_obs(self):
+    def get_obs(self):    
         qp = self.data.qpos.ravel()
         qv = self.data.qvel.ravel()
         palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
@@ -476,8 +472,23 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
                 final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         return final_observation
 
-    def reset_model(self):
+    def reset_model(self, num_traj_idx):
+        # clear each round
         self.count_step = 0
+        self.previous_contact_points = []
+        self.new_current_pos_list = []
+        # generate voxel
+        name_map = ['duck', 'watch', 'doorknob', 'headphones', 'bowl', 'cubesmall', 'spheremedium', 'train', 'piggybank', 'cubemedium', 'cubelarge', 'elephant', 'flute', 'wristwatch', 'pyramidmedium', 'gamecontroller', 'toothbrush', 'pyramidsmall', 'body', 'cylinderlarge', 'cylindermedium', 'cylindersmall', 'fryingpan', 'stanfordbunny', 'scissors', 'pyramidlarge', 'stapler', 'flashlight', 'mug', 'hand', 'stamp', 'rubberduck', 'binoculars', 'apple', 'mouse', 'eyeglasses', 'airplane', 'coffeemug', 'cup', 'toothpaste', 'torusmedium', 'cubemiddle', 'phone', 'torussmall', 'spheresmall', 'knife', 'banana', 'teapot', 'hammer', 'alarmclock', 'waterbottle', 'camera', 'table', 'wineglass', 'lightbulb', 'spherelarge', 'toruslarge', 'glass', 'heart', 'donut']
+        num_traj_idx = min(num_traj_idx, len(name_map) - 1)
+        self.obj_name = name_map[num_traj_idx]
+        print(">>> num_traj{} obj_name{}".format(num_traj_idx, self.obj_name))
+        self.touch_obj_bid = self.sim.model.body_name2id('{}object'.format(self.obj_name))
+        self.generate_uniform_gt_voxel()
+
+        if self.ground_truth_type == "sample":
+            # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
+            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(self.obj_name)))['pcd']
+
         current_reset = False
         if self.reset_mode == "random" and random.randint(0,9) > 6:
             current_reset = True
@@ -485,8 +496,14 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             current_reset = True
 
         # set target object pose
+        for name in name_map:
+            if name != self.obj_name:
+                other_obj_bid = self.sim.model.body_name2id('{}object'.format(name))
+                self.model.body_pos[other_obj_bid] = [0, 0, -10]
+
         self.model.body_pos[self.touch_obj_bid] = self.obj_relative_position
         self.model.body_quat[self.touch_obj_bid] = euler2quat(self.obj_orientation)
+
         # set arm pose
         self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)
         self.model.body_pos[self.forearm_obj_bid] = self.forearm_relative_position
@@ -495,14 +512,11 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             self.sim.forward()
             return self.get_obs()
 
-        # reset model
+        # optional reset
         qp = self.init_qpos.copy()
         qv = self.init_qvel.copy()
         self.set_state(qp, qv)
 
-        # clear each episode
-        self.voxel_array = [0] * self.voxel_num
-        self.new_current_pos_list = []
         self.sim.forward()
         return self.get_obs()
 

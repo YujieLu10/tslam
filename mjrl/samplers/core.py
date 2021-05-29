@@ -12,6 +12,7 @@ logging.disable(logging.CRITICAL)
 # =======================================================
 def do_rollout(
         num_traj,
+        start_traj,
         env,
         policy,
         eval_mode = False,
@@ -49,8 +50,7 @@ def do_rollout(
         np.random.seed()
     horizon = min(horizon, env.horizon)
     paths = []
-
-    for ep in range(num_traj):
+    for ep in range(start_traj,start_traj+num_traj):
         # seeding
         if base_seed is not None:
             seed = base_seed + ep
@@ -62,8 +62,7 @@ def do_rollout(
         rewards=[]
         agent_infos = []
         env_infos = []
-
-        o = env.reset()
+        o = env.reset(ep)
         done = False
         t = 0
 
@@ -122,11 +121,11 @@ def sample_paths(
         # dont invoke multiprocessing if not necessary
         return do_rollout(**input_dict)
 
-    # do multiprocessing otherwise
+    # do multiprocessing otherwise add paths start per cpu
     paths_per_cpu = int(np.ceil(num_traj/num_cpu))
     input_dict_list= []
     for i in range(num_cpu):
-        input_dict = dict(num_traj=paths_per_cpu, env=env, policy=policy,
+        input_dict = dict(num_traj=paths_per_cpu, start_traj=i*paths_per_cpu, env=env, policy=policy,
                           eval_mode=eval_mode, horizon=horizon,
                           base_seed=base_seed + i * paths_per_cpu,
                           env_kwargs=env_kwargs)

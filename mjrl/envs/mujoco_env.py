@@ -100,10 +100,10 @@ class MujocoEnv(gym.Env):
 
     # -----------------------------
 
-    def reset(self):
+    def reset(self, num_traj_idx):
         self.sim.reset()
         self.sim.forward()
-        ob = self.reset_model()
+        ob = self.reset_model(num_traj_idx)
         return ob
 
     def set_state(self, qpos, qvel):
@@ -163,7 +163,7 @@ class MujocoEnv(gym.Env):
                 t = t+1
         self.mujoco_render_frames = False
 
-    def visualize_policy_offscreen(self, policy, horizon=150,
+    def visualize_policy_offscreen(self, obj_eval_iter, policy, horizon=150,
                                    num_episodes=1,
                                    frame_size=(640,480),
                                    mode='exploration',
@@ -173,7 +173,7 @@ class MujocoEnv(gym.Env):
         import skvideo.io
         for ep in range(num_episodes):
             print("Episode %d: rendering offline " % ep, end='', flush=True)
-            o = self.reset()
+            o = self.reset(obj_eval_iter)
             d = False
             t = 0
             arrs = []

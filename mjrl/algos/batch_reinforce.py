@@ -120,7 +120,6 @@ class BatchREINFORCE:
         eval_statistics = self.train_from_paths(paths)
         eval_statistics.append(N)
         # log number of samples
-        print(">>> save logs")
         if self.save_logs:
             num_samples = np.sum([p["rewards"].shape[0] for p in paths])
             self.logger.log_kv('num_samples', num_samples)
@@ -173,7 +172,6 @@ class BatchREINFORCE:
                 if kl_dist <= self.desired_kl:
                     break
                 else:
-                    print("backtracking")
                     alpha = alpha / 2.0
         else:
             curr_params = self.policy.get_param_values()

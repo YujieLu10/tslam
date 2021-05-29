@@ -57,18 +57,18 @@ class GymEnv(object):
     def horizon(self):
         return self._horizon
 
-    def reset(self, seed=None):
+    def reset(self, num_traj_idx, seed=None):
         try:
             self.env._elapsed_steps = 0
-            return self.env.env.reset_model(seed=seed)
+            return self.env.env.reset_model(num_traj_idx)
         except:
             if seed is not None:
                 self.set_seed(seed)
             return self.env.reset()
 
-    def reset_model(self, seed=None):
+    def reset_model(self, num_traj_idx, seed=None):
         # overloading for legacy code
-        return self.reset(seed)
+        return self.reset(num_traj_idx)
 
     def step(self, action):
         return self.env.step(action)
@@ -139,7 +139,7 @@ class GymEnv(object):
                     self.render()
                     t = t+1
 
-    def visualize_policy_offscreen(self, policy,
+    def visualize_policy_offscreen(self, obj_eval_iter, policy,
             horizon=150,
             num_episodes= 1,
             mode='evaluation',
@@ -150,7 +150,7 @@ class GymEnv(object):
         frames = list()
         env_infos = list()
         for ep in range(num_episodes):
-            o = self.reset()
+            o = self.reset(obj_eval_iter)
             d = False
             t = 0
             while t < horizon and d is False:

@@ -69,7 +69,7 @@ default_config = dict(
         num_cpu = 8,
         sample_mode = 'trajectories',
         horizon= 200, 
-        num_traj = 200,
+        num_traj = 60,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 3,
         evaluation_rollouts = 3,
