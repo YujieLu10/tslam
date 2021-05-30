@@ -63,7 +63,7 @@ default_config = dict(
     ),
     train_agent_kwargs = dict(
         # seed = seed,
-        niter = 10000,
+        niter = 100000,
         gamma = 0.995,
         gae_lambda = 0.97,
         num_cpu = 8,

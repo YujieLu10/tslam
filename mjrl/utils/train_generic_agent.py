@@ -154,7 +154,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     ax.set_zlim(1,20)
     ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_bp{}_br{}_exp.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
+        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_bp{}_br{}_exp_{}.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
 
@@ -331,8 +331,8 @@ def train_generic_agent(job_name, agent,
                             plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/npz_bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
                             plt.close()
                             # save gif
-                            exptools.logging.logger.record_image("{}_rendered".format(obj_name), video[-1], i)
-                            exptools.logging.logger.record_gif("{}_rendered".format(obj_name), video, i)
+                            exptools.logging.logger.record_image("{}_bp{}_br{}_rendered".format(obj_name, is_best_policy, is_best_reconstruct), video[-1], i)
+                            exptools.logging.logger.record_gif("{}_bp{}_br{}_rendered".format(obj_name, is_best_policy, is_best_reconstruct), video, i)
 
         if exptools:
             exptools.logging.logger.log_scalar("Iter", i, i)
