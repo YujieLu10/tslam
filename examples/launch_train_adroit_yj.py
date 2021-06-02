@@ -180,7 +180,13 @@ def main(args):
     ]
     idx = int(args.obj)
     if idx == -1:
-        values = [[True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],]
+        values = [
+                    [True, False, "generic", "down", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
+                ]
+    elif idx == -2:
+        values = [
+                    [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                ]
     else:
         values = values[idx*2:min((idx+1)*2, len(values) - 1)]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}".format(*tuple(str(vi) for vi in v[0:4])) for v in values]

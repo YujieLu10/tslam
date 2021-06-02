@@ -69,7 +69,7 @@ def _load_latest_policy_and_logs(agent, *, policy_dir, logs_dir):
     raise RuntimeError("Log file exists, but cannot find any saved policy.")
 
 def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
-    obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, generic, rotate = env_args[0], env_args[1], env_args[2], env_args[3], env_args[4], env_args[5], env_args[6], env_args[7]
+    obj_name, obj_orientation, obj_relative_position, obj_scale, best_eval_path = env_args[0], env_args[1], env_args[2], env_args[3], env_args[4]
     uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
@@ -130,7 +130,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     occupancy = len(map_list) / len(gt_map_list)
 
     is_best_reconstruct = True
-    files = os.listdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf))
+    files = os.listdir(best_eval_path)
     for file in files:
         if "overlap" in file and "png" in file:
             file_str = str(file)
@@ -139,22 +139,22 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
                 is_best_reconstruct = False
 
     gt_colors = np.empty(gt_voxels.shape, dtype=object)
-    gt_colors[gt_voxels] = 'cyan'
+    gt_colors[gt_voxels] = 'white'
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,20)
     ax.voxels(gt_voxels, facecolors=gt_colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_gt.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf))    
+        plt.savefig(os.path.join(best_eval_path, 'voxel_gt.png'))    
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
 
     exp_colors = np.empty(voxels.shape, dtype=object)
-    exp_colors[voxels] = 'white'
+    exp_colors[voxels] = 'cyan'
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,20)
     ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_bp{}_br{}_exp_{}.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
+        plt.savefig(os.path.join(best_eval_path, 'voxel_exp_bp{}_br{}_{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
 
@@ -170,7 +170,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/voxel_bp{}_br{}_overlap-{}.png'.format(obj_name, generic, rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
+        plt.savefig(os.path.join(best_eval_path, 'voxel_bp{}_br{}_overlap-{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
     plt.close()
     return is_best_reconstruct, occupancy
@@ -204,19 +204,22 @@ def train_generic_agent(job_name, agent,
     if os.path.isdir(job_name) == False:
         os.mkdir(job_name)
     previous_dir = os.getcwd()
-    obj_to_scale_map = {'duck':1, 'watch':1, 'doorknob':1, 'headphones':1, 'bowl':1, 'cubesmall':1, 'spheremedium':1, 'train':1, 'piggybank':1, 'cubemedium':1, 'cubelarge':1, 'elephant':1, 'flute':1, 'wristwatch':1, 'pyramidmedium':1, 'gamecontroller':1, 'toothbrush':1, 'pyramidsmall':1, 'body':0.001, 'cylinderlarge':1, 'cylindermedium':1, 'cylindersmall':1, 'fryingpan':0.8, 'stanfordbunny':1, 'scissors':1, 'pyramidlarge':1, 'stapler':1, 'flashlight':1, 'mug':1, 'hand':1, 'stamp':1, 'rubberduck':1, 'binoculars':1, 'apple':1, 'mouse':1, 'eyeglasses':1, 'airplane':1, 'coffeemug':1, 'cup':1, 'toothpaste':1, 'torusmedium':1, 'cubemiddle':1, 'phone':1, 'torussmall':1, 'spheresmall':1, 'knife':1, 'banana':1, 'teapot':1, 'hammer':1, 'alarmclock':1, 'waterbottle':1, 'camera':1, 'table':1, 'wineglass':1, 'lightbulb':1, 'spherelarge':1, 'toruslarge':1, 'glass':0.015, 'heart':0.0006, 'donut':0.01}
+    obj_to_scale_map = {'duck':1, 'watch':1, 'doorknob':1, 'headphones':1, 'bowl':1, 'cubesmall':1, 'spheremedium':1, 'train':1, 'piggybank':1, 'cubemedium':1, 'cubelarge':1, 'elephant':1, 'flute':1, 'wristwatch':1, 'pyramidmedium':1, 'gamecontroller':1, 'toothbrush':1, 'pyramidsmall':1, 'body':0.1, 'cylinderlarge':1, 'cylindermedium':1, 'cylindersmall':1, 'fryingpan':0.8, 'stanfordbunny':1, 'scissors':1, 'pyramidlarge':1, 'stapler':1, 'flashlight':1, 'mug':1, 'hand':1, 'stamp':1, 'rubberduck':1, 'binoculars':1, 'apple':1, 'mouse':1, 'eyeglasses':1, 'airplane':1, 'coffeemug':1, 'cup':1, 'toothpaste':1, 'torusmedium':1, 'cubemiddle':1, 'phone':1, 'torussmall':1, 'spheresmall':1, 'knife':1, 'banana':1, 'teapot':1, 'hammer':1, 'alarmclock':1, 'waterbottle':1, 'camera':1, 'table':0.01, 'wineglass':1, 'lightbulb':1, 'spherelarge':1, 'toruslarge':1, 'glass':0.015, 'heart':0.0006, 'donut':0.01}
     obj_name = env_kwargs["obj_name"]
     is_generic = env_kwargs["generic"]
     is_rotate = env_kwargs["base_rotation"]
+    forearm_orien = env_kwargs["forearm_orientation_name"]
     reset_mode_conf = env_kwargs["reset_mode"]
     reward_conf = "cf{}knn{}voxel{}".format(env_kwargs["chamfer_r_factor"], env_kwargs["knn_r_factor"], env_kwargs["new_voxel_r_factor"])
     os.chdir(job_name) # important! we are now in the directory to save data
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
     if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
+    best_eval_path = '/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+    best_policy_path = '/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
     if not obj_name == "generic":
-        if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
-        if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
+        if os.path.isdir(best_policy_path) == False: os.makedirs(best_policy_path)
+        if os.path.isdir(best_eval_path) == False: os.makedirs(best_eval_path)
     if os.path.isdir('voxel') == False: os.mkdir('voxel')
     if os.path.isdir('logs') == False and agent.save_logs == True: os.mkdir('logs')
     best_policy = copy.deepcopy(agent.policy)
@@ -302,12 +305,15 @@ def train_generic_agent(job_name, agent,
                 for obj_idx in range(60):
                     obj_name = obj_name_map[obj_idx]
                     obj_scale = obj_to_scale_map[obj_name]
-                    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
-                    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf))
+                    if obj_name == "heart":
+                        obj_orientation = [-1.57, 0, 0]
+                    best_eval_path = '/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+                    best_policy_path = '/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+                    if os.path.isdir(best_policy_path) == False: os.makedirs(best_policy_path)
+                    if os.path.isdir(best_eval_path) == False: os.makedirs(best_eval_path)
 
                     # save videos and pointcloud and reconstruted mesh          
                     if exptools:
-                        print(">>> obj_idx{} obj_name {}".format(obj_idx, obj_name))
                         video, env_infos = e.visualize_policy_offscreen(
                             obj_eval_iter= obj_idx,
                             policy= agent.policy,
@@ -317,18 +323,18 @@ def train_generic_agent(job_name, agent,
                         pc_frame = np.array(env_infos[-1]["pointcloud"] if len(env_infos[-1]["pointcloud"]) > 0 else np.empty((0, 3)))
 
                         # 3d voxel visualization
-                        is_best_reconstruct, occupancy = save_voxel_visualization([obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, is_generic, is_rotate], pc_frame, i, is_best_policy)
+                        is_best_reconstruct, occupancy = save_voxel_visualization([obj_name, obj_orientation, obj_relative_position, obj_scale, best_eval_path], pc_frame, i, is_best_policy)
                         if is_best_policy or is_best_reconstruct:
                             # dump policy
-                            pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}/{}_{}/bp{}_br{}_best_policy.pickle'.format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
+                            pickle.dump(best_policy, open(os.path.join(best_policy_path, 'bp{}_br{}_best_policy.pickle'.format(is_best_policy, is_best_reconstruct)), 'wb'))
                             # save pointcloud
                             np.savez_compressed("pointcloudnpz/{}_alpha_pointcloud_".format(obj_name)+str(i)+".npz",pcd=pc_frame)
-                            np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/npz_bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
+                            np.savez_compressed(os.path.join(best_eval_path, "npz_bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(is_best_policy, is_best_reconstruct, occupancy)), pcd=pc_frame)
                             # save 2dpointcloud
                             ax = plt.axes()
                             ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
                             plt.savefig("2dpointcloud/{}_alpha_{}.png".format(obj_name, '2dpointcloud' + str(i)))
-                            plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}/{}_{}/npz_bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, is_generic, is_rotate, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
+                            plt.savefig(os.path.join(best_eval_path, "npz_bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(is_best_policy, is_best_reconstruct, occupancy)))
                             plt.close()
                             # save gif
                             exptools.logging.logger.record_image("{}_bp{}_br{}_rendered".format(obj_name, is_best_policy, is_best_reconstruct), video[-1], i)

@@ -481,12 +481,11 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         name_map = ['duck', 'watch', 'doorknob', 'headphones', 'bowl', 'cubesmall', 'spheremedium', 'train', 'piggybank', 'cubemedium', 'cubelarge', 'elephant', 'flute', 'wristwatch', 'pyramidmedium', 'gamecontroller', 'toothbrush', 'pyramidsmall', 'body', 'cylinderlarge', 'cylindermedium', 'cylindersmall', 'fryingpan', 'stanfordbunny', 'scissors', 'pyramidlarge', 'stapler', 'flashlight', 'mug', 'hand', 'stamp', 'rubberduck', 'binoculars', 'apple', 'mouse', 'eyeglasses', 'airplane', 'coffeemug', 'cup', 'toothpaste', 'torusmedium', 'cubemiddle', 'phone', 'torussmall', 'spheresmall', 'knife', 'banana', 'teapot', 'hammer', 'alarmclock', 'waterbottle', 'camera', 'table', 'wineglass', 'lightbulb', 'spherelarge', 'toruslarge', 'glass', 'heart', 'donut']
         num_traj_idx = min(num_traj_idx, len(name_map) - 1)
         self.obj_name = name_map[num_traj_idx]
-        print(">>> num_traj{} obj_name{}".format(num_traj_idx, self.obj_name))
+        # print(">>> num_traj{} obj_name{}".format(num_traj_idx, self.obj_name))
         self.touch_obj_bid = self.sim.model.body_name2id('{}object'.format(self.obj_name))
         self.generate_uniform_gt_voxel()
 
         if self.ground_truth_type == "sample":
-            # TODO: self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/data/local/agent", "gt_pcloud", "gt_{}.npz".format(obj_name)))['pcd']
             self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(self.obj_name)))['pcd']
 
         current_reset = False
@@ -502,7 +501,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
                 self.model.body_pos[other_obj_bid] = [0, 0, -10]
 
         self.model.body_pos[self.touch_obj_bid] = self.obj_relative_position
-        self.model.body_quat[self.touch_obj_bid] = euler2quat(self.obj_orientation)
+        # self.model.body_quat[self.touch_obj_bid] = euler2quat(self.obj_orientation)
 
         # set arm pose
         self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)
