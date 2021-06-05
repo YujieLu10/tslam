@@ -92,7 +92,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.new_voxel_r_factor = new_voxel_r_factor
         self.obs_type = obs_type
 
-        self.voxel_num = 512 if obs_type[0] else 200
+        self.voxel_num = 216 if obs_type[0] else 200
         self.voxel_array = [0] * self.voxel_num
         self.gt_map_list = []
 
@@ -211,8 +211,8 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             sep_z = math.ceil(0.1 / resolution_z)
             x, y, z = np.indices((sep_x, sep_y, sep_z))
         else:
-            resolution_x, resolution_y, resolution_z = math.ceil(0.25 / 8.0), math.ceil(0.225 / 8.0), math.ceil(0.1 / 8.0)
-            x, y, z = np.indices((8, 8, 8))
+            resolution_x, resolution_y, resolution_z = math.ceil(0.25 / 6.0), math.ceil(0.225 / 6.0), math.ceil(0.1 / 6.0)
+            x, y, z = np.indices((6, 6, 6))
 
         gtcube = (x<0) & (y <1) & (z<1)
         gt_voxels = gtcube
@@ -232,8 +232,8 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             self.voxel_array = [0] * len(gt_map_list)
             self.voxel_num = len(gt_map_list)
         else:
-            self.voxel_num = 512
-            self.voxel_array = [0] * 512
+            self.voxel_num = 216
+            self.voxel_array = [0] * 216
 
     def get_voxel_idx(self, posx, posy, posz):
         # currently only suitable for obj4
@@ -246,7 +246,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
             return self.gt_map_list.index(name) if name in self.gt_map_list else -1
         else:
-            resolution_x, resolution_y, resolution_z = math.ceil(0.25 / 8.0), math.ceil(0.225 / 8.0), math.ceil(0.1 / 8.0)
+            resolution_x, resolution_y, resolution_z = math.ceil(0.25 / 6.0), math.ceil(0.225 / 6.0), math.ceil(0.1 / 6.0)
             idx_x = math.floor((posx + 0.125) / resolution_x)
             idx_y = math.floor((posy + 0.25) / resolution_y)
             idx_z = math.floor((posz - 0.16) / resolution_z)
@@ -456,7 +456,10 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
             else:
                 impact_list = np.append(impact_list, np.clip(self.sim.data.sensordata[rid], [-1.0], [1.0]))
 
-        voxel_obs = (self.voxel_array[0:200] if len(self.voxel_array) > 200 else np.array(np.pad(self.voxel_array, (0,200 - len(self.voxel_array)), 'constant', constant_values=0))) if self.generic else np.array(self.voxel_array)
+        if self.obs_type[0]:
+            voxel_obs = np.array(self.voxel_array)
+        else:
+            voxel_obs = (self.voxel_array[0:200] if len(self.voxel_array) > 200 else np.array(np.pad(self.voxel_array, (0,200 - len(self.voxel_array)), 'constant', constant_values=0))) if self.generic else np.array(self.voxel_array)
         if self.obs_type[1]:
             final_observation = np.concatenate([qp, qv, np.array(impact_list), voxel_obs]) if self.use_voxel else np.concatenate([qp, qv, np.array(impact_list), np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         else:
