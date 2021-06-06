@@ -31,7 +31,7 @@ class MLPBaseline:
             relu_id = 'relu_' + str(i)
             self.model.add_module(layer_id, nn.Linear(layer_sizes[i], layer_sizes[i+1]))
             if i != len(layer_sizes) - 2:
-                self.model.add_module(relu_id, nn.ReLU())
+                self.model.add_module(relu_id, nn.ReLU(inplace=False))
 
         if self.use_gpu:
             self.model.cuda()
