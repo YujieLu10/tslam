@@ -18,6 +18,13 @@ class FCNetwork3D(nn.Module):
         assert type(hidden_sizes) == tuple
         self.layer_sizes = (self.obs_dim, ) + hidden_sizes + (act_dim, )
         self.set_transformations(in_shift, in_scale, out_shift, out_scale)
+        # conv3d
+        self.conv_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=0), nn.ReLU(inplace=False)) # out: 32 
+        self.conv_1_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=0), nn.ReLU(inplace=False)) # out: 32
+        self.conv_2 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 16 
+        self.conv_2_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 16 
+        self.conv_3 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 8 
+        self.conv_3_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 8
         # hidden layers
         self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
                          for i in range(len(self.layer_sizes) -1)])
@@ -43,23 +50,6 @@ class FCNetwork3D(nn.Module):
                 out = x.to('cpu')
             else:
                 out = x
-            # conv3d
-            self.conv_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=0), nn.ReLU(inplace=False)) # out: 32 
-            self.conv_1_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=0), nn.ReLU(inplace=False)) # out: 32
-            self.conv_2 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 16 
-            self.conv_2_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 16 
-            self.conv_3 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 8 
-            self.conv_3_1 = nn.Sequential(nn.Conv3d(1, 1, 3, padding=1), nn.ReLU(inplace=False)) # out: 8
-            # for idx in range(batch):
-            #     voxel_obs = out[idx:idx+1, -512:].reshape(1,1,8,8,8)
-            #     voxel_obs_1 = self.conv_1(voxel_obs)
-            #     voxel_obs_1_1 = self.conv_1_1(voxel_obs_1)
-            #     voxel_obs_2 = self.conv_2(voxel_obs_1_1)
-            #     voxel_obs_2_1 = self.conv_2_1(voxel_obs_2)
-            #     voxel_obs_3 = self.conv_3(voxel_obs_2_1)
-            #     voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
-            #     out_obs = voxel_obs_3_1.reshape(-1, 64)
-            #     out[idx:idx+1, 68:-448] = out_obs
             voxel_obs_1 = self.conv_1(out[:, -512:].reshape(-1,1,8,8,8))
             voxel_obs_1_1 = self.conv_1_1(voxel_obs_1)
             voxel_obs_2 = self.conv_2(voxel_obs_1_1)
@@ -74,5 +64,4 @@ class FCNetwork3D(nn.Module):
                 out = self.nonlinearity(out)
             out = self.fc_layers[-1](out)
             out = out * self.out_scale + self.out_shift
-            print(">>> out shape {}".format(out.shape))
         return out
