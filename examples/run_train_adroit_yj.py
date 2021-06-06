@@ -6,7 +6,7 @@ import exptools.logging as logger
 import os, sys
 
 from mjrl.utils.gym_env import GymEnv
-from mjrl.policies.gaussian_mlp_3d import MLP
+from mjrl.policies.gaussian_mlp import MLP
 from mjrl.baselines.mlp_baseline import MLPBaseline
 from mjrl.algos.ppo_clip import PPO
 from mjrl.utils.train_agent import train_agent

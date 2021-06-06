@@ -30,7 +30,7 @@ default_config = dict(
         obj_name= "airplane",
         generic= False,
         base_rotation= False,
-        obs_type= [False, False], # 1: fix voxel 8 * 8 * 8; 2: obs
+        obs_type= [False, False], # 1: fix voxel 8 * 8 * 8; 2: sensor obs
     ),
     policy_name = "MLP",
     policy_kwargs = dict(
@@ -205,7 +205,6 @@ def main(args):
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
-    # voxel_conf= ['2d', 16, 4, False]
     values = [
         #[0, 0, 1, 0.5, 5, ['3d', 0, 0.04, False], False],
         # [0, 0, 0, 0.5, 5, ['3d', 0, 0.02, False], False],
