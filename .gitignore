@@ -109,6 +109,7 @@ ENV/
 # workspace files
 data/local/
 data/result/
+recon_tool/previous_step_vis/*
 mj_envs/mj_envs/envs/hand_manipulation_suite/combine/
 .vscode
 .vs
