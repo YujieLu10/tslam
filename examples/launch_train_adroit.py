@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 default_config = dict(
-    env_name = "adroit-v2",
+    env_name = "adroit-v4", # adroit-v2: our best policy # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
@@ -17,6 +17,9 @@ default_config = dict(
         palm_r_factor= 0,
         untouch_p_factor= 0,
         newpoints_r_factor= 0,
+        npoint_r_factor= 0,
+        ntouch_r_factor= 0,
+        random_r_factor= 0,
         ground_truth_type= "nope",
         knn_r_factor= 0,
         new_voxel_r_factor= 0,
@@ -183,14 +186,16 @@ def main(args):
     idx = int(args.obj)
     if idx < 0:
         values = [
-                    [True, False, "generic", "down", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
-                    [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
+                    # [True, False, "generic", "down", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
+                    # [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid
                     [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
-                    [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
+                    # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
+                    # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                 ]
-        values = values[-idx-1:-idx]
+        # values = values[-idx-1:-idx]
     else:
         values = values[idx*2:min((idx+1)*2, len(values) - 1)]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}".format(*tuple(str(vi) for vi in v[0:4])) for v in values]
@@ -209,15 +214,21 @@ def main(args):
 
     # reward setting and voxel observatoin mode
     values = [
-        [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
-        # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]],
+        [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
+        # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
+        # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
+        # [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
         # [0, 0, 1, 0.5, 5, ['3d', 0.02], [True, False]],
     ]
-    dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
-        ("env_kwargs", "chamfer_r_factor"),
-        ("env_kwargs", "knn_r_factor"),
-        ("env_kwargs", "new_voxel_r_factor"),
+        # ("env_kwargs", "chamfer_r_factor"),
+        # ("env_kwargs", "knn_r_factor"),
+        # ("env_kwargs", "new_voxel_r_factor"),
+        ("env_kwargs", "npoint_r_factor"),
+        ("env_kwargs", "ntouch_r_factor"),
+        ("env_kwargs", "random_r_factor"),
         ("policy_kwargs", "init_log_std"),
         ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),
