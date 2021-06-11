@@ -122,9 +122,9 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in map_list and name in gt_map_list:
             map_list.append(name)
-        cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
-        # combine the objects into a single boolean array
-        voxels = cube if voxels is None else (voxels + cube)
+            cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+            # combine the objects into a single boolean array
+            voxels = cube if voxels is None else (voxels + cube)
 
     # gt_obj4:668
     occupancy = len(map_list) / len(gt_map_list)
