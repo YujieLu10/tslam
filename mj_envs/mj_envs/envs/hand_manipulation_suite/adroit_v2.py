@@ -267,6 +267,10 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         return 0
 
     def step(self, a):
+        if self.count_step % 2000 == 0:
+            # set arm pose
+            self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)
+            self.model.body_pos[self.forearm_obj_bid] = self.forearm_relative_position
         # uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
         a = np.clip(a, -1.0, 1.0)
