@@ -63,7 +63,7 @@ for root, dirs, files in os.walk("../../prox/tslam/data/result/{}/".format(eval_
         for res in res_list:
             save_trans_file_path = os.path.join(save_path, "{}_trans_voxelization_{}.npy".format(vis_root, res))
             if os.path.exists(save_trans_file_path):
-                # print(">>> file {} exists!".format(save_trans_file_path))
+                print(">>> file {} exists!".format(save_trans_file_path))
                 continue
             print(">>> save {}".format(save_trans_file_path))
             
@@ -137,14 +137,14 @@ for root, dirs, files in os.walk("../../prox/tslam/data/result/{}/".format(eval_
                         exp_voxels = cube if exp_voxels is None else (exp_voxels + cube)
                         if idx_x < 32 and idx_y < 32 and idx_z < 32:
                             exp_occupancies[idx_x, idx_y, idx_z] = 1
-                #===============
-                exp_colors = np.empty(exp_voxels.shape, dtype=object)
-                exp_colors[exp_voxels] = 'white'
-                ax = plt.figure().add_subplot(projection='3d')
-                ax.set_zlim(1,res)
-                ax.voxels(exp_voxels, facecolors=gt_colors, edgecolor='g', alpha=.4, linewidth=.05)
-                plt.savefig(os.path.join(save_path, "{}_voxelization_{}.png".format(vis_root, res)))
-                plt.close()
+            #===============
+            exp_colors = np.empty(exp_voxels.shape, dtype=object)
+            exp_colors[exp_voxels] = 'white'
+            ax = plt.figure().add_subplot(projection='3d')
+            ax.set_zlim(1,res)
+            ax.voxels(exp_voxels, facecolors=gt_colors, edgecolor='g', alpha=.4, linewidth=.05)
+            plt.savefig(os.path.join(save_path, "{}_voxelization_{}.png".format(vis_root, res)))
+            plt.close()
             #=============== save voxelized pcd
             save_occupancies = exp_occupancies.copy() if vis_root != "uniform_gt" else gt_occupancies.copy()
             if len(save_occupancies[np.where(save_occupancies == 1)]) <= 0:
