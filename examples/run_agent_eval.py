@@ -63,7 +63,7 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "lightbulb", conf_eval_dir.replace("10k", "500").replace("fixup", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("fixup", "fixdown").replace("fixleft", "fixdown").replace("fixright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
 
     gif_frames = list()

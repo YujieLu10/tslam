@@ -7,7 +7,7 @@ import random
 
 policy_type = ["voxel1"] #["knn1", "cf1", "voxel1", "random1", "npoint1", "ntouch1"]
 clear_files = False
-test_obj_list = ["body", "lightbulb"] #["airplane", "cup", "spherelarge", "body", "fryingpan", "lightbulb"]
+test_obj_list = ["airplane", "cup", "spherelarge", "body", "fryingpan", "lightbulb"]
 vis_root = "exp" # exp uniform_gt two_pose long_step
 eval_dir = "agent_eval"
 save_root = "../data/result/{}/".format(eval_dir)
@@ -19,9 +19,9 @@ for root, dirs, files in os.walk("../data/result/{}/".format(eval_dir)):
     is_obj_test = False
     for obj_test in test_obj_list:
         if obj_test in root: is_obj_test = True
-    if is_obj_test and is_hit_type:
+    if is_obj_test and is_hit_type and not "pose" in root and not "downleft" in root and not "downright" in root and not "upfront" in root and not "upback" in root:
         voxel_cls = root[root.index(eval_dir)+(len(eval_dir))+1:root.index('/gene')]
-        voxel_config = root[root.index('/gene')+1:].replace('/','_').replace('down', 'pose').replace('up', 'pose')
+        voxel_config = root[root.index('/gene')+1:].replace('/','_').replace("downback", "pose").replace('downfront', 'pose').replace('downleft', 'pose').replace('downright', 'pose').replace('upback','pose').replace('upfront', 'pose').replace('upleft', 'pose').replace('upright', 'pose')
         save_path = os.path.join(save_root, voxel_cls, voxel_config)
         # print(root)
         if clear_files:
@@ -51,7 +51,7 @@ for root, dirs, files in os.walk("../data/result/{}/".format(eval_dir)):
                             recon_pcd_file = os.path.join(root, file)
                 file_path = recon_pcd_file
                 vis_data = np.load(file_path)['pcd']
-                save_file_path = os.path.join(save_path, "twopose_alpha_pointcloud.npz")
+                save_file_path = os.path.join(save_path, "fourpose_alpha_pointcloud.npz")
                 # save_imgfile_path = os.path.join(save_path, "twopose_alpha_pointcloud.png")
 
                 # ========= save file
@@ -65,7 +65,7 @@ for root, dirs, files in os.walk("../data/result/{}/".format(eval_dir)):
                     np.savez(save_file_path, pcd=vis_data)
             else: # save each iter
                 for file in files:
-                    if ".npz" in file and not "twopose" in file:
+                    if ".npz" in file and not "pose_alpha" in file:
                         file_str = str(file)
                         try:
                             iter_num = int(file_str[(file_str.index("iternum_")+8):file_str.index("_pointcloud")])
@@ -75,7 +75,7 @@ for root, dirs, files in os.walk("../data/result/{}/".format(eval_dir)):
                             recon_pcd_file = os.path.join(root, file)
                             file_path = recon_pcd_file
                             vis_data = np.load(file_path)['pcd']
-                            save_file_path = os.path.join(save_path, "iternum_{}_twopose_alpha_pointcloud.npz".format(iter_num))
+                            save_file_path = os.path.join(save_path, "iternum_{}_fourpose_alpha_pointcloud.npz".format(iter_num))
                             # save_imgfile_path = os.path.join(save_path, "twopose_alpha_pointcloud.png")
                             # ========= save file
                             if os.path.exists(save_file_path):

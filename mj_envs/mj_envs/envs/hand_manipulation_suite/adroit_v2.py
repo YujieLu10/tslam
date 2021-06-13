@@ -60,8 +60,9 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
             tree = ElementTree.ElementTree(root)
             tree.write(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name)), encoding="utf-8", xml_declaration=False)
         
-        self.model_path_name = (curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)) if not generic else (curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic"))
-
+        # self.model_path_name = (curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)) if not generic else (curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic"))
+        self.model_path_name = curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic")
+        print(">>> self.model_path_name{}".format(self.model_path_name))
         self.sim = mujoco_env.get_sim(model_path=self.model_path_name)
 
         self.obj_name = obj_name
@@ -267,10 +268,6 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         return 0
 
     def step(self, a):
-        if self.count_step % 2000 == 0:
-            # set arm pose
-            self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)
-            self.model.body_pos[self.forearm_obj_bid] = self.forearm_relative_position
         # uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
         a = np.clip(a, -1.0, 1.0)
