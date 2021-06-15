@@ -3,11 +3,11 @@ import numpy as np
 import math
 
 default_config = dict(
-    env_name = "adroit-v4", # adroit-v2: our best policy # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
+    env_name = "adroit-v2", # adroit-v2: our best policy # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward; adroit-v2 coverage_voxel_r(old new voxel r):coverage curiosity_voxel_r:curiosity
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
-        goal_threshold= int(8e3), # how many points touched to achieve the goal
+        goal_threshold= int(0.3), # how many points touched to achieve the goal 8e3 => occupancy threshold set to 0.3
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation_name= "up", # ("up", "down")
         # scale all reward/penalty to the scale of 1.0
@@ -17,12 +17,14 @@ default_config = dict(
         palm_r_factor= 0,
         untouch_p_factor= 0,
         newpoints_r_factor= 0,
-        npoint_r_factor= 0,
-        ntouch_r_factor= 0,
-        random_r_factor= 0,
+        # npoint_r_factor= 0,
+        # ntouch_r_factor= 0,
+        # random_r_factor= 0,
         ground_truth_type= "nope",
         knn_r_factor= 0,
-        new_voxel_r_factor= 0,
+        # new_voxel_r_factor= 0, # new => coverage_voxel_r
+        coverage_voxel_r_factor= 0, # new and touched objects
+        curiosity_voxel_r_factor= 0, # new voxel
         use_voxel= False,
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
@@ -71,14 +73,14 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 8,
         sample_mode = 'trajectories',
-        horizon= 200, 
+        horizon= 500, 
         num_traj = 60,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 3,
         evaluation_rollouts = 3,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
-            horizon=200,
+            horizon=500,
             num_episodes= 1,
             mode='evaluation',
             width= 640, height= 480,
@@ -129,7 +131,7 @@ def main(args):
         [True, False, "apple", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "banana", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "binoculars", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "body", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.001],
+        [True, False, "body", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.1],
         [True, False, "bowl", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "camera", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "coffeemug", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
@@ -169,7 +171,7 @@ def main(args):
         [True, False, "stamp", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "stanfordbunny", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "stapler", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-        [True, False, "table", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+        [True, False, "table", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.5],
         [True, False, "teapot", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "toothbrush", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
         [True, False, "toothpaste", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
@@ -188,12 +190,12 @@ def main(args):
         values = [
                     # [True, False, "generic", "down", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
                     # [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid
-                    [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    # [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid
+                    # [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                     # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
                     # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
-                    # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
+                    [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                 ]
         # values = values[-idx-1:-idx]
     else:
@@ -214,23 +216,29 @@ def main(args):
 
     # reward setting and voxel observatoin mode
     values = [
-        [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
+        # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
+        [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
+        # [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
         # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
         # [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
         # [0, 0, 1, 0.5, 5, ['3d', 0.02], [True, False]],
     ]
     # dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
-    dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
+        ("env_kwargs", "curiosity_voxel_r_factor"),
+        ("env_kwargs", "coverage_voxel_r_factor"),
         # ("env_kwargs", "chamfer_r_factor"),
         # ("env_kwargs", "knn_r_factor"),
         # ("env_kwargs", "new_voxel_r_factor"),
-        ("env_kwargs", "npoint_r_factor"),
-        ("env_kwargs", "ntouch_r_factor"),
-        ("env_kwargs", "random_r_factor"),
+        # ("env_kwargs", "npoint_r_factor"),
+        # ("env_kwargs", "ntouch_r_factor"),
+        # ("env_kwargs", "random_r_factor"),
         ("policy_kwargs", "init_log_std"),
-        ("env_kwargs", "knn_k"),
+        # ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),
         ("env_kwargs", "obs_type"),
     ]
@@ -291,7 +299,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--obj', help= 'obj',
-        type= int, default= 0,
+        type= int, default= -1,
     )
     parser.add_argument(
         '--reset', help= 'reset',

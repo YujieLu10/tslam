@@ -63,7 +63,11 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("fixup", "fixdown").replace("fixleft", "fixdown").replace("fixright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("upfront", "fixup").replace("upback", "fixup").replace("upleft", "fixup").replace("upright", "fixup").replace("downfront", "fixup").replace("downback", "fixup").replace("downleft", "fixup").replace("downright", "fixup"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result", "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        # other policy no 500
+        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
 
     gif_frames = list()
@@ -77,7 +81,7 @@ def run_experiment(log_dir, args):
         elif args["sample_method"] == "agent":
             obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
         elif args["sample_method"] == "policy":
-            obs, rew, done, info = env.step(policy.get_action(obs)[0])
+            obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
 
         logger.log_scalar("step", i, i)
         logger.log_scalar("total_reward", rew, i)
@@ -105,7 +109,7 @@ def run_experiment(log_dir, args):
                                 mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
-        if (i+1) == 500:
+        if (i+1) == 200:
             logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()

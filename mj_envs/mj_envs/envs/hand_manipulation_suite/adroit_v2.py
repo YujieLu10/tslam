@@ -34,6 +34,8 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
             newpoints_r_factor= 0,
             knn_r_factor= 0,
             new_voxel_r_factor= 0,
+            coverage_voxel_r_factor= 0, # new and touched objects
+            curiosity_voxel_r_factor= 0, # new voxel
             ground_truth_type= "nope",
             use_voxel= False,
             forearm_orientation= [0, 0, 0], # forearm orientation
@@ -62,7 +64,6 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         
         # self.model_path_name = (curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)) if not generic else (curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic"))
         self.model_path_name = curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic")
-        print(">>> self.model_path_name{}".format(self.model_path_name))
         self.sim = mujoco_env.get_sim(model_path=self.model_path_name)
 
         self.obj_name = obj_name
@@ -90,8 +91,9 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         self.voxel_type = voxel_conf[0]
         self.twod_sep = voxel_conf[1]
         self.new_voxel_r_factor = new_voxel_r_factor
+        self.coverage_voxel_r_factor= coverage_voxel_r_factor
+        self.curiosity_voxel_r_factor= curiosity_voxel_r_factor
         self.obs_type = obs_type
-
         self.voxel_num = int(math.pow(self.twod_sep, 3))
         self.voxel_array = [0] * self.voxel_num
         self.gt_map_list = []
@@ -281,6 +283,15 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         rfknuckle_xpos = self.data.site_xpos[self.rfknuckle_obj_bid].ravel()
         lfmetacarpal_xpos = self.data.site_xpos[self.lfmetacarpal_obj_bid].ravel()
         thbase_xpos = self.data.site_xpos[self.thbase_obj_bid].ravel()
+        
+        # position for curiosity touch
+        ffknuckle_pos = self.model.body_pos[self.ffknuckle_obj_bid].ravel()
+        mfknuckle_pos = self.model.body_pos[self.mfknuckle_obj_bid].ravel()
+        rfknuckle_pos = self.model.body_pos[self.rfknuckle_obj_bid].ravel()
+        lfmetacarpal_pos = self.model.body_pos[self.lfmetacarpal_obj_bid].ravel()
+        thbase_pos = self.model.body_pos[self.thbase_obj_bid].ravel()
+
+        # reward initialization
         reward = 0.0
         untouched_p = 0.0
         # palm close to object reward
@@ -314,6 +325,8 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         knn_r = 0
         newpoints_r = 0
         new_voxel_r = 0
+        curiosity_voxel_r = 0
+        coverage_voxel_r = 0
         chamfer_r = 0
         chamfer_loss = 0
 
@@ -348,22 +361,25 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
             chamfer_r -= 300
         self.previous_contact_points = next_pos_list.copy()
         # start computing reward
-        # for simplicity goal_achieved depends on the nubmer of touched points
-        goal_achieved = (len(self.previous_contact_points) > self.goal_threshold)
-        if "nope" not in self.ground_truth_type and is_touched and self.previous_contact_points != [] and previous_pos_list != [] and chamfer_loss < 0.06:
-            goal_achieved = True
         mesh_p = 0
         # voxel obs and new voxel reward
         if self.voxel_array is not None and len(self.voxel_array) == 0:
             self.voxel_array = [0] * self.voxel_num
-        if len(self.previous_contact_points) > 0:
+        if (self.coverage_voxel_r_factor > 0 or self.new_voxel_r_factor > 0) and len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
                 # if self.is_in_voxel_bound(point[0], point[1]):
                 idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
                 if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
                     new_voxel_r += 1
+                    coverage_voxel_r += 1
                     self.voxel_array[min(idx, self.voxel_num-1)] = 1
-        denominator = len(np.array(self.voxel_array))
+        if self.curiosity_voxel_r_factor > 0:
+            for finger_pos in [ffknuckle_pos, mfknuckle_pos, rfknuckle_pos, lfmetacarpal_pos, thbase_pos]:
+                finger_touch_idx = self.get_2d_voxel_idx(finger_pos[0], finger_pos[1]) if self.voxel_type == '2d' else self.get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2])
+                if finger_touch_idx > 0 and self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] == 0: # new voxel explored
+                    curiosity_voxel_r += 1
+                    self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] = 1
+        denominator = len(self.gt_map_list) #len(np.array(self.voxel_array))
         voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
@@ -372,6 +388,12 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         reward += self.mesh_p_factor * mesh_p
         reward += self.knn_r_factor * knn_r
         reward += self.new_voxel_r_factor * new_voxel_r
+        reward += self.curiosity_voxel_r_factor * curiosity_voxel_r
+        reward += self.coverage_voxel_r_factor * coverage_voxel_r
+        # for simplicity goal_achieved depends on the nubmer of touched points
+        goal_achieved = True if voxel_occupancy > self.goal_threshold else False# (len(self.previous_contact_points) > self.goal_threshold)
+        # if "nope" not in self.ground_truth_type and is_touched and self.previous_contact_points != [] and previous_pos_list != [] and chamfer_loss < 0.06:
+        #     goal_achieved = True
         done = False
         info = dict(
             pointcloud= np.array(self.previous_contact_points), #np.array(uniform_samplegt),
@@ -381,6 +403,8 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
             chamfer_r= chamfer_r,
             newpoints_r= newpoints_r,
             new_voxel_r= new_voxel_r,
+            curiosity_voxel_r= curiosity_voxel_r,
+            coverage_voxel_r= coverage_voxel_r,
             mesh_p= mesh_p,
             knn_r= knn_r,
             total_reward_r= reward,

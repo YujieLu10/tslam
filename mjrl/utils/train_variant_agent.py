@@ -107,9 +107,9 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in gt_map_list:
             gt_map_list.append(name)
-        cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
-        # combine the objects into a single boolean array
-        gt_voxels = cube if gt_voxels is None else (gt_voxels + cube)
+            cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
+            # combine the objects into a single boolean array
+            gt_voxels = cube if gt_voxels is None else (gt_voxels + cube)
 
     # draw cuboids in the top left and bottom right corners, and a link between them
     map_list = []
@@ -148,21 +148,23 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
 
-    exp_colors = np.empty(voxels.shape, dtype=object)
-    exp_colors[voxels] = 'cyan'
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
-    ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy or is_best_reconstruct:
-        plt.savefig(os.path.join(best_eval_path, 'voxel_exp_bp{}_br{}_{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
-    plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
-    plt.close()
+    if voxels is not None:
+        exp_colors = np.empty(voxels.shape, dtype=object)
+        exp_colors[voxels] = 'cyan'
+        ax = plt.figure().add_subplot(projection='3d')
+        ax.set_zlim(1,20)
+        ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
+        if is_best_policy or is_best_reconstruct:
+            plt.savefig(os.path.join(best_eval_path, 'voxel_exp_bp{}_br{}_{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
+        plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
+        plt.close()
 
     # set the colors of each object
     vis_voxel = gt_voxels | voxels
     colors = np.empty(vis_voxel.shape, dtype=object)
     colors[gt_voxels] = 'white'
-    colors[voxels] = 'cyan'
+    if voxels is not None:
+        colors[voxels] = 'cyan'
     # and plot everything
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,20)

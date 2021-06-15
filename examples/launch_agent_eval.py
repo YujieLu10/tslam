@@ -48,7 +48,7 @@ default_config = dict(
         reinitialize= True,
         # seed= seed,
     ),
-    sample_method = "policy", # `action`:env.action_space.sample(), `policy`
+    sample_method = "agent", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
     total_timesteps = int(2000),
     seed= seed,
@@ -88,12 +88,66 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
+        ["glass", 0.015],
+        ["donut", 0.01],
+        ["heart", 0.0006],
         ["airplane", 1],
+        ["alarmclock", 1],
+        ["apple", 1],
+        ["banana", 1],
+        ["binoculars", 1],
         ["body", 0.1],
+        ["bowl", 1],
+        ["camera", 1],
+        ["coffeemug", 1],
+        ["cubelarge", 1],
+        ["cubemedium", 1],
+        ["cubemiddle", 1],
+        ["cubesmall", 1],
         ["cup", 1],
+        ["cylinderlarge", 1],
+        ["cylindermedium", 1],
+        ["cylindersmall", 1],
+        ["doorknob", 1],
+        ["duck", 1],
+        ["elephant", 1],
+        ["eyeglasses", 1],
+        ["flashlight", 1],
+        ["flute", 1],
         ["fryingpan", 0.8],
-        ["spherelarge", 1],
+        ["gamecontroller", 1],
+        ["hammer", 1],
+        ["hand", 1],
+        ["headphones", 1],
+        ["knife", 1],
         ["lightbulb", 1],
+        ["mouse", 1],
+        ["mug", 1],
+        ["phone", 1],
+        ["piggybank", 1],
+        ["pyramidlarge", 1],
+        ["pyramidmedium", 1],
+        ["pyramidsmall", 1],
+        ["rubberduck", 1],
+        ["scissors", 1],
+        ["spherelarge", 1],
+        ["spheremedium", 1],
+        ["spheresmall", 1],
+        ["stamp", 1],
+        ["stanfordbunny", 1],
+        ["stapler", 1],
+        ["table", 0.5],
+        ["teapot", 1],
+        ["toothbrush", 1],
+        ["toothpaste", 1],
+        ["toruslarge", 1],
+        ["torusmedium", 1],
+        ["torussmall", 1],
+        ["train", 1],
+        ["watch", 1],
+        ["waterbottle", 1],
+        ["wineglass", 1],
+        ["wristwatch", 1],
     ]
     dir_names = ["obj{}_scale{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
@@ -166,8 +220,8 @@ def main(args):
 
     values = [
         # ["action"],
-        ["policy"], # random
-        # ["agent"],
+        # ["policy"], # random
+        ["agent"],
         # ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]

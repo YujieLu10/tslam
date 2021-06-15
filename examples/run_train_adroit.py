@@ -12,7 +12,6 @@ from mjrl.utils.train_agent import train_agent
 from mjrl.utils.train_generic_agent import train_generic_agent
 from mjrl.utils.train_variant_agent import train_variant_agent
 
-train_variant = True
 
 def main(affinity_code, log_dir, run_ID, **kwargs):
     # affinity = affinity_from_code(affinity_code)
@@ -43,7 +42,7 @@ def run_experiment(log_dir, args):
     agent = PPO(env, policy, baseline, **args["algo_kwargs"])
 
     if args["env_kwargs"]["generic"]:
-        if train_variant:
+        if args["env_name"] == "adroit_v4": #variant
             train_variant_agent(
                 job_name= log_dir, # using this interface to guide the algorithm log files into our designated log_dir
                 agent= agent,
