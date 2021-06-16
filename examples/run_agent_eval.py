@@ -47,9 +47,12 @@ def run_experiment(log_dir, args):
     conf_eval_dir = "geneTrue_rotTrue_{}/normal_cf{}knn{}voxel{}".format(args["env_kwargs"]["forearm_orientation_name"], int(args["env_kwargs"]["chamfer_r_factor"]), int(args["env_kwargs"]["knn_r_factor"]), int(args["env_kwargs"]["new_voxel_r_factor"])) if "chamfer_r_factor" in args["env_kwargs"] else "geneTrue_rotTrue_{}/normal_npoint{}_ntouch{}_random{}".format(args["env_kwargs"]["forearm_orientation_name"], int(args["env_kwargs"]["npoint_r_factor"]), int(args["env_kwargs"]["ntouch_r_factor"]), int(args["env_kwargs"]["random_r_factor"]))
 
     save_agent_eval_dir = os.path.join(save_agent_eval_root, str(args["env_kwargs"]["obj_name"]), conf_eval_dir)
-    if os.path.isdir(save_agent_eval_dir) == True:
-        shutil.rmtree(save_agent_eval_dir)
-        print(">>> clear file {}!".format(save_agent_eval_dir))
+    # if os.path.isdir(save_agent_eval_dir) == True:
+    #     shutil.rmtree(save_agent_eval_dir)
+    #     print(">>> clear file {}!".format(save_agent_eval_dir))
+    if len(os.listdir(save_agent_eval_dir)) > 0:
+        print(">>> skip {}".format(save_agent_eval_dir))
+        return
     if not os.path.isdir(save_agent_eval_dir): os.makedirs(save_agent_eval_dir)
 
     for cam_name in ['fixed', 'vil_camera', 'view_1', 'view_2', 'view_4']:
@@ -65,7 +68,13 @@ def run_experiment(log_dir, args):
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
         # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("upfront", "fixup").replace("upback", "fixup").replace("upleft", "fixup").replace("upright", "fixup").replace("downfront", "fixup").replace("downback", "fixup").replace("downleft", "fixup").replace("downright", "fixup"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result", "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        # ours
+        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours_coverage.pickle"), 'rb'))
+        # knn chamfer
+        if int(args["env_kwargs"]["knn_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "knn.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["chamfer_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "chamfer.pickle"), 'rb'))
         # other policy no 500
         # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))

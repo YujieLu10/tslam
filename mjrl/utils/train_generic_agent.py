@@ -148,31 +148,32 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
 
-    exp_colors = np.empty(voxels.shape, dtype=object)
-    exp_colors[voxels] = 'cyan'
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
-    ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy or is_best_reconstruct:
-        plt.savefig(os.path.join(best_eval_path, 'voxel_exp_bp{}_br{}_{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
-    plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
-    plt.close()
+    if voxels is not None:
+        exp_colors = np.empty(voxels.shape, dtype=object)
+        exp_colors[voxels] = 'cyan'
+        ax = plt.figure().add_subplot(projection='3d')
+        ax.set_zlim(1,20)
+        ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
+        if is_best_policy or is_best_reconstruct:
+            plt.savefig(os.path.join(best_eval_path, 'voxel_exp_bp{}_br{}_{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
+        plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
+        plt.close()
 
-    # set the colors of each object
-    vis_voxel = gt_voxels | voxels
-    colors = np.empty(vis_voxel.shape, dtype=object)
-    colors[gt_voxels] = 'white'
-    colors[voxels] = 'cyan'
-    # and plot everything
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
-    ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    # plt.savefig('uniform_gtbox_{}.png'.format(step))
+        # set the colors of each object
+        vis_voxel = gt_voxels | voxels
+        colors = np.empty(vis_voxel.shape, dtype=object)
+        colors[gt_voxels] = 'white'
+        colors[voxels] = 'cyan'
+        # and plot everything
+        ax = plt.figure().add_subplot(projection='3d')
+        ax.set_zlim(1,20)
+        ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
+        # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
-    if is_best_policy or is_best_reconstruct:
-        plt.savefig(os.path.join(best_eval_path, 'voxel_bp{}_br{}_overlap-{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
-    plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
-    plt.close()
+        if is_best_policy or is_best_reconstruct:
+            plt.savefig(os.path.join(best_eval_path, 'voxel_bp{}_br{}_overlap-{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
+        plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
+        plt.close()
     return is_best_reconstruct, occupancy
 
 def log_gif(log_dir, tag, data, step= None, duration= 0.1, **kwargs):
@@ -212,8 +213,10 @@ def train_generic_agent(job_name, agent,
     reset_mode_conf = env_kwargs["reset_mode"]
     if "new_voxel_r_factor" in env_kwargs: # old ours
         reward_conf = "cf{}knn{}voxel{}".format(env_kwargs["chamfer_r_factor"], env_kwargs["knn_r_factor"], env_kwargs["new_voxel_r_factor"])
-    else:
+    elif "curiosity_voxel_r_factor" in env_kwargs:
         reward_conf = "curf{}covf{}".format(env_kwargs["curiosity_voxel_r_factor"], env_kwargs["coverage_voxel_r_factor"])
+    else:
+        reward_conf = "disagreef{}".format(env_kwargs["disagree_r_factor"])
     os.chdir(job_name) # important! we are now in the directory to save data
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')

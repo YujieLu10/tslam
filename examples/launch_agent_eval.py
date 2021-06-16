@@ -6,7 +6,7 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v2", # adroit-v2: our best policy # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
+    env_name = "adroit-v3", # adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
@@ -196,9 +196,9 @@ def main(args):
 
     # reward setting and voxel observatoin mode
     values = [
-        [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
-        # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
-        # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
+        # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
+        [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
+        [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
         # [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
         # [0, 0, 1, 0.5, 5, ['3d', 0.02], [True, False]],
     ]

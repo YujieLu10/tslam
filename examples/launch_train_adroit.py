@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 default_config = dict(
-    env_name = "adroit-v2", # adroit-v2: our best policy # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward; adroit-v2 coverage_voxel_r(old new voxel r):coverage curiosity_voxel_r:curiosity
+    env_name = "adroit-v5", # adroit-v2: our best policy # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward; adroit-v2 coverage_voxel_r(old new voxel r):coverage curiosity_voxel_r:curiosity # adroit-v5 un-supervised chamfer
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
@@ -11,7 +11,8 @@ default_config = dict(
         new_point_threshold= 0.001, # minimum distance new point to all previous points
         forearm_orientation_name= "up", # ("up", "down")
         # scale all reward/penalty to the scale of 1.0
-        chamfer_r_factor= 0,
+        # chamfer_r_factor= 0,
+        disagree_r_factor= 0,
         mesh_p_factor= 0,
         mesh_reconstruct_alpha= 0.01,
         palm_r_factor= 0,
@@ -23,8 +24,8 @@ default_config = dict(
         ground_truth_type= "nope",
         knn_r_factor= 0,
         # new_voxel_r_factor= 0, # new => coverage_voxel_r
-        coverage_voxel_r_factor= 0, # new and touched objects
-        curiosity_voxel_r_factor= 0, # new voxel
+        # coverage_voxel_r_factor= 0, # new and touched objects
+        # curiosity_voxel_r_factor= 0, # new voxel
         use_voxel= False,
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
@@ -194,7 +195,7 @@ def main(args):
                     # [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                     # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
                     # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
+                    # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
                     [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                 ]
         # values = values[-idx-1:-idx]
@@ -217,8 +218,9 @@ def main(args):
     # reward setting and voxel observatoin mode
     values = [
         # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
-        [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
-        # [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
+        # [1, 3, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [1, 0.5, ['3d', 6], [True, False]], # disagreement variant
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
         # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
@@ -227,16 +229,18 @@ def main(args):
     ]
     # dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     # dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
-    dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["disagreef{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
-        ("env_kwargs", "curiosity_voxel_r_factor"),
-        ("env_kwargs", "coverage_voxel_r_factor"),
+        # ("env_kwargs", "curiosity_voxel_r_factor"),
+        # ("env_kwargs", "coverage_voxel_r_factor"),
         # ("env_kwargs", "chamfer_r_factor"),
         # ("env_kwargs", "knn_r_factor"),
         # ("env_kwargs", "new_voxel_r_factor"),
         # ("env_kwargs", "npoint_r_factor"),
         # ("env_kwargs", "ntouch_r_factor"),
         # ("env_kwargs", "random_r_factor"),
+        ("env_kwargs", "disagree_r_factor"),
         ("policy_kwargs", "init_log_std"),
         # ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),

@@ -35,3 +35,10 @@ register(
     max_episode_steps=int(1e3),
 )
 from mj_envs.envs.hand_manipulation_suite.adroit_v4 import AdroitEnvV4
+
+register(
+    id='adroit-v5',
+    entry_point='mj_envs.envs.hand_manipulation_suite:AdroitEnvV5',
+    max_episode_steps=int(1e3),
+)
+from mj_envs.envs.hand_manipulation_suite.adroit_v5 import AdroitEnvV5
