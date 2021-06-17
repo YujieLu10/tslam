@@ -15,7 +15,7 @@ parser.add_argument('-clear_files' , default=False, type=bool)
 args = parser.parse_args()
 
 pose_num_list = ["four", "eight"]
-policy_type = ["knn1", "cf1", "voxel1", "npoint1", "ntouch1", "random1"] #0615 generated # ["curf1covf1", "curf1covf0", "curf0covf1"] wait for agent train and eval
+policy_type = ["disagreef1"]#["curf1covf3", "curf0covf1"] #, "curf1covf0"] wait for agent train and eval # ["knn1", "cf1"] gen 0616 # ["voxel1", "npoint1", "ntouch1", "random1"] #0615 generated
 clear_files = args.clear_files
 test_obj_list = ["airplane", "cup", "lightbulb"] #, "spherelarge", "body", "fryingpan"]
 vis_root = "exp" # exp uniform_gt two_pose long_step

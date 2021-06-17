@@ -14,8 +14,8 @@ import heapq
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-# from chamfer_distance import ChamferDistance
-# chamfer_dist = ChamferDistance()
+from chamferdist import ChamferDistance
+chamferdist = ChamferDistance()
 
 ADD_BONUS_REWARDS = True
 
@@ -27,6 +27,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             new_point_threshold= 0.01, # minimum distance new point to all previous points
             forearm_orientation_name= "up", # ("up", "down")
             chamfer_r_factor= 0,
+            disagree_r_factor= 0,
             mesh_p_factor= 0,
             mesh_reconstruct_alpha= 0.01,
             palm_r_factor= 0,
@@ -40,15 +41,12 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             forearm_relative_position= [0, 0.5, 0], # forearm position related to hand (z-value will be flipped when arm faced down)
             reset_mode= "normal",
             knn_k= 1, # k setting
-            voxel_conf= ['2d', 0, 0.005, False], # 2d/3d, voxelNum, 2d_sep, test_part
-            sensor_obs= False,
+            voxel_conf= ['2d', 0.005], # 2d/3d, 2d_sep
             obj_scale= 0.01,
             obj_name= "airplane",
             generic= False,
             base_rotation= False,
-            # voxel_num= 280,
-            # twod_sep= 2,
-            # test_part= False,
+            obs_type= [False, False],
         ):
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         # xml add object node
@@ -65,13 +63,6 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         
         self.model_path_name = (curr_dir+'/combine/{}_{}.xml'.format(model_prename, obj_name)) if not generic else (curr_dir+'/combine/{}_{}.xml'.format(model_prename, "generic"))
 
-        # rawtext = ElementTree.tostring(root)
-        # dom = minidom.parseString(rawtext)
-        # with open(os.path.join(curr_dir, "assets/DAPG_touchobject.xml"), "w") as f:
-        #     dom.writexml(f, indent="\t", newl="", encoding="utf-8")
-        
-        # get sim
-        # print("{} isfile:{}".format(("{}_{}.xml").format(model_prename, obj_name), os.path.isfile(os.path.join(curr_dir, "combine/{}_{}.xml".format(model_prename, obj_name)))))
         self.sim = mujoco_env.get_sim(model_path=self.model_path_name)
 
         self.obj_name = obj_name
@@ -88,6 +79,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.goal_threshold = goal_threshold
         self.new_point_threshold = new_point_threshold
         self.chamfer_r_factor = chamfer_r_factor
+        self.disagree_r_factor = disagree_r_factor
         self.mesh_p_factor = mesh_p_factor
         self.mesh_reconstruct_alpha = mesh_reconstruct_alpha
         self.palm_r_factor = palm_r_factor
@@ -97,12 +89,11 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.ground_truth_type = ground_truth_type
         self.use_voxel = use_voxel
         self.voxel_type = voxel_conf[0]
-        self.twod_sep = voxel_conf[2]
-        self.test_part = voxel_conf[3]
+        self.twod_sep = voxel_conf[1]
         self.new_voxel_r_factor = new_voxel_r_factor
-        self.sensor_obs = sensor_obs
+        self.obs_type = obs_type
 
-        self.voxel_num = 200
+        self.voxel_num = int(math.pow(self.twod_sep, 3))
         self.voxel_array = [0] * self.voxel_num
         self.gt_map_list = []
 
@@ -154,21 +145,14 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def is_in_voxel_bound(self, posx, posy):
         is_in_bound = False
-        if self.test_part:
-            is_in_bound = posx > 0 and posx < 0.125 and posy > -0.25 and posy < -0.025
-        else:
-            is_in_bound = posx > -0.125 and posx < 0.125 and posy > -0.25 and posy < -0.025
+        is_in_bound = posx > -0.125 and posx < 0.125 and posy > -0.25 and posy < -0.025
         return is_in_bound
     
     def get_voxel_len(self):
         if self.voxel_type == '2d':
             sep_x, sep_y = 0, 0
-            if self.test_part:
-                sep_x = 0.125 / self.twod_sep
-                sep_y = 0.225 / self.twod_sep
-            else:
-                sep_x = 0.25 / self.twod_sep
-                sep_y = 0.225 / self.twod_sep
+            sep_x = 0.25 / self.twod_sep
+            sep_y = 0.225 / self.twod_sep
             return math.ceil(sep_x) * math.ceil(sep_y)
         else:
             sep_x, sep_y, sep_z = 0, 0, 0
@@ -184,16 +168,10 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # corner points (-0.125,-0.25) (-0.125,-0.025) (0.125, -0.25) (0.125, -0.025)
         # test left (0,-0.25) (0,-0.025) (0.125, -0.25) (0.125, -0.025)
         sep_x, sep_y, idx_x, idx_y = 0, 0, 0, 0
-        if self.test_part:
-            sep_x = 0.125 / self.twod_sep
-            sep_y = 0.225 / self.twod_sep
-            idx_x = math.floor((posx - 0) / self.twod_sep)
-            idx_y = math.floor((posy + 0.25) / self.twod_sep)
-        else:
-            sep_x = 0.25 / self.twod_sep
-            sep_y = 0.225 / self.twod_sep
-            idx_x = math.floor((posx + 0.125) / self.twod_sep)
-            idx_y = math.floor((posy + 0.25) / self.twod_sep)
+        sep_x = 0.25 / self.twod_sep
+        sep_y = 0.225 / self.twod_sep
+        idx_x = math.floor((posx + 0.125) / self.twod_sep)
+        idx_y = math.floor((posy + 0.25) / self.twod_sep)
         voxel_idx = idx_y * math.ceil(sep_x) + idx_x + 1
         return voxel_idx
 
@@ -214,19 +192,17 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         data_trans[:, 2] += self.obj_relative_position[2]
 
         uniform_gt_data = data_trans.copy()
-        resolution = self.twod_sep
-        sep_x = math.ceil(0.25 / resolution)
-        sep_y = math.ceil(0.225 / resolution)
-        sep_z = math.ceil(0.1 / resolution)
-        x, y, z = np.indices((sep_x, sep_y, sep_z))
+
+        resolution_x, resolution_y, resolution_z = math.ceil(0.25 / self.twod_sep), math.ceil(0.225 / self.twod_sep), math.ceil(0.1 / self.twod_sep)
+        x, y, z = np.indices((self.twod_sep, self.twod_sep, self.twod_sep))
 
         gtcube = (x<0) & (y <1) & (z<1)
         gt_voxels = gtcube
         gt_map_list = []
         for idx,val in enumerate(uniform_gt_data):
-            idx_x = math.floor((val[0] + 0.125) / resolution)
-            idx_y = math.floor((val[1] + 0.25) / resolution)
-            idx_z = math.floor((val[2] - 0.16) / resolution)
+            idx_x = math.floor((val[0] + 0.125) / resolution_x)
+            idx_y = math.floor((val[1] + 0.25) / resolution_y)
+            idx_z = math.floor((val[2] - 0.16) / resolution_z)
             name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
             if name not in gt_map_list:
                 gt_map_list.append(name)
@@ -234,16 +210,12 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             # combine the objects into a single boolean array
             gt_voxels += cube
         self.gt_map_list = gt_map_list.copy()
-        self.voxel_array = [0] * len(gt_map_list)
-        self.voxel_num = len(gt_map_list)
 
     def get_voxel_idx(self, posx, posy, posz):
-        # currently only suitable for obj4
-        # posz = max(min(posz, 0.2 - 1e-4), 0.16)
-        resolution = self.twod_sep
-        idx_x = math.floor((posx + 0.125) / resolution)
-        idx_y = math.floor((posy + 0.25) / resolution)
-        idx_z = math.floor((posz - 0.16) / resolution)
+        resolution_x, resolution_y, resolution_z = math.ceil(0.25 / self.twod_sep), math.ceil(0.225 / self.twod_sep), math.ceil(0.1 / self.twod_sep)
+        idx_x = math.floor((posx + 0.125) / resolution_x)
+        idx_y = math.floor((posy + 0.25) / resolution_y)
+        idx_z = math.floor((posz - 0.16) / resolution_z)
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         return self.gt_map_list.index(name) if name in self.gt_map_list else -1
 
@@ -272,23 +244,28 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def get_chamfer_reward(self, chamfer_distance_loss):
         chamfer_reward = 0
-        if "nope" not in self.ground_truth_type:
+        if self.chamfer_r_factor and "nope" not in self.ground_truth_type:
             chamfer_reward += (0.1-chamfer_distance_loss) * 10
-        else:
+        elif self.disagree_r_factor:
             chamfer_reward += self.loss_transform(chamfer_distance_loss) * 10
         return chamfer_reward
 
-    # def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
-    #     chamfer_distance_loss = 0.0
-    #     if "nope" not in self.ground_truth_type:
-    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-    #             gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
-    #             chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
-    #     else:
-    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-    #             dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
-    #             chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
-    #     return chamfer_distance_loss
+    def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
+        chamfer_distance_loss = 1.0
+        if self.chamfer_r_factor and "nope" not in self.ground_truth_type:
+            if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+                gt_dist1, gt_dist2 = chamferdist(torch.FloatTensor([self.obj_current_gt]).cuda(), torch.FloatTensor([current_pos_list]).cuda())
+                chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
+        elif self.disagree_r_factor:
+            if is_touched and current_pos_list != [] and previous_pos_list != []:
+                try:
+                    # dist1, dist2 = chamferdist(torch.FloatTensor([previous_pos_list]).cuda(), torch.FloatTensor([current_pos_list]).cuda())
+                    dist_forward = chamferdist(torch.FloatTensor([previous_pos_list]).cuda(), torch.FloatTensor([current_pos_list]).cuda())
+                    # chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
+                    chamfer_distance_loss = dist_forward.detach().cpu().item()
+                except:
+                    print(">>> Error chamfer loss")
+        return chamfer_distance_loss
 
     def get_knn_reward(self):
         return 0
@@ -371,30 +348,18 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # similar points penalty
         # penalty_sim = similar_points_cnt * 5
         # penalty_sim = self.get_penalty()
-        if self.chamfer_r_factor:
-            chamfer_loss = 0#self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
+        if self.chamfer_r_factor or self.disagree_r_factor:
+            chamfer_loss = self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
             chamfer_r = 1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
-            chamfer_r -= 300
+            # chamfer_r -= 300
+
         self.previous_contact_points = next_pos_list.copy()
-        #
         # start computing reward
         # for simplicity goal_achieved depends on the nubmer of touched points
         goal_achieved = (len(self.previous_contact_points) > self.goal_threshold)
         if "nope" not in self.ground_truth_type and is_touched and self.previous_contact_points != [] and previous_pos_list != [] and chamfer_loss < 0.06:
             goal_achieved = True
         mesh_p = 0
-        # if self.mesh_p_factor and len(self.previous_contact_points) > 0:
-        #     pv_cloud = pv.PolyData(np.array(self.previous_contact_points))
-        #     pv_volume = pv_cloud.delaunay_3d(alpha= self.mesh_reconstruct_alpha)
-        #     pv_shell = pv_volume.extract_geometry()
-        #     reconstruct_points = pv_shell.points
-        #     mesh_p = chamfer_dist(
-        #         torch.FloatTensor([reconstruct_points]),
-        #         torch.FloatTensor([self.previous_contact_points]),
-        #     )
-        #     mesh_p = (-1) * (torch.mean(mesh_p[0]) + torch.mean(mesh_p[1]))
-        # else:
-        #     mesh_p = 0
         # voxel obs and new voxel reward
         if self.voxel_array is not None and len(self.voxel_array) == 0:
             self.voxel_array = [0] * self.voxel_num
@@ -409,7 +374,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
-        reward += self.chamfer_r_factor * chamfer_r
+        reward += self.chamfer_r_factor * chamfer_r + self.disagree_r_factor * chamfer_r
         reward += self.newpoints_r_factor * newpoints_r
         reward += self.mesh_p_factor * mesh_p
         reward += self.knn_r_factor * knn_r
@@ -463,13 +428,13 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             else:
                 impact_list = np.append(impact_list, np.clip(self.sim.data.sensordata[rid], [-1.0], [1.0]))
 
-        if self.sensor_obs:
-            final_observation = np.concatenate([qp, qv, np.array(impact_list), np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.array(impact_list), np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+        # use 3d fixed voxel grid
+        voxel_obs = np.array(self.voxel_array)
+        # use sensor obs
+        if self.obs_type[1]:
+            final_observation = np.concatenate([qp, qv, np.array(impact_list), voxel_obs]) if self.use_voxel else np.concatenate([qp, qv, np.array(impact_list), np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         else:
-            if self.generic:
-                final_observation = np.concatenate([qp, qv, self.voxel_array[0:200] if len(self.voxel_array) > 200 else np.array(np.pad(self.voxel_array, (0,200 - len(self.voxel_array)), 'constant', constant_values=0))]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
-            else:
-                final_observation = np.concatenate([qp, qv, np.array(self.voxel_array)]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
+            final_observation = np.concatenate([qp, qv, voxel_obs]) if self.use_voxel else np.concatenate([qp, qv, np.concatenate((np.array(touch_pos).flatten(), np.array(extreme_points).flatten()))])
         return final_observation
 
     def reset_model(self, num_traj_idx):
@@ -481,7 +446,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         name_map = ['duck', 'watch', 'doorknob', 'headphones', 'bowl', 'cubesmall', 'spheremedium', 'train', 'piggybank', 'cubemedium', 'cubelarge', 'elephant', 'flute', 'wristwatch', 'pyramidmedium', 'gamecontroller', 'toothbrush', 'pyramidsmall', 'body', 'cylinderlarge', 'cylindermedium', 'cylindersmall', 'fryingpan', 'stanfordbunny', 'scissors', 'pyramidlarge', 'stapler', 'flashlight', 'mug', 'hand', 'stamp', 'rubberduck', 'binoculars', 'apple', 'mouse', 'eyeglasses', 'airplane', 'coffeemug', 'cup', 'toothpaste', 'torusmedium', 'cubemiddle', 'phone', 'torussmall', 'spheresmall', 'knife', 'banana', 'teapot', 'hammer', 'alarmclock', 'waterbottle', 'camera', 'table', 'wineglass', 'lightbulb', 'spherelarge', 'toruslarge', 'glass', 'heart', 'donut']
         num_traj_idx = min(num_traj_idx, len(name_map) - 1)
         self.obj_name = name_map[num_traj_idx]
-        # print(">>> num_traj{} obj_name{}".format(num_traj_idx, self.obj_name))
+
         self.touch_obj_bid = self.sim.model.body_name2id('{}object'.format(self.obj_name))
         self.generate_uniform_gt_voxel()
 

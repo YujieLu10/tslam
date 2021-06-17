@@ -6,7 +6,7 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v3", # adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
+    env_name = "adroit-v2", # adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
@@ -15,6 +15,7 @@ default_config = dict(
         forearm_orientation_name= "up", # ("up", "down")
         # scale all reward/penalty to the scale of 1.0
         chamfer_r_factor= 0,
+        # disagree_r_factor= 0,
         mesh_p_factor= 0,
         mesh_reconstruct_alpha= 0.01,
         palm_r_factor= 0,
@@ -26,6 +27,8 @@ default_config = dict(
         ground_truth_type= "nope",
         knn_r_factor= 0,
         new_voxel_r_factor= 0,
+        coverage_voxel_r_factor= 0, # new and touched objects
+        curiosity_voxel_r_factor= 0, # new voxel
         use_voxel= False,
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
@@ -50,7 +53,7 @@ default_config = dict(
     ),
     sample_method = "agent", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(2000),
+    total_timesteps = int(500),
     seed= seed,
 )
 
@@ -197,22 +200,29 @@ def main(args):
     # reward setting and voxel observatoin mode
     values = [
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
-        [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
-        [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
+        # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
+        # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
+        [1, 0, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        # [1, 0.5, ['3d', 6], [True, False]], # disagreef
         # [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
         # [0, 0, 1, 0.5, 5, ['3d', 0.02], [True, False]],
     ]
-    dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     # dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["disagreef{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
-        ("env_kwargs", "chamfer_r_factor"),
-        ("env_kwargs", "knn_r_factor"),
-        ("env_kwargs", "new_voxel_r_factor"),
+        ("env_kwargs", "curiosity_voxel_r_factor"),
+        ("env_kwargs", "coverage_voxel_r_factor"),
+        # ("env_kwargs", "chamfer_r_factor"),
+        # ("env_kwargs", "knn_r_factor"),
+        # ("env_kwargs", "new_voxel_r_factor"),
         # ("env_kwargs", "npoint_r_factor"),
         # ("env_kwargs", "ntouch_r_factor"),
         # ("env_kwargs", "random_r_factor"),
+        # ("env_kwargs", "disagree_r_factor"),
         ("policy_kwargs", "init_log_std"),
-        ("env_kwargs", "knn_k"),
+        # ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),
         ("env_kwargs", "obs_type"),
     ]

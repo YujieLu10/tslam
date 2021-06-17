@@ -15,6 +15,7 @@ class FCNetwork(nn.Module):
 
         self.obs_dim = obs_dim
         self.act_dim = act_dim
+        print(">>> self.act_dim {}".format(self.act_dim))
         assert type(hidden_sizes) == tuple
         self.layer_sizes = (obs_dim, ) + hidden_sizes + (act_dim, )
         self.set_transformations(in_shift, in_scale, out_shift, out_scale)
