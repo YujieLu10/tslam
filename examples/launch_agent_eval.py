@@ -6,7 +6,7 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v2", # adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
+    env_name = "adroit-v0", # adroit-v0 heuristic adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
@@ -21,14 +21,14 @@ default_config = dict(
         palm_r_factor= 0,
         untouch_p_factor= 0,
         newpoints_r_factor= 0,
-        # npoint_r_factor= 0,
-        # ntouch_r_factor= 0,
-        # random_r_factor= 0,
+        npoint_r_factor= 0,
+        ntouch_r_factor= 0,
+        random_r_factor= 0,
         ground_truth_type= "nope",
         knn_r_factor= 0,
         new_voxel_r_factor= 0,
-        coverage_voxel_r_factor= 0, # new and touched objects
-        curiosity_voxel_r_factor= 0, # new voxel
+        # coverage_voxel_r_factor= 0, # new and touched objects
+        # curiosity_voxel_r_factor= 0, # new voxel
         use_voxel= False,
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
@@ -58,7 +58,7 @@ default_config = dict(
 )
 
 def main(args):
-    experiment_title = "agent" #"sample_pointclouds"
+    experiment_title = "heuristic" #"sample_pointclouds"
 
     # set up variants
     variant_levels = list()
@@ -160,14 +160,22 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        [True, False, "10kdownback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27]], # fix voxel grid
-        [True, False, "10kdownfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 0],  [0, 0.4, 0.27]],
-        [True, False, "10kdownright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 3.14151926],  [0.55, -0.15, 0.27]],
-        [True, False, "10kdownleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 3.14151926],  [-0.55, -0.15, 0.27]],
-        [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17]],
-        [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.17]],
-        [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.17]],
-        [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.17]],
+        # [True, False, "10kdownback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27]], # fix voxel grid
+        # [True, False, "10kdownfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 0],  [0, 0.4, 0.27]],
+        # [True, False, "10kdownright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 3.14151926],  [0.55, -0.15, 0.27]],
+        # [True, False, "10kdownleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 3.14151926],  [-0.55, -0.15, 0.27]],
+        # [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17]],
+        # [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.17]],
+        # [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.17]],
+        # [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.17]],
+        [True, False, "10kdownback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3]], # fix voxel grid
+        [True, False, "10kdownfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 0],  [0, 0.4, 0.3]],
+        [True, False, "10kdownright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 3.14151926],  [0.55, -0.15, 0.3]],
+        [True, False, "10kdownleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 3.14151926],  [-0.55, -0.15, 0.3]],
+        [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.14]],
+        [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.14]],
+        [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.14]],
+        [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.14]],
     ]
     # generic policy with several hand poses
     # idx = int(args.obj)
@@ -201,28 +209,29 @@ def main(args):
     values = [
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
+        [0, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # heuristic
         # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
-        [1, 0, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        # [1, 0, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [1, 0.5, ['3d', 6], [True, False]], # disagreef
         # [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
         # [0, 0, 1, 0.5, 5, ['3d', 0.02], [True, False]],
     ]
     # dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
-    # dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
-    dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     # dir_names = ["disagreef{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
-        ("env_kwargs", "curiosity_voxel_r_factor"),
-        ("env_kwargs", "coverage_voxel_r_factor"),
+        # ("env_kwargs", "curiosity_voxel_r_factor"),
+        # ("env_kwargs", "coverage_voxel_r_factor"),
         # ("env_kwargs", "chamfer_r_factor"),
         # ("env_kwargs", "knn_r_factor"),
         # ("env_kwargs", "new_voxel_r_factor"),
-        # ("env_kwargs", "npoint_r_factor"),
-        # ("env_kwargs", "ntouch_r_factor"),
-        # ("env_kwargs", "random_r_factor"),
+        ("env_kwargs", "npoint_r_factor"),
+        ("env_kwargs", "ntouch_r_factor"),
+        ("env_kwargs", "random_r_factor"),
         # ("env_kwargs", "disagree_r_factor"),
         ("policy_kwargs", "init_log_std"),
-        # ("env_kwargs", "knn_k"),
+        ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),
         ("env_kwargs", "obs_type"),
     ]
@@ -231,7 +240,8 @@ def main(args):
     values = [
         # ["action"],
         # ["policy"], # random
-        ["agent"],
+        # ["agent"],
+        ["heuristic"],
         # ["explore"],
     ]
     dir_names = ["{}".format(*v) for v in values]

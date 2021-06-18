@@ -23,7 +23,7 @@ def main(affinity_code, log_dir, run_ID, **kwargs):
 
     args = load_variant(log_dir)
 
-    name = "agent" #"sample_pointclouds"
+    name = "heuristic" #"sample_pointclouds"
     # This helps you know what GPU is recommand to you for this experiment
     # gpu_idx = affinity["cuda_idx"]
     
@@ -52,6 +52,9 @@ def run_experiment(log_dir, args):
         conf_eval_dir = "geneTrue_rotTrue_{}/normal_curf{}covf{}".format(args["env_kwargs"]["forearm_orientation_name"], int(args["env_kwargs"]["curiosity_voxel_r_factor"]), int(args["env_kwargs"]["coverage_voxel_r_factor"]))
     elif "disagree_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["disagree_r_factor"]) > 0:
         conf_eval_dir = "geneTrue_rotTrue_{}/normal_disagreef{}".format(args["env_kwargs"]["forearm_orientation_name"], int(args["env_kwargs"]["disagree_r_factor"]))
+    else: # heuristic
+        print(">>> heuristic")
+        conf_eval_dir = "geneTrue_rotTrue_{}/normal_heuristic".format(args["env_kwargs"]["forearm_orientation_name"])
 
     save_agent_eval_dir = os.path.join(save_agent_eval_root, str(args["env_kwargs"]["obj_name"]), conf_eval_dir)
     if os.path.isdir(save_agent_eval_dir) == True:
@@ -81,6 +84,8 @@ def run_experiment(log_dir, args):
             policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "knn.pickle"), 'rb'))
         elif int(args["env_kwargs"]["chamfer_r_factor"]) == 1:
             policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "chamfer.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["ntouch_r_factor"]) == 1: #it's npoints actually
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ntouch.pickle"), 'rb'))
         elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 0:
             policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "curiosity.pickle"), 'rb'))
             # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
@@ -101,6 +106,8 @@ def run_experiment(log_dir, args):
         if args["sample_method"] == "explore":
             obs, rew, done, info = env.step(policy.get_action(obs)[0])
         elif args["sample_method"] == "action":
+            obs, rew, done, info = env.step(env.action_space.sample())
+        elif args["sample_method"] == "heuristic":
             obs, rew, done, info = env.step(env.action_space.sample())
         elif args["sample_method"] == "agent":
             obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
@@ -128,15 +135,15 @@ def run_experiment(log_dir, args):
             plt.close()
 
         # record gif
-        # if i < 500:
-        #     frame = env.env.env.sim.render(width=640, height=480,
-        #                         mode='offscreen', camera_name="view_1", device_id=0)
-        #     frame = np.transpose(frame[::-1, :, :], (2,0,1))
-        #     gif_frames.append(frame)
-        # if (i+1) == 200:
-        #     logger.log_gif("rendered", gif_frames, i)
+        if "10kdownback" in args["env_kwargs"]["forearm_orientation_name"] and i < 210:
+            frame = env.env.env.sim.render(width=640, height=480,
+                                mode='offscreen', camera_name="view_1", device_id=0)
+            frame = np.transpose(frame[::-1, :, :], (2,0,1))
+            gif_frames.append(frame)
+        if "10kdownback" in args["env_kwargs"]["forearm_orientation_name"] and (i+1) == 200:
+            logger.log_gif("rendered", gif_frames, i)
 
-        # logger.dump_tabular()
+        logger.dump_tabular()
     
 if __name__ == "__main__":
     main(*sys.argv[1:])

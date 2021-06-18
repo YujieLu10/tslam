@@ -15,7 +15,7 @@ parser.add_argument('-clear_files' , default=False, type=bool)
 args = parser.parse_args()
 
 pose_num_list = ["four", "eight"]
-policy_type = ["disagreef1"]#["curf1covf3", "curf0covf1"] #, "curf1covf0"] wait for agent train and eval # ["knn1", "cf1"] gen 0616 # ["voxel1", "npoint1", "ntouch1", "random1"] #0615 generated
+policy_type = ["heuristic"] #["disagreef1"]#["curf1covf3", "curf0covf1"] #, "curf1covf0"] wait for agent train and eval # ["knn1", "cf1"] gen 0616 # ["voxel1", "npoint1", "ntouch1", "random1"] #0615 generated
 clear_files = args.clear_files
 test_obj_list = ["airplane", "cup", "lightbulb"] #, "spherelarge", "body", "fryingpan"]
 vis_root = "exp" # exp uniform_gt two_pose long_step
@@ -85,7 +85,7 @@ for root, dirs, files in os.walk("../data/result/{}/".format(eval_dir)):
                                     iter_num = int(file_str[(file_str.index("iternum_")+8):file_str.index("_pointcloud")])
                                 except:
                                     print(file_str[(file_str.index("iternum_")+9):file_str.index("_pointcloud")])
-                                if (iter_num + 1) % 500 == 0:
+                                if (iter_num + 1) % 100 == 0:
                                     recon_pcd_file = os.path.join(root, file)
                                     file_path = recon_pcd_file
                                     vis_data = np.load(file_path)['pcd']

@@ -311,6 +311,9 @@ class AdroitEnvV4(mujoco_env.MujocoEnv, utils.EzPickle):
                 current_pos_list.append(contact.pos.tolist())
                 is_touched = True
                 ntouch_r += 1
+
+        # if is_touched:
+        #     ntouch_r += 1
         
         # untouch penalty
         untouched_p -= 0.01 if self.untouch_p_factor and not is_touched else 0
@@ -332,9 +335,10 @@ class AdroitEnvV4(mujoco_env.MujocoEnv, utils.EzPickle):
         for pos in current_pos_list:
             if pos not in next_pos_list:
                 next_pos_list.append(pos)  
+            if self.npoint_r_factor:
+                npoint_r += 1
             # new contact points
             if pos not in self.previous_contact_points and self.knn_r_factor:
-                npoint_r += 1
                 min_pos_dist = 1
                 pos_dist_list = []
                 for previous_pos in self.previous_contact_points:

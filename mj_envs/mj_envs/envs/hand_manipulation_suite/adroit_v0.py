@@ -14,8 +14,8 @@ import heapq
 from xml.etree import ElementTree
 from xml.dom import minidom
 
-from chamferdist import ChamferDistance
-chamferdist = ChamferDistance()
+# from chamfer_distance import ChamferDistance
+# chamfer_dist = ChamferDistance()
 
 ADD_BONUS_REWARDS = True
 
@@ -27,12 +27,14 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             new_point_threshold= 0.01, # minimum distance new point to all previous points
             forearm_orientation_name= "up", # ("up", "down")
             chamfer_r_factor= 0,
-            disagree_r_factor= 0,
             mesh_p_factor= 0,
             mesh_reconstruct_alpha= 0.01,
             palm_r_factor= 0,
             untouch_p_factor= 0,
             newpoints_r_factor= 0,
+            npoint_r_factor= 0,
+            ntouch_r_factor= 0,
+            random_r_factor= 0,
             knn_r_factor= 0,
             new_voxel_r_factor= 0,
             ground_truth_type= "nope",
@@ -79,12 +81,14 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.goal_threshold = goal_threshold
         self.new_point_threshold = new_point_threshold
         self.chamfer_r_factor = chamfer_r_factor
-        self.disagree_r_factor = disagree_r_factor
         self.mesh_p_factor = mesh_p_factor
         self.mesh_reconstruct_alpha = mesh_reconstruct_alpha
         self.palm_r_factor = palm_r_factor
         self.untouch_p_factor = untouch_p_factor
         self.newpoints_r_factor = newpoints_r_factor
+        self.npoint_r_factor = npoint_r_factor
+        self.ntouch_r_factor = ntouch_r_factor
+        self.random_r_factor = random_r_factor
         self.knn_r_factor = knn_r_factor
         self.ground_truth_type = ground_truth_type
         self.use_voxel = use_voxel
@@ -244,28 +248,23 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def get_chamfer_reward(self, chamfer_distance_loss):
         chamfer_reward = 0
-        if self.chamfer_r_factor and "nope" not in self.ground_truth_type:
+        if "nope" not in self.ground_truth_type:
             chamfer_reward += (0.1-chamfer_distance_loss) * 10
-        elif self.disagree_r_factor:
+        else:
             chamfer_reward += self.loss_transform(chamfer_distance_loss) * 10
         return chamfer_reward
 
-    def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
-        chamfer_distance_loss = 1.0
-        if self.chamfer_r_factor and "nope" not in self.ground_truth_type:
-            if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-                gt_dist1, gt_dist2 = chamferdist(torch.FloatTensor([self.obj_current_gt]).cuda(), torch.FloatTensor([current_pos_list]).cuda())
-                chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
-        elif self.disagree_r_factor:
-            if is_touched and current_pos_list != [] and previous_pos_list != []:
-                try:
-                    # dist1, dist2 = chamferdist(torch.FloatTensor([previous_pos_list]).cuda(), torch.FloatTensor([current_pos_list]).cuda())
-                    dist_forward = chamferdist(torch.FloatTensor([previous_pos_list]).cuda(), torch.FloatTensor([current_pos_list]).cuda())
-                    # chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
-                    chamfer_distance_loss = dist_forward.detach().cpu().item()
-                except:
-                    print(">>> Error chamfer loss")
-        return chamfer_distance_loss
+    # def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
+    #     chamfer_distance_loss = 0.0
+    #     if "nope" not in self.ground_truth_type:
+    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+    #             gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
+    #             chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
+    #     else:
+    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
+    #             dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
+    #             chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
+    #     return chamfer_distance_loss
 
     def get_knn_reward(self):
         return 0
@@ -289,6 +288,9 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         thbase_xpos = self.data.site_xpos[self.thbase_obj_bid].ravel()
         reward = 0.0
         untouched_p = 0.0
+        # variant npoint and ntouch
+        npoint_r = 0
+        ntouch_r = 0
         # palm close to object reward
         palm_r = self.get_basic_reward(obj_init_xpos, palm_xpos) if self.palm_r_factor else 0
         palm_r += self.get_basic_reward(obj_init_xpos, ffknuckle_xpos) if self.palm_r_factor else 0
@@ -308,6 +310,10 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             if "contact" in self.sim.model.geom_id2name(contact.geom1) or "contact" in self.sim.model.geom_id2name(contact.geom2):
                 current_pos_list.append(contact.pos.tolist())
                 is_touched = True
+                ntouch_r += 1
+
+        # if is_touched:
+        #     ntouch_r += 1
         
         # untouch penalty
         untouched_p -= 0.01 if self.untouch_p_factor and not is_touched else 0
@@ -329,6 +335,8 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         for pos in current_pos_list:
             if pos not in next_pos_list:
                 next_pos_list.append(pos)  
+            if self.npoint_r_factor:
+                npoint_r += 1
             # new contact points
             if pos not in self.previous_contact_points and self.knn_r_factor:
                 min_pos_dist = 1
@@ -348,9 +356,9 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         # similar points penalty
         # penalty_sim = similar_points_cnt * 5
         # penalty_sim = self.get_penalty()
-        if self.chamfer_r_factor or self.disagree_r_factor:
-            chamfer_loss = self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
-            chamfer_r = 1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
+        if self.chamfer_r_factor:
+            chamfer_loss = 0 #self.get_chamfer_distance_loss(is_touched, previous_pos_list, next_pos_list)
+            chamfer_r = 0 #1 / (chamfer_loss) if chamfer_loss > 0 else 0 # self.get_chamfer_reward(chamfer_loss)
             # chamfer_r -= 300
 
         self.previous_contact_points = next_pos_list.copy()
@@ -374,11 +382,15 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
-        reward += self.chamfer_r_factor * chamfer_r + self.disagree_r_factor * chamfer_r
+        reward += self.chamfer_r_factor * chamfer_r
         reward += self.newpoints_r_factor * newpoints_r
         reward += self.mesh_p_factor * mesh_p
         reward += self.knn_r_factor * knn_r
         reward += self.new_voxel_r_factor * new_voxel_r
+        reward += self.npoint_r_factor * npoint_r
+        reward += self.ntouch_r_factor * ntouch_r
+        if self.random_r_factor > 0:
+            reward = 0
         done = False
         info = dict(
             pointcloud= np.array(self.previous_contact_points), #np.array(uniform_samplegt),
@@ -388,6 +400,8 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
             chamfer_r= chamfer_r,
             newpoints_r= newpoints_r,
             new_voxel_r= new_voxel_r,
+            npoint_r= npoint_r,
+            ntouch_r= ntouch_r,
             mesh_p= mesh_p,
             knn_r= knn_r,
             total_reward_r= reward,
