@@ -74,14 +74,14 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 8,
         sample_mode = 'trajectories',
-        horizon= 500, 
+        horizon= 200, 
         num_traj = 60,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 3,
         evaluation_rollouts = 3,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
-            horizon=500,
+            horizon= 200,
             num_episodes= 1,
             mode='evaluation',
             width= 640, height= 480,
@@ -189,16 +189,8 @@ def main(args):
     idx = int(args.obj)
     if idx < 0:
         values = [
-                    # [True, False, "generic", "down", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
-                    # [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    # [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid
-                    # [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
-                    # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
-                    # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    [True, False, "generic", "down3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3], 1], # fix voxel grid
                 ]
-        # values = values[-idx-1:-idx]
     else:
         values = values[idx*2:min((idx+1)*2, len(values) - 1)]
     dir_names = ["voxel{}_rw{}_obj{}_orien{}".format(*tuple(str(vi) for vi in v[0:4])) for v in values]

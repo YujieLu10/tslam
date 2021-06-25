@@ -107,8 +107,14 @@ ENV/
 *.DS_Store
 
 # workspace files
+assets/
 data/local/
 data/result/
+tool/
+ifnet/objs
+ifnet/standard_voxel
+ifnet/shapenet
+ifnet/weights
 recon_tool/previous_step_vis/*
 mj_envs/mj_envs/envs/hand_manipulation_suite/combine/
 .vscode

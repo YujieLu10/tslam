@@ -7,7 +7,7 @@ res = 32
 # vis_data_tuple [obj_name, obj_orien, obj_pos, obj_scale, pc_frame, iternum]
 def save_voxel_visualization(vis_data_tuple, save_path):#env_args, pc_frame, iternum, is_best_policy):
     obj_name, obj_orientation, obj_relative_position, obj_scale, pc_frame, iternum = vis_data_tuple[0], vis_data_tuple[1], vis_data_tuple[2], vis_data_tuple[3], vis_data_tuple[4], vis_data_tuple[5]
-    uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
+    uniform_gt_data = np.load("/home/yourpathname/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
     x = data_rotate[:, 0].copy()

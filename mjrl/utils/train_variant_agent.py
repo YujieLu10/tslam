@@ -70,7 +70,7 @@ def _load_latest_policy_and_logs(agent, *, policy_dir, logs_dir):
 
 def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     obj_name, obj_orientation, obj_relative_position, obj_scale, best_eval_path = env_args[0], env_args[1], env_args[2], env_args[3], env_args[4]
-    uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
+    uniform_gt_data = np.load("/home/yourpathname/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
     x = data_rotate[:, 0].copy()
@@ -217,8 +217,8 @@ def train_variant_agent(job_name, agent,
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
     if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
-    best_eval_path = '/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
-    best_policy_path = '/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+    best_eval_path = '/home/yourpathname/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+    best_policy_path = '/home/yourpathname/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
     if not obj_name == "generic":
         if os.path.isdir(best_policy_path) == False: os.makedirs(best_policy_path)
         if os.path.isdir(best_eval_path) == False: os.makedirs(best_eval_path)
@@ -309,8 +309,8 @@ def train_variant_agent(job_name, agent,
                     obj_scale = obj_to_scale_map[obj_name]
                     if obj_name == "heart":
                         obj_orientation = [-1.57, 0, 0]
-                    best_eval_path = '/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
-                    best_policy_path = '/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+                    best_eval_path = '/home/yourpathname/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
+                    best_policy_path = '/home/yourpathname/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
                     if os.path.isdir(best_policy_path) == False: os.makedirs(best_policy_path)
                     if os.path.isdir(best_eval_path) == False: os.makedirs(best_eval_path)
 

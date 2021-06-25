@@ -69,7 +69,7 @@ def _load_latest_policy_and_logs(agent, *, policy_dir, logs_dir):
     raise RuntimeError("Log file exists, but cannot find any saved policy.")
 
 def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, pc_frame, iternum, is_best_policy):
-    uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
+    uniform_gt_data = np.load("/home/yourpathname/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
     x = data_rotate[:, 0].copy()
@@ -132,7 +132,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     # print(len(map_list) / sep_x / sep_y / sep_z )
 
     is_best_reconstruct = True
-    files = os.listdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/'.format(obj_name, reset_mode_conf, reward_conf))
+    files = os.listdir('/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}/'.format(obj_name, reset_mode_conf, reward_conf))
     for file in files:
         if "overlap" in file and "png" in file:
             file_str = str(file)
@@ -152,7 +152,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_overlap-{}.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
+        plt.savefig('/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_overlap-{}.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
     plt.close()
 
@@ -160,7 +160,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax.set_zlim(1,20)
     ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/gt.png'.format(obj_name, reset_mode_conf, reward_conf))    
+        plt.savefig('/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}/gt.png'.format(obj_name, reset_mode_conf, reward_conf))    
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
 
@@ -168,7 +168,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax.set_zlim(1,20)
     ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy or is_best_reconstruct:
-        plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_exp.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
+        plt.savefig('/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_exp.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
     return is_best_reconstruct, occupancy
@@ -202,8 +202,8 @@ def train_agent(job_name, agent,
     if os.path.isdir('iterations') == False: os.mkdir('iterations')
     if os.path.isdir('2dpointcloud') == False: os.mkdir('2dpointcloud')
     if os.path.isdir('pointcloudnpz') == False: os.mkdir('pointcloudnpz')
-    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf))
-    if os.path.isdir('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf))
+    if os.path.isdir('/home/yourpathname/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/yourpathname/prox/tslam/data/result/best_policy/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf))
+    if os.path.isdir('/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf)) == False: os.makedirs('/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}'.format(obj_name, reset_mode_conf, reward_conf))
     if os.path.isdir('voxel') == False: os.mkdir('voxel')
     if os.path.isdir('logs') == False and agent.save_logs == True: os.mkdir('logs')
     best_policy = copy.deepcopy(agent.policy)
@@ -306,10 +306,10 @@ def train_agent(job_name, agent,
                 # 3d voxel visualization
                 is_best_reconstruct, occupancy = save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, pc_frame, i, is_best_policy)
                 if is_best_policy or is_best_reconstruct:
-                    pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}/bp{}_br{}_best_policy.pickle'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
+                    pickle.dump(best_policy, open('/home/yourpathname/prox/tslam/data/result/best_policy/{}/{}/{}/bp{}_br{}_best_policy.pickle'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
                 if is_best_policy or is_best_reconstruct:
                     np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
-                    np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
+                    np.savez_compressed("/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
                 # else:
                 #     np.savez_compressed("pointcloudnpz/pointcloud_"+str(i)+".npz",pcd=pc_frame)
                 
@@ -318,7 +318,7 @@ def train_agent(job_name, agent,
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
                 if is_best_policy or is_best_reconstruct:
                     plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
-                    plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
+                    plt.savefig("/home/yourpathname/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
                 # else:
                 #     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()

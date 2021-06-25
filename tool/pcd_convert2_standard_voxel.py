@@ -67,7 +67,7 @@ for root, dirs, files in os.walk("../../prox/tslam/data/result/{}/".format(eval_
             print(">>> save {}".format(save_trans_file_path))
             
             # load uniform gt
-            uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(voxel_cls))['pcd']
+            uniform_gt_data = np.load("/home/yourpathname/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(voxel_cls))['pcd']
             vis_gt_data = get_transform_gt_data(uniform_gt_data, voxel_cls, obj_relative_position_down if "down" in root else obj_relative_position_up)
             # load pcd of max overlap with ground truth
             max_overlap = 0

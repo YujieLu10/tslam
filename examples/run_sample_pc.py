@@ -89,13 +89,13 @@ def run_experiment(log_dir, args):
             )
             np.save(os.path.join(log_dir, "pointcloud.np"), pc)
             
-        # if (i+1) <= 100:
-        #     frame = env.env.env.sim.render(width=640, height=480,
-        #                         mode='offscreen', camera_name="view_1", device_id=0)
-        #     frame = np.transpose(frame[::-1, :, :], (2,0,1))
-        #     gif_frames.append(frame)
-        # if (i+1) == 100:
-        #     logger.log_gif("rendered", gif_frames, i)
+        if (i+1) <= 100:
+            frame = env.env.env.sim.render(width=640, height=480,
+                                mode='offscreen', camera_name="view_1", device_id=0)
+            frame = np.transpose(frame[::-1, :, :], (2,0,1))
+            gif_frames.append(frame)
+        if (i+1) == 100:
+            logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_data()
     

@@ -8,12 +8,12 @@ np.set_printoptions(threshold=np.inf)
 # prepare some coordinates
 # [3, 4, 13, 14, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 154, 155, 156, 157, 158]
 # 2 2 2
-# /home/jianrenw/prox/tslam/data/local/agent/20210506/resetnormal/gtsample/voxelFalse_rwFalse_obj4_orienup_[-1.57, 0, 0]_[0, -0.14, 0.22]_[-1.57, 0, 0]_[0, -0.7, 0.17]/cf0_knn0_vr1_lstd0.5_knnk5_vconf['3d', 0, 0.01, False]_sensorFalse/agent/run_0/2dnewpointcloud/obj4_step_299.npz
-# gtdata = np.load("/home/jianrenw/prox/tslam/data/local/agent/gt_pcloud/groundtruth_obj4.npz")['pcd']
+# /home/yourpathname/prox/tslam/data/local/agent/20210506/resetnormal/gtsample/voxelFalse_rwFalse_obj4_orienup_[-1.57, 0, 0]_[0, -0.14, 0.22]_[-1.57, 0, 0]_[0, -0.7, 0.17]/cf0_knn0_vr1_lstd0.5_knnk5_vconf['3d', 0, 0.01, False]_sensorFalse/agent/run_0/2dnewpointcloud/obj4_step_299.npz
+# gtdata = np.load("/home/yourpathname/prox/tslam/data/local/agent/gt_pcloud/groundtruth_obj4.npz")['pcd']
 
-# uniform_gt_data = np.load("/home/jianrenw/prox/tslam/test_o3d.npz")['pcd']
-# uniform_gt_data = np.load("/home/jianrenw/prox/tslam/uniform_glass_o3d.npz")['pcd']
-uniform_gt_data = np.load("/home/jianrenw/prox/tslam/uniform_donut_o3d.npz")['pcd']
+# uniform_gt_data = np.load("/home/yourpathname/prox/tslam/test_o3d.npz")['pcd']
+# uniform_gt_data = np.load("/home/yourpathname/prox/tslam/uniform_glass_o3d.npz")['pcd']
+uniform_gt_data = np.load("/home/yourpathname/prox/tslam/uniform_donut_o3d.npz")['pcd']
 # print(data['pcd'])
 # obj4:0.0008 obj1:0.015 obj2:0.01
 data_scale = uniform_gt_data * 0.01
@@ -33,12 +33,12 @@ data_trans[:, 2] += 0.23
 
 uniform_gt_data = data_trans.copy()
 
-for root, dirs, files in os.walk("/home/jianrenw/prox/tslam/data/local/train_adroit/20210516/resetnormal/gtsample/"):
+for root, dirs, files in os.walk("/home/yourpathname/prox/tslam/data/local/train_adroit/20210516/resetnormal/gtsample/"):
     if "pointcloud_573.npz" in files and "obj2" in root:
         print(root)
         data = np.load(os.path.join(root, "pointcloud_597.npz"))['pcd']
 # for step in [49]:#, 99, 149, 249, 299]:
-# data = np.load("/home/jianrenw/prox/tslam/voxel/2dnewpointcloud/obj4_orien__step_{}.npz".format(step))['pcd']
+# data = np.load("/home/yourpathname/prox/tslam/voxel/2dnewpointcloud/obj4_orien__step_{}.npz".format(step))['pcd']
 
 
 resolution = 0.01

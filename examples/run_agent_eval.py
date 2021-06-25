@@ -9,15 +9,15 @@ import numpy as np
 import torch
 from colorsys import hsv_to_rgb
 import pickle
-# sys.path.append("/home/jianrenw/prox/tslam")
+# sys.path.append("/home/yourpathname/prox/tslam")
 from tool.visualization import save_voxel_visualization
 import matplotlib.pyplot as plt
 from mjrl.policies.gaussian_mlp import MLP
 from mjrl.utils import gym_env
 import shutil
 
-# save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval"
-save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_supp"
+# save_agent_eval_root = "/home/yourpathname/prox/tslam/data/result/agent_eval"
+save_agent_eval_root = "/home/yourpathname/prox/tslam/data/result/agent_eval_supp"
 
 def main(affinity_code, log_dir, run_ID, **kwargs):
     affinity = affinity_from_code(affinity_code)
@@ -76,30 +76,21 @@ def run_experiment(log_dir, args):
         policy = MLP(env.spec, **args["policy_kwargs"])
 
     if args["sample_method"] == "agent" or args["sample_method"] == "explore":
-        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
-        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", "cup", conf_eval_dir.replace("10k", "500").replace("upfront", "fixup").replace("upback", "fixup").replace("upleft", "fixup").replace("upright", "fixup").replace("downfront", "fixup").replace("downback", "fixup").replace("downleft", "fixup").replace("downright", "fixup"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
-        # ours
-        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours_coverage.pickle"), 'rb'))
-        # knn chamfer
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
-        # if int(args["env_kwargs"]["knn_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "knn.pickle"), 'rb'))
-        # elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 3:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
-        # elif int(args["env_kwargs"]["chamfer_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "chamfer.pickle"), 'rb'))
-        # elif int(args["env_kwargs"]["ntouch_r_factor"]) == 1: #it's npoints actually
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ntouch.pickle"), 'rb'))
-        # elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 0:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "curiosity.pickle"), 'rb'))
-        #     # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
-        # elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 0 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "coverage.pickle"), 'rb'))
-        # elif int(args["env_kwargs"]["disagree_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "disagree.pickle"), 'rb'))
-        # other policy no 500
-        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
-        # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
+        if int(args["env_kwargs"]["knn_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "knn.pickle"), 'rb'))
+        elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 3:
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["chamfer_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "chamfer.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["ntouch_r_factor"]) == 1: #it's npoints actually
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "ntouch.pickle"), 'rb'))
+        elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 0:
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "curiosity.pickle"), 'rb'))
+            # policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 0 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "coverage.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["disagree_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/yourpathname/prox/tslam/data/result/eval_policy", "disagree.pickle"), 'rb'))
 
     gif_frames = list()
     pc_frames = list()
@@ -116,12 +107,12 @@ def run_experiment(log_dir, args):
         elif args["sample_method"] == "policy":
             obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
 
-        # logger.log_scalar("step", i, i)
-        # logger.log_scalar("total_reward", rew, i)
-        # logger.log_scalar("n_points", len(info["pointcloud"]), i)
-        # for k, v in info.items():
-        #     if "_p" in k or "_r" in k or "occupancy" in k:
-        #         logger.log_scalar(k, v, i)
+        logger.log_scalar("step", i, i)
+        logger.log_scalar("total_reward", rew, i)
+        logger.log_scalar("n_points", len(info["pointcloud"]), i)
+        for k, v in info.items():
+            if "_p" in k or "_r" in k or "occupancy" in k:
+                logger.log_scalar(k, v, i)
         
         if (i+1) % int(200) == 0:
             pc_frame = np.array(info["pointcloud"])

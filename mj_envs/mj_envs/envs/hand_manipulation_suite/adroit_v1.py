@@ -188,7 +188,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         return voxel_idx
 
     def generate_uniform_gt_voxel(self):
-        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(self.obj_name))['pcd']
+        uniform_gt_data = np.load("/home/yourpathname/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(self.obj_name))['pcd']
         data_scale = uniform_gt_data * self.obj_scale
         data_rotate = data_scale.copy()
         x = data_rotate[:, 0].copy()
@@ -303,7 +303,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         return 0
 
     def step(self, a):
-        # uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
+        # uniform_samplegt = np.load('/home/yourpathname/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
         a = np.clip(a, -1.0, 1.0)
         a = self.act_mid + a*self.act_rng
@@ -480,7 +480,7 @@ class AdroitEnvV1(mujoco_env.MujocoEnv, utils.EzPickle):
         self.generate_uniform_gt_voxel()
 
         if self.ground_truth_type == "sample":
-            self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(self.obj_name)))['pcd']
+            self.obj_current_gt = np.load(os.path.join("/home/yourpathname/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(self.obj_name)))['pcd']
 
         current_reset = False
         if self.reset_mode == "random" and random.randint(0,9) > 6:
