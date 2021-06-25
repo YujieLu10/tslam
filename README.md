@@ -4,7 +4,9 @@ Intricate behaviors an organism can exhibit is predicated on its ability to sens
 
 ## Installation
 
-You should create a new conda environment and do `pip install -e .`. Details refering to [here](./setup/README.md)
+You can run `python examples/launch_train_adroit.py` to train the agent for ours, our variants and baselines. To evaluate the agent, you can run `python examples/launch_agent_eval.py`.
+
+After preprocessing the point cloud, you can navigate to ifnet folder, and run `sh generate.sh 1` to generate mesh and evaluate the reconstruction metrics by `python data_processing/evaluate_gather.py -voxel_input -res 32 -generation_path ../data/result/agent_eval_standard_voxel/exp/`.
 
 ## NOTES
 
