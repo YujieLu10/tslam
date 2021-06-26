@@ -22,8 +22,7 @@ def gen_iterator(out_path, dataset, gen_p, vis_type, res, model_type, is_pcloud,
     if not os.path.exists(os.path.join(out_path, 'generation')):
         os.makedirs(os.path.join(out_path, 'generation'))
     for pose_num_str in pose_num_list:
-        # for iternum in range(499, 10000, 500):
-        for iternum in [499]:#, 999, 1499]:
+        for iternum in [199]:
             # export_file_path = os.path.join(out_path, 'generation', 'iternum_{}_{}_{}_{}_pose{}_surface_reconstruction.off'.format(iternum, vis_type, model_type, res, pose_num_str))
             export_file_path = os.path.join(out_path, 'generation', 'uniform_gt_trans_{}_{}_surface_reconstruction.off'.format(model_type, res))
             if os.path.exists(export_file_path):
