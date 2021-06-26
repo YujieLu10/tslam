@@ -6,7 +6,6 @@ Intricate behaviors an organism can exhibit is predicated on its ability to sens
 We modify mjrl module based on the repo: https://github.com/vikashplus/mjrl.
 Please refer to https://github.com/vikashplus/mj_envs for origin version of mj_envs.
 For Adroit repo, please refer to https://github.com/vikashplus/Adroit.
-For origin version of reconstruction repo, please refer to https://github.com/jchibane/if-net.
 ## Installation
 
 You can run `python examples/launch_train_adroit.py` to train the agent for ours, our variants and baselines. To evaluate the agent, you can run `python examples/launch_agent_eval.py`.
