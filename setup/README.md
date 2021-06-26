@@ -1,8 +1,3 @@
-# Refrence Module
-We modify mjrl module based on the repo: https://github.com/vikashplus/mjrl.
-Please refer to https://github.com/vikashplus/mj_envs for origin version of mj_envs.
-For Adroit repo, please refer to https://github.com/vikashplus/Adroit.
-
 # Installation
 
 A short guide to install this package is below. The package relies on `mujoco-py` which might be the trickiest part of the installation. See `known issues` below and also instructions from the mujoco-py [page](https://github.com/openai/mujoco-py) if you are stuck with mujoco-py installation.
