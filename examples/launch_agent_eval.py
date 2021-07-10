@@ -6,7 +6,7 @@ import numpy as np
 
 seed = 123
 default_config = dict(
-    env_name = "adroit-v0", # adroit-v0 heuristic adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
+    env_name = "adroit-v2", # adroit-v0 heuristic adroit-v2: our best policy + coverage + curiosity # adroit-v3: variant using knn reward or chamfer reward # adroit-v4: new points reward and only touch reward
     env_kwargs = dict(
         obj_orientation= [0, 0, 0], # object orientation
         obj_relative_position= [0, 0.5, 0.07], # object position related to hand (z-value will be flipped when arm faced down)
@@ -21,14 +21,14 @@ default_config = dict(
         palm_r_factor= 0,
         untouch_p_factor= 0,
         newpoints_r_factor= 0,
-        npoint_r_factor= 0,
-        ntouch_r_factor= 0,
-        random_r_factor= 0,
+        # npoint_r_factor= 0,
+        # ntouch_r_factor= 0,
+        # random_r_factor= 0,
         ground_truth_type= "nope",
         knn_r_factor= 0,
         new_voxel_r_factor= 0,
-        # coverage_voxel_r_factor= 0, # new and touched objects
-        # curiosity_voxel_r_factor= 0, # new voxel
+        coverage_voxel_r_factor= 0, # new and touched objects
+        curiosity_voxel_r_factor= 0, # new voxel
         use_voxel= False,
         forearm_orientation= [0, 0, 0], # forearm orientation
         forearm_relative_position= [0, 0.5, 0.07], # forearm position related to hand (z-value will be flipped when arm faced down)
@@ -53,12 +53,12 @@ default_config = dict(
     ),
     sample_method = "agent", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(400),
+    total_timesteps = int(200),
     seed= seed,
 )
 
 def main(args):
-    experiment_title = "agent_random" #"sample_pointclouds"
+    experiment_title = "agent" #"sample_pointclouds"
 
     # set up variants
     variant_levels = list()
@@ -91,71 +91,73 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        ["glass", 0.015],
-        ["donut", 0.01],
-        ["heart", 0.0006],
-        ["airplane", 1],
-        ["alarmclock", 1],
-        ["apple", 1],
-        ["banana", 1],
-        ["binoculars", 1],
-        ["body", 0.1],
-        ["bowl", 1],
-        ["camera", 1],
-        ["coffeemug", 1],
-        ["cubelarge", 1],
-        ["cubemedium", 1],
-        ["cubemiddle", 1],
-        ["cubesmall", 1],
-        ["cup", 1],
-        ["cylinderlarge", 1],
-        ["cylindermedium", 1],
-        ["cylindersmall", 1],
-        ["doorknob", 1],
-        ["duck", 1],
-        ["elephant", 1],
-        ["eyeglasses", 1],
-        ["flashlight", 1],
-        ["flute", 1],
-        ["fryingpan", 0.8],
-        ["gamecontroller", 1],
-        ["hammer", 1],
-        ["hand", 1],
-        ["headphones", 1],
-        ["knife", 1],
-        ["lightbulb", 1],
-        ["mouse", 1],
-        ["mug", 1],
-        ["phone", 1],
-        ["piggybank", 1],
-        ["pyramidlarge", 1],
-        ["pyramidmedium", 1],
-        ["pyramidsmall", 1],
-        ["rubberduck", 1],
-        ["scissors", 1],
-        ["spherelarge", 1],
-        ["spheremedium", 1],
-        ["spheresmall", 1],
-        ["stamp", 1],
-        ["stanfordbunny", 1],
-        ["stapler", 1],
-        ["table", 0.5],
-        ["teapot", 1],
-        ["toothbrush", 1],
-        ["toothpaste", 1],
-        ["toruslarge", 1],
-        ["torusmedium", 1],
-        ["torussmall", 1],
-        ["train", 1],
-        ["watch", 1],
-        ["waterbottle", 1],
-        ["wineglass", 1],
-        ["wristwatch", 1],
+        ["glass", 0.015, [0, 0, 0], [0, 0, 0.3]],
+        # ["donut", 0.01, [0, 0, 0], [0, 0, 0.3]],
+        # ["heart", 0.0006, [0, 0, 0], [0, 0, 0.3]],
+        # ["airplane", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["alarmclock", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["apple", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["banana", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["binoculars", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["body", 0.1, [0, 0, 0], [0, 0, 0.3]],
+        # ["bowl", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["camera", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["coffeemug", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cubelarge", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cubemedium", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cubemiddle", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cubesmall", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cup", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cylinderlarge", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cylindermedium", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["cylindersmall", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["doorknob", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["duck", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["elephant", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["eyeglasses", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["flashlight", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["flute", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["fryingpan", 0.8, [0, 0, 0], [0, 0, 0.3]],
+        # ["gamecontroller", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["hammer", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["hand", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["headphones", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["knife", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["lightbulb", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["mouse", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["mug", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["phone", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["piggybank", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["pyramidlarge", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["pyramidmedium", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["pyramidsmall", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["rubberduck", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["scissors", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["spherelarge", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["spheremedium", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["spheresmall", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["stamp", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["stanfordbunny", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["stapler", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["table", 0.5, [0, 0, 0], [0, 0, 0.3]],
+        # ["teapot", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["toothbrush", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["toothpaste", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["toruslarge", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["torusmedium", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["torussmall", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["train", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["watch", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["waterbottle", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["wineglass", 1, [0, 0, 0], [0, 0, 0.3]],
+        # ["wristwatch", 1, [0, 0, 0], [0, 0, 0.3]],
     ]
-    dir_names = ["obj{}_scale{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["obj{}".format(*tuple(str(vi) for vi in v[0:1])) for v in values]
     keys = [
         ("env_kwargs", "obj_name"),
         ("env_kwargs", "obj_scale"),
+        ("env_kwargs", "obj_orientation"),
+        ("env_kwargs", "obj_relative_position"),
     ] # each entry in the list is the string path to your config
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
@@ -168,38 +170,20 @@ def main(args):
         # [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.17]],
         # [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.17]],
         # [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.17]],
-        [True, False, "10kdownback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3]], # fix voxel grid
+        [True, False, "10kdownback", [-1.57, 0, 3.14151926],  [0, -0.7, 0.3]], # fix voxel grid
         # [True, False, "10kdownfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 0],  [0, 0.4, 0.3]],
         # [True, False, "10kdownright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 3.14151926],  [0.55, -0.15, 0.3]],
         # [True, False, "10kdownleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 3.14151926],  [-0.55, -0.15, 0.3]],
-        [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.14]],
+        # [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.03], [-1.57, 0, 0],  [0, -0.7, 0.14]],
         # [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.14]],
         # [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.14]],
         # [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.14]],
     ]
-    # generic policy with several hand poses
-    # idx = int(args.obj)
-    # if idx < 0:
-    #     values = [
-    #                 # [True, False, "generic", "down", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
-    #                 # [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-    #                 [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid
-    #                 [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-    #                 # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
-    #                 # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-    #                 # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
-    #                 # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-    #             ]
-    #     # values = values[-idx-1:-idx]
-    # else:
-    #     values = values[idx*2:min((idx+1)*2, len(values) - 1)]
     dir_names = ["voxel{}_rw{}_orien{}".format(*tuple(str(vi) for vi in v[0:3])) for v in values]
     keys = [
         ("env_kwargs", "use_voxel"),
         ("policy_kwargs", "reinitialize"),
         ("env_kwargs", "forearm_orientation_name"),
-        ("env_kwargs", "obj_orientation"),
-        ("env_kwargs", "obj_relative_position"),
         ("env_kwargs", "forearm_orientation"),
         ("env_kwargs", "forearm_relative_position"),
     ] # each entry in the list is the string path to your config
@@ -209,29 +193,29 @@ def main(args):
     values = [
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
-        [0, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # heuristic
+        # [0, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # heuristic
         # [1, 0, 0, 0.5, 5, ['3d', 6], [True, False]], # chamfer variant | npoint
-        # [1, 3, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [1, 3, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [1, 0.5, ['3d', 6], [True, False]], # disagreef
         # [0, 0, 1, 0.5, 5, ['3d', 8], [True, False]],
         # [0, 0, 1, 0.5, 5, ['3d', 0.02], [True, False]],
     ]
     # dir_names = ["cf{}_knn{}_vr{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
-    dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
-    # dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # dir_names = ["npoint{}_ntouch{}_random{}_lstd{}_knnk{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    dir_names = ["curf{}covf{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     # dir_names = ["disagreef{}_lstd{}_vconf{}_obst{}".format(*tuple(str(vi) for vi in v)) for v in values]
     keys = [
-        # ("env_kwargs", "curiosity_voxel_r_factor"),
-        # ("env_kwargs", "coverage_voxel_r_factor"),
+        ("env_kwargs", "curiosity_voxel_r_factor"),
+        ("env_kwargs", "coverage_voxel_r_factor"),
         # ("env_kwargs", "chamfer_r_factor"),
         # ("env_kwargs", "knn_r_factor"),
         # ("env_kwargs", "new_voxel_r_factor"),
-        ("env_kwargs", "npoint_r_factor"),
-        ("env_kwargs", "ntouch_r_factor"),
-        ("env_kwargs", "random_r_factor"),
+        # ("env_kwargs", "npoint_r_factor"),
+        # ("env_kwargs", "ntouch_r_factor"),
+        # ("env_kwargs", "random_r_factor"),
         # ("env_kwargs", "disagree_r_factor"),
         ("policy_kwargs", "init_log_std"),
-        ("env_kwargs", "knn_k"),
+        # ("env_kwargs", "knn_k"),
         ("env_kwargs", "voxel_conf"),
         ("env_kwargs", "obs_type"),
     ]
@@ -239,8 +223,8 @@ def main(args):
 
     values = [
         # ["action"],
-        ["policy"], # random
-        # ["agent"],
+        # ["policy"], # random
+        ["agent"],
         # ["heuristic"],
         # ["explore"],
     ]

@@ -17,14 +17,15 @@ from mjrl.utils import gym_env
 import shutil
 
 # save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval"
-save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_supp"
+# save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_supp"
+save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_camera"
 
 def main(affinity_code, log_dir, run_ID, **kwargs):
     affinity = affinity_from_code(affinity_code)
 
     args = load_variant(log_dir)
 
-    name = "agent_random" #"sample_pointclouds"
+    name = "agent" #"sample_pointclouds"
     # This helps you know what GPU is recommand to you for this experiment
     # gpu_idx = affinity["cuda_idx"]
     
@@ -123,18 +124,18 @@ def run_experiment(log_dir, args):
         #     if "_p" in k or "_r" in k or "occupancy" in k:
         #         logger.log_scalar(k, v, i)
         
-        if (i+1) % int(200) == 0:
-            pc_frame = np.array(info["pointcloud"])
-            # ====== voxel visualization
-            vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
-            overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
-            # ====== 3d pointcloud
-            np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_pointcloud_overlap-{}.npz".format(overlap),pcd=pc_frame)
-            # ====== 2d visualization
-            ax = plt.axes()
-            ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-            plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
-            plt.close()
+        # if (i+1) % int(200) == 0:
+        #     pc_frame = np.array(info["pointcloud"])
+        #     # ====== voxel visualization
+        #     vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
+        #     overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
+        #     # ====== 3d pointcloud
+        #     np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_pointcloud_overlap-{}.npz".format(overlap),pcd=pc_frame)
+        #     # ====== 2d visualization
+        #     ax = plt.axes()
+        #     ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
+        #     plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
+        #     plt.close()
 
         # record gif
         if i < 800:

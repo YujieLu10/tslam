@@ -189,14 +189,10 @@ def main(args):
     idx = int(args.obj)
     if idx < 0:
         values = [
-                    # [True, False, "generic", "down", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1],
-                    # [True, False, "generic", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    # [True, False, "generic", "fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid
-                    # [True, False, "generic", "fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                     # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
                     # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # long horizon -7
-                    # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
+                    [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3], 1], # long horizon -7
+                    [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.13], 1],
                 ]
         # values = values[-idx-1:-idx]
     else:
@@ -219,7 +215,10 @@ def main(args):
     values = [
         # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
         # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
-        [1, 2, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [1, 5, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [5, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [5, 5, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [1, 0.5, ['3d', 6], [True, False]], # disagreement variant
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
