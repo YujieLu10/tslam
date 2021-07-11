@@ -138,7 +138,7 @@ def run_experiment(log_dir, args):
         #     plt.close()
 
         # record gif
-        if i < 800:
+        if i < 200:
             frame = env.env.env.sim.render(width=640, height=480,
                                 mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))

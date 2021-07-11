@@ -365,20 +365,20 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         # voxel obs and new voxel reward
         if self.voxel_array is not None and len(self.voxel_array) == 0:
             self.voxel_array = [0] * self.voxel_num
-        if (self.coverage_voxel_r_factor > 0 or self.new_voxel_r_factor > 0) and len(self.previous_contact_points) > 0:
+        if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
-                # if self.is_in_voxel_bound(point[0], point[1]):
                 idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
-                if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] == 0: # new voxel touched
-                    new_voxel_r += 1
-                    coverage_voxel_r += 1
+                if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] <= 0: # new voxel touched (known empty/unknown => known obj)
+                    if self.coverage_voxel_r_factor > 0: coverage_voxel_r += 1
+                    if self.new_voxel_r_factor > 0: new_voxel_r += 1
                     self.voxel_array[min(idx, self.voxel_num-1)] = 1
-        if self.curiosity_voxel_r_factor > 0:
-            for finger_pos in [ffknuckle_pos, mfknuckle_pos, rfknuckle_pos, lfmetacarpal_pos, thbase_pos]:
-                finger_touch_idx = self.get_2d_voxel_idx(finger_pos[0], finger_pos[1]) if self.voxel_type == '2d' else self.get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2])
-                if finger_touch_idx > 0 and self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] == 0: # new voxel explored
-                    curiosity_voxel_r += 1
-                    self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] = 1
+        # finger pos
+        for finger_pos in [ffknuckle_pos, mfknuckle_pos, rfknuckle_pos, lfmetacarpal_pos, thbase_pos]:
+            finger_touch_idx = self.get_2d_voxel_idx(finger_pos[0], finger_pos[1]) if self.voxel_type == '2d' else self.get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2])
+            if finger_touch_idx > 0 and self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] == 0: # unknown voxel explored
+                if self.curiosity_voxel_r_factor > 0: curiosity_voxel_r += 1
+                self.voxel_array[min(idx, self.voxel_num-1)] = -1
+
         denominator = len(self.gt_map_list) #len(np.array(self.voxel_array))
         voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
