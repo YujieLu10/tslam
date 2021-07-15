@@ -34,8 +34,8 @@ def save_voxel_visualization(vis_data_tuple, save_path):#env_args, pc_frame, ite
     gt_map_list = []
     for idx,val in enumerate(uniform_gt_data):
         idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.25) / resolution)
-        idx_z = math.floor((val[2] - 0.16) / resolution)
+        idx_y = math.floor((val[1] + 0.125) / resolution)
+        idx_z = math.floor((val[2] + 0.125) / resolution) 
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in gt_map_list:
             gt_map_list.append(name)
@@ -56,8 +56,8 @@ def save_voxel_visualization(vis_data_tuple, save_path):#env_args, pc_frame, ite
     map_list = []
     for idx,val in enumerate(data):
         idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.25) / resolution)
-        idx_z = math.floor((val[2] - 0.16) / resolution)
+        idx_y = math.floor((val[1] + 0.125) / resolution)
+        idx_z = math.floor((val[2] + 0.125) / resolution) 
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in map_list and name in gt_map_list:
             map_list.append(name)
