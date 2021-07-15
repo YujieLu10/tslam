@@ -1,3 +1,4 @@
+from mjrl.policies.gaussian_mlp import MLP
 from exptools.launching.affinity import affinity_from_code
 from exptools.launching.variant import load_variant
 from exptools.logging.context import logger_context
@@ -12,7 +13,6 @@ import pickle
 # sys.path.append("/home/jianrenw/prox/tslam")
 from tool.visualization import save_voxel_visualization
 import matplotlib.pyplot as plt
-from mjrl.policies.gaussian_mlp import MLP
 from mjrl.utils import gym_env
 import shutil
 
@@ -25,7 +25,7 @@ def main(affinity_code, log_dir, run_ID, **kwargs):
 
     args = load_variant(log_dir)
 
-    name = "agent" #"sample_pointclouds"
+    name = "unified_agent_eval" #"sample_pointclouds"
     # This helps you know what GPU is recommand to you for this experiment
     # gpu_idx = affinity["cuda_idx"]
     
@@ -55,7 +55,6 @@ def run_experiment(log_dir, args):
     elif "disagree_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["disagree_r_factor"]) > 0:
         conf_eval_dir = "geneTrue_rotTrue_{}/normal_disagreef{}".format(args["env_kwargs"]["forearm_orientation_name"], int(args["env_kwargs"]["disagree_r_factor"]))
     else: # heuristic
-        print(">>> heuristic")
         conf_eval_dir = "geneTrue_rotTrue_{}/normal_heuristic".format(args["env_kwargs"]["forearm_orientation_name"])
 
     save_agent_eval_dir = os.path.join(save_agent_eval_root, str(args["env_kwargs"]["obj_name"]), conf_eval_dir)
@@ -82,22 +81,22 @@ def run_experiment(log_dir, args):
         # ours
         # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours_coverage.pickle"), 'rb'))
         # knn chamfer
-        policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
-        # if int(args["env_kwargs"]["knn_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "knn.pickle"), 'rb'))
-        # elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 3:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
-        # elif int(args["env_kwargs"]["chamfer_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "chamfer.pickle"), 'rb'))
-        # elif int(args["env_kwargs"]["ntouch_r_factor"]) == 1: #it's npoints actually
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ntouch.pickle"), 'rb'))
-        # elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 0:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "curiosity.pickle"), 'rb'))
-        #     # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
-        # elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 0 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "coverage.pickle"), 'rb'))
-        # elif int(args["env_kwargs"]["disagree_r_factor"]) == 1:
-        #     policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "disagree.pickle"), 'rb'))
+        # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
+        if int(args["env_kwargs"]["knn_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "knn.pickle"), 'rb'))
+        elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 3:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ours.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["chamfer_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "chamfer.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["ntouch_r_factor"]) == 1: #it's npoints actually
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "ntouch.pickle"), 'rb'))
+        elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 1 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 0:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "curiosity.pickle"), 'rb'))
+            # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "500").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
+        elif "curiosity_voxel_r_factor" in args["env_kwargs"] and int(args["env_kwargs"]["curiosity_voxel_r_factor"]) == 0 and int(args["env_kwargs"]["coverage_voxel_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "coverage.pickle"), 'rb'))
+        elif int(args["env_kwargs"]["disagree_r_factor"]) == 1:
+            policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/eval_policy", "disagree.pickle"), 'rb'))
         # other policy no 500
         # policy = pickle.load(open(os.path.join("/home/jianrenw/prox/tslam/data/result/best_policy", str(args["env_kwargs"]["obj_name"]), conf_eval_dir.replace("10k", "").replace("upfront", "fixdown").replace("upback", "fixdown").replace("upleft", "fixdown").replace("upright", "fixdown").replace("downfront", "fixdown").replace("downback", "fixdown").replace("downleft", "fixdown").replace("downright", "fixdown"), "bpFalse_brTrue_best_policy.pickle"), 'rb'))
         # policy = pickle.load(open(os.path.join("/home/jianrenw/ziwenz/tslam/data/local/train_adroit/20210314", "obj" + str(args["env_kwargs"]["obj_bid_idx"]), "run_0/iterations", "best_policy.pickle"), 'rb'))
@@ -124,18 +123,18 @@ def run_experiment(log_dir, args):
         #     if "_p" in k or "_r" in k or "occupancy" in k:
         #         logger.log_scalar(k, v, i)
         
-        # if (i+1) % int(200) == 0:
-        #     pc_frame = np.array(info["pointcloud"])
-        #     # ====== voxel visualization
-        #     vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
-        #     overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
-        #     # ====== 3d pointcloud
-        #     np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_pointcloud_overlap-{}.npz".format(overlap),pcd=pc_frame)
-        #     # ====== 2d visualization
-        #     ax = plt.axes()
-        #     ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-        #     plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
-        #     plt.close()
+        if (i+1) % int(200) == 0:
+            pc_frame = np.array(info["pointcloud"])
+            # ====== voxel visualization
+            vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
+            overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
+            # ====== 3d pointcloud
+            np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_unifiedpose_alpha_pointcloud.npz",pcd=pc_frame)
+            # ====== 2d visualization
+            ax = plt.axes()
+            ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
+            plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
+            plt.close()
 
         # record gif
         if i < 200:
