@@ -88,8 +88,8 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     data = pc_frame
     resolution = 0.01
     sep_x = math.ceil(0.25 / resolution)
-    sep_y = math.ceil(0.225 / resolution)
-    sep_z = math.ceil(0.1 / resolution)
+    sep_y = math.ceil(0.25 / resolution)
+    sep_z = math.ceil(0.25 / resolution)
     x, y, z = np.indices((sep_x, sep_y, sep_z))
 
     cube1 = (x<0) & (y <1) & (z<1)
@@ -101,8 +101,8 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     gt_map_list = []
     for idx,val in enumerate(uniform_gt_data):
         idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.25) / resolution)
-        idx_z = math.floor((val[2] - 0.16) / resolution)
+        idx_y = math.floor((val[1] + 0.125) / resolution)
+        idx_z = math.floor((val[2] + 0.125) / resolution)
         if idx_z > 6:
             continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
@@ -116,8 +116,8 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     map_list = []
     for idx,val in enumerate(data):
         idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.25) / resolution)
-        idx_z = math.floor((val[2] - 0.16) / resolution)
+        idx_y = math.floor((val[1] + 0.125) / resolution)
+        idx_z = math.floor((val[2] + 0.125) / resolution)
         if idx_z > 6:
             continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
@@ -151,7 +151,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
-    if is_best_policy or is_best_reconstruct:
+    if is_best_policy:# or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_overlap-{}.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
     plt.close()
@@ -159,7 +159,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,20)
     ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy or is_best_reconstruct:
+    if is_best_policy:# or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/gt.png'.format(obj_name, reset_mode_conf, reward_conf))    
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
@@ -167,7 +167,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,20)
     ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy or is_best_reconstruct:
+    if is_best_policy:# or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_exp.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
@@ -305,9 +305,9 @@ def train_agent(job_name, agent,
 
                 # 3d voxel visualization
                 is_best_reconstruct, occupancy = save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, pc_frame, i, is_best_policy)
-                if is_best_policy or is_best_reconstruct:
+                if is_best_policy:# or is_best_reconstruct:
                     pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}/bp{}_br{}_best_policy.pickle'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
-                if is_best_policy or is_best_reconstruct:
+                if is_best_policy:# or is_best_reconstruct:
                     np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
                     np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
                 # else:
@@ -316,7 +316,7 @@ def train_agent(job_name, agent,
                 # pc_frames.append(pc_frame)
                 ax = plt.axes()
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-                if is_best_policy or is_best_reconstruct:
+                if is_best_policy:# or is_best_reconstruct:
                     plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
                     plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
                 # else:

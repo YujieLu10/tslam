@@ -77,11 +77,11 @@ default_config = dict(
         horizon= 500, 
         num_traj = 60,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
-        save_freq = 3,
-        evaluation_rollouts = 3,
+        save_freq = 5,
+        evaluation_rollouts = 5,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
-            horizon=500,
+            horizon=800,
             num_episodes= 1,
             mode='evaluation',
             width= 640, height= 480,
@@ -191,8 +191,9 @@ def main(args):
         values = [
                     # [True, False, "generic", "fixdown3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.27], 1], # fix voxel grid with 3dconv
                     # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
-                    [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3], 1], # long horizon -7
-                    [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.13], 1],
+                    # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3], 1], # long horizon -7
+                    # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.13], 1],
+                    [True, False, "generic", "unified3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926], [0, -0.56, 0.1], 1], # long horizon -7
                 ]
         # values = values[-idx-1:-idx]
     else:
@@ -215,10 +216,7 @@ def main(args):
     values = [
         # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
         # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
-        [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
-        [1, 5, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
-        [5, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
-        [5, 5, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [1, 3, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
         # [1, 0.5, ['3d', 6], [True, False]], # disagreement variant
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch
