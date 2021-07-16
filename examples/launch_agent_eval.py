@@ -53,7 +53,7 @@ default_config = dict(
     ),
     sample_method = "agent", # `action`:env.action_space.sample(), `policy`
     policy_path = "",
-    total_timesteps = int(200),
+    total_timesteps = int(800),
     seed= seed,
 )
 
@@ -162,22 +162,10 @@ def main(args):
     variant_levels.append(VariantLevel(keys, values, dir_names))
 
     values = [
-        # [True, False, "10kdownback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.28]], # fix voxel grid
-        # [True, False, "10kdownfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 0],  [0, 0.4, 0.28]],
-        # [True, False, "10kdownright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 3.14151926],  [0.55, -0.15, 0.28]],
-        # [True, False, "10kdownleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 3.14151926],  [-0.55, -0.15, 0.28]],
-        # [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17]],
-        # [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.17]],
-        # [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.17]],
-        # [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.17]],
         [True, False, "unifiedpose", [-1.57, 0, 3.14151926],  [0, -0.56, 0.1]], # fix voxel grid downback
         # [True, False, "10kdownfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 0],  [0, 0.4, 0.3]],
         # [True, False, "10kdownright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 3.14151926],  [0.55, -0.15, 0.3]],
         # [True, False, "10kdownleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 3.14151926],  [-0.55, -0.15, 0.3]],
-        # [True, False, "10kupback", [0, 0, 0],  [0, -0.14, 0.03], [-1.57, 0, 0],  [0, -0.7, 0.14]],
-        # [True, False, "10kupfront", [0, 0, 0],  [0, -0.14, 0.23], [1.57, 0, 3.14151926],  [0, 0.4, 0.14]],
-        # [True, False, "10kupleft", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, -1.57, 0],  [0.55, -0.15, 0.14]],
-        # [True, False, "10kupright", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 1.57, 0],  [-0.55, -0.15, 0.14]],
     ]
     dir_names = ["voxel{}_rw{}_orien{}".format(*tuple(str(vi) for vi in v[0:3])) for v in values]
     keys = [
