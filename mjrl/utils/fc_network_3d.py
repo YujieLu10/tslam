@@ -42,20 +42,21 @@ class FCNetwork3D(nn.Module):
         self.out_shift = torch.from_numpy(np.float32(out_shift)) if out_shift is not None else torch.zeros(self.act_dim)
         self.out_scale = torch.from_numpy(np.float32(out_scale)) if out_scale is not None else torch.ones(self.act_dim)
 
-    def forward(self, x):
+    def forward(self, x, x_voxel):
         # TODO(Aravind): Remove clamping to CPU
         # This is a temp change that should be fixed shortly
-        if x.is_cuda:
-            out = x.to('cpu')
-        else:
-            out = x
-        voxel_obs_1 = self.conv_1(out[:, -512:].reshape(-1,1,8,8,8))
+        # if x.is_cuda:
+        #     out = x.to('cpu')
+        # else:
+        #     out = x
+        voxel_obs_1 = self.conv_1(x_voxel.reshape(-1,1,8,8,8))
         voxel_obs_1_1 = self.conv_1_1(voxel_obs_1)
         voxel_obs_2 = self.conv_2(voxel_obs_1_1)
         voxel_obs_2_1 = self.conv_2_1(voxel_obs_2)
         voxel_obs_3 = self.conv_3(voxel_obs_2_1)
         voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
-        out[:, 68:-448] = voxel_obs_3_1.reshape(-1, 64)
+        x_voxel = voxel_obs_3_1.reshape(-1, 64)
+        # ================================================
         # out = out.narrow(1, 0, 132)
         # out = (out - self.in_shift)/(self.in_scale + 1e-8)
         # for i in range(len(self.fc_layers)-1):
@@ -64,9 +65,11 @@ class FCNetwork3D(nn.Module):
         # out = self.fc_layers[-1](out)
         # out = out * self.out_scale + self.out_shift
         # return out
-        out[:, 0:132] = (out[:, 0:132] - self.in_shift)/(self.in_scale + 1e-8)
+        # out[:, 0:132] = (out[:, 0:132] - self.in_shift)/(self.in_scale + 1e-8)
+        out = np.append(x.to('cpu'), x_voxel.to('cpu'), axis=1)
+        out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
-            out = self.fc_layers[i](out[:, 0:132])
+            out = self.fc_layers[i](out)
             out = self.nonlinearity(out)
         out = self.fc_layers[-1](out)
         out = out * self.out_scale + self.out_shift

@@ -285,11 +285,11 @@ def train_agent(job_name, agent,
             obj_scale = env_kwargs["obj_scale"]  
             policy_file = 'policy_%i.pickle' % i
             baseline_file = 'baseline_%i.pickle' % i
-            # pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
-            # pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
-            # pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
+            pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
+            pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
+            pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
 
-            # pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
+            pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
 
             # save videos and pointcloud and reconstruted mesh          
             if exptools:

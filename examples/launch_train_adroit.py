@@ -193,7 +193,7 @@ def main(args):
                     # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                     # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3], 1], # long horizon -7
                     # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.13], 1],
-                    [True, False, "generic", "unified3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926], [0, -0.56, 0.1], 1], # long horizon -7
+                    [True, False, "generic", "unified3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926], [0, -0.56, 0.2], 1], # long horizon -7
                 ]
         # values = values[-idx-1:-idx]
     else:
