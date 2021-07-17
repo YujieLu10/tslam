@@ -112,7 +112,7 @@ class MLP:
             act_var = Variable(torch.from_numpy(actions).float(), requires_grad=False)
         else:
             act_var = actions
-        mean = model(obs_var)
+        mean = model(obs_var[:, :-512], obs_var[:, -512:])
         zs = (act_var - mean) / torch.exp(log_std)
         LL = - 0.5 * torch.sum(zs ** 2, dim=1) + \
              - torch.sum(log_std) + \

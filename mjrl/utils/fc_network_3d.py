@@ -66,7 +66,7 @@ class FCNetwork3D(nn.Module):
         # out = out * self.out_scale + self.out_shift
         # return out
         # out[:, 0:132] = (out[:, 0:132] - self.in_shift)/(self.in_scale + 1e-8)
-        out = np.append(x.to('cpu'), x_voxel.to('cpu'), axis=1)
+        out = torch.cat((x.to('cpu'), x_voxel.to('cpu')), 1)
         out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
             out = self.fc_layers[i](out)
