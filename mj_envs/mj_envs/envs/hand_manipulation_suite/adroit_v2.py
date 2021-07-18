@@ -214,9 +214,9 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def get_voxel_idx(self, posx, posy, posz):
         resolution_x, resolution_y, resolution_z = math.ceil(0.25 / self.twod_sep), math.ceil(0.225 / self.twod_sep), math.ceil(0.1 / self.twod_sep)
-        idx_x = math.floor((posx + 0) / resolution_x)
-        idx_y = math.floor((posy + 0) / resolution_y)
-        idx_z = math.floor((posz - 0.05) / resolution_z)
+        idx_x = math.floor((posx + 0.125) / resolution_x)
+        idx_y = math.floor((posy + 0.125) / resolution_y)
+        idx_z = math.floor((posz + 0.125) / resolution_z)
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         return self.gt_map_list.index(name) if name in self.gt_map_list else -1
 
