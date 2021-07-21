@@ -19,12 +19,12 @@ class FCNetwork3D(nn.Module):
         self.layer_sizes = (self.obs_dim, ) + hidden_sizes + (act_dim, )
         self.set_transformations(in_shift, in_scale, out_shift, out_scale)
         # conv3d
-        self.conv_1 = nn.Conv3d(1, 1, 3, padding=0) # out: 32 
-        self.conv_1_1 = nn.Conv3d(1, 1, 3, padding=0) # out: 32
-        self.conv_2 = nn.Conv3d(1, 1, 3, padding=1) # out: 16 
-        self.conv_2_1 = nn.Conv3d(1, 1, 3, padding=1) # out: 16 
-        self.conv_3 = nn.Conv3d(1, 1, 3, padding=1) # out: 8 
-        self.conv_3_1 = nn.Conv3d(1, 1, 3, padding=1) # out: 8
+        self.conv_1 = nn.Conv3d(1, 16, 3, padding=0) # out: 32 
+        self.conv_1_1 = nn.Conv3d(16, 16, 3, padding=0) # out: 32
+        self.conv_2 = nn.Conv3d(16, 16, 3, padding=1) # out: 16 
+        self.conv_2_1 = nn.Conv3d(16, 16, 3, padding=1) # out: 16 
+        self.conv_3 = nn.Conv3d(16, 16, 3, padding=1) # out: 8 
+        self.conv_3_1 = nn.Conv3d(16, 1, 3, padding=1) # out: 8
         # hidden layers
         self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
                          for i in range(len(self.layer_sizes) -1)])
@@ -55,18 +55,10 @@ class FCNetwork3D(nn.Module):
         voxel_obs_2_1 = self.conv_2_1(voxel_obs_2)
         voxel_obs_3 = self.conv_3(voxel_obs_2_1)
         voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
-        x_voxel = voxel_obs_3_1.reshape(-1, 64)
-        # ================================================
-        # out = out.narrow(1, 0, 132)
-        # out = (out - self.in_shift)/(self.in_scale + 1e-8)
-        # for i in range(len(self.fc_layers)-1):
-        #     out = self.fc_layers[i](out)
-        #     out = self.nonlinearity(out)
-        # out = self.fc_layers[-1](out)
-        # out = out * self.out_scale + self.out_shift
-        # return out
-        # out[:, 0:132] = (out[:, 0:132] - self.in_shift)/(self.in_scale + 1e-8)
-        out = torch.cat((x.to('cpu'), x_voxel.to('cpu')), 1)
+        # x_voxel = torch.flatten(voxel_obs_3_1, start_dim=0, end_dim=-1)
+        x_voxel = voxel_obs_3_1.reshape(1, -1)
+
+        out = torch.cat((x, x_voxel), 1)
         out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
             out = self.fc_layers[i](out)
