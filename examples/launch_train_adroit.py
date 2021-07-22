@@ -219,7 +219,7 @@ def main(args):
         # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
         # [1, 3, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 32], [True, False]], # cur & cove : ours
-        [1, 1, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
+        [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
         # [1, 0.5, ['3d', 6], [True, False]], # disagreement variant
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random

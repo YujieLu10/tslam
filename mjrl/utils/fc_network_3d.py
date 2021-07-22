@@ -56,9 +56,9 @@ class FCNetwork3D(nn.Module):
         voxel_obs_3 = self.conv_3(voxel_obs_2_1)
         voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
         # x_voxel = torch.flatten(voxel_obs_3_1, start_dim=0, end_dim=-1)
-        x_voxel = voxel_obs_3_1.reshape(1, -1)
-
-        out = torch.cat((x, x_voxel), 1)
+        x_voxel = voxel_obs_3_1.reshape(-1, 64)
+        # x torch.Size([1,68]) voxel_obs_3_1 torch.Size([1,1,4,4,4]) x_voxel torch.Size([1,64])
+        out = torch.cat((x.to('cpu'), x_voxel.to('cpu')), 1)
         out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
             out = self.fc_layers[i](out)
