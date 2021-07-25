@@ -122,7 +122,7 @@ def main(args):
         ("env_kwargs", "base_rotation"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
-
+    # tabletop
     values = [
         [True, False, "glass", "up", [1.57, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.015],
         [True, False, "donut", "up", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 0.01],
@@ -217,10 +217,10 @@ def main(args):
     values = [
         # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
         # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
-        # [1, 3, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
+        [1, 3, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 32], [True, False]], # cur & cove : ours
-        [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
-        # [3, 1, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
+        # [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
+        [3, 1, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
         # [1, 0.5, ['3d', 6], [True, False]], # disagreement variant
         # [0, 0, 1, 0.5, 5, ['3d', 6], [True, False]], # best policy | random
         # [0, 1, 0, 0.5, 5, ['3d', 6], [True, False]], # knn variant | ntouch

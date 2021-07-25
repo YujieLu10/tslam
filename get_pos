@@ -1,0 +1,636 @@
+RS:> Registering Biomechanics Envs
+[32mProgram started, working on...[0m
+>>> clear file /home/jianrenw/prox/tslam/data/result/agent_eval_camera/wineglass/geneTrue_rotTrue_unifiedpose/normal_curf1covf3!
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:57.820825  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:57.944042  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.052434  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.165960  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.278866  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.394641  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.512514  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.628804  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.743969  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.858523  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.977618  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.096326  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.214515  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.330870  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.453488  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.573800  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.691625  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.809193  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.926143  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.042465  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.160750  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.276241  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.395355  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.516269  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.642469  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.774340  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.901501  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.027178  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.153303  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.278301  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.404389  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.530294  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.656288  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.783057  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.916247  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.045428  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.170573  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.295588  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.423899  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.551459  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.679822  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.810520  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.942561  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.075526  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.215474  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.349555  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.481804  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.614473  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.747413  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+>>> obj wineglass
+>>> body_xpos [0.         0.         0.08697578]
+>>> body_xquat [1. 0. 0. 0.]
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:06.306090  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[32mProgram finished, warpping up...[0m
+[33mWarning: You are removing default scalar output[0m
+[33mWarning: You are removing default text output[0m
+RS:> Registering Biomechanics Envs
+[32mProgram started, working on...[0m
+>>> clear file /home/jianrenw/prox/tslam/data/result/agent_eval_camera/wristwatch/geneTrue_rotTrue_unifiedpose/normal_curf1covf3!
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:57.857031  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.000837  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.161156  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.305784  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.445963  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.586046  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.729041  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.871747  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.013453  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.158365  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.306290  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.459577  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.612299  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.756747  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.895881  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.041583  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.181510  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.321717  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.463782  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.613836  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.760117  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.912425  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.059682  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.205650  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.350920  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.496096  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.641711  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.788179  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.935620  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.089174  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.236561  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.384522  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.533619  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.683267  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.833440  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.984518  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.143197  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.302227  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.455475  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.609917  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.764496  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.919846  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.076826  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.233317  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.402462  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.565008  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.723795  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.883031  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:05.042593  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+>>> obj wristwatch
+>>> body_xpos [0.        0.        0.0424445]
+>>> body_xquat [1. 0. 0. 0.]
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:07.537383  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[32mProgram finished, warpping up...[0m
+[33mWarning: You are removing default scalar output[0m
+[33mWarning: You are removing default text output[0m
+RS:> Registering Biomechanics Envs
+[32mProgram started, working on...[0m
+>>> clear file /home/jianrenw/prox/tslam/data/result/agent_eval_camera/waterbottle/geneTrue_rotTrue_unifiedpose/normal_curf1covf3!
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:57.865765  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.028284  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.183123  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.339802  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.497067  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.653137  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.809267  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:58.967936  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.125757  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.281093  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.443548  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.599665  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.752017  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:17:59.902645  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.048767  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.197620  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.344644  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.499877  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.657873  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.816294  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:00.968856  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.122873  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.274310  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.426891  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.578586  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.730292  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:01.887380  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.041113  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.188340  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.335577  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.486754  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.637192  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.790868  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:02.943512  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.096749  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.254669  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.407280  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.557785  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.708126  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:03.858254  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.007658  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.157633  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.320797  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.480598  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.644029  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.794730  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:04.949378  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:05.101539  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:05.255181  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+>>> obj waterbottle
+>>> body_xpos [0.         0.         0.06880109]
+>>> body_xquat [1. 0. 0. 0.]
+[33mYou are using dereprecated API of exptools logger[0m
+2021-07-25 18:18:07.810109  | unified_agent_eval_0 Dumping scalar data for progress.csv
+
+
+[32mProgram finished, warpping up...[0m
+[33mWarning: You are removing default scalar output[0m
+[33mWarning: You are removing default text output[0m
+
+call string:
+ taskset -c 0,16 python examples/run_agent_eval.py 0slt_8cpu_4gpu_2cxg_16hto_2skt /home/jianrenw/prox/tslam/data/local/agent/20210725/resetnormal/gtsample_geneTrue_rotTrue/objwaterbottle/voxelTrue_rwFalse_orienunifiedpose/curf1covf3_lstd0.5_vconf['3d', 6]_obst[True, False]/agent 0
+
+call string:
+ taskset -c 2,18 python examples/run_agent_eval.py 1slt_8cpu_4gpu_2cxg_16hto_2skt /home/jianrenw/prox/tslam/data/local/agent/20210725/resetnormal/gtsample_geneTrue_rotTrue/objwineglass/voxelTrue_rwFalse_orienunifiedpose/curf1covf3_lstd0.5_vconf['3d', 6]_obst[True, False]/agent 0
+
+call string:
+ taskset -c 8,24 python examples/run_agent_eval.py 2slt_8cpu_4gpu_2cxg_16hto_2skt /home/jianrenw/prox/tslam/data/local/agent/20210725/resetnormal/gtsample_geneTrue_rotTrue/objwristwatch/voxelTrue_rwFalse_orienunifiedpose/curf1covf3_lstd0.5_vconf['3d', 6]_obst[True, False]/agent 0

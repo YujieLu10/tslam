@@ -123,26 +123,26 @@ def run_experiment(log_dir, args):
         #     if "_p" in k or "_r" in k or "occupancy" in k:
         #         logger.log_scalar(k, v, i)
         
-        if (i+1) % int(200) == 0:
-            pc_frame = np.array(info["pointcloud"])
-            # ====== voxel visualization
-            vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
-            overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
-            # ====== 3d pointcloud
-            np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_unifiedpose_alpha_pointcloud.npz",pcd=pc_frame)
-            # ====== 2d visualization
-            ax = plt.axes()
-            ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-            plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
-            plt.close()
+        # if (i+1) % int(200) == 0:
+        #     pc_frame = np.array(info["pointcloud"])
+        #     # ====== voxel visualization
+        #     vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
+        #     overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
+        #     # ====== 3d pointcloud
+        #     np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_unifiedpose_alpha_pointcloud.npz",pcd=pc_frame)
+        #     # ====== 2d visualization
+        #     ax = plt.axes()
+        #     ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
+        #     plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
+        #     plt.close()
 
         # record gif
-        if i < 200:
+        if i < 50:
             frame = env.env.env.sim.render(width=640, height=480,
                                 mode='offscreen', camera_name="view_1", device_id=0)
             frame = np.transpose(frame[::-1, :, :], (2,0,1))
             gif_frames.append(frame)
-        if (i+1) % 200 == 0:
+        if (i+1) % 50 == 0:
             logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()

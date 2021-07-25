@@ -323,10 +323,10 @@ def train_agent(job_name, agent,
                 #     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
                 # =======================================================
-                exptools.logging.logger.record_image("rendered", video[-1], i)
-                exptools.logging.logger.record_gif("rendered", video, i)
-                exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
-                exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
+                exptools.logging.logger.record_image("rendered", video[-1], 0) # i
+                exptools.logging.logger.record_gif("rendered", video, 0) # i
+                # exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
+                # exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
 
         # print results to console
         if i == 0:
