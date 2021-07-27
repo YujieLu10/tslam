@@ -11,6 +11,7 @@ import torch
 import math
 import heapq
 
+from mj_envs.envs.hand_manipulation_suite.adroit_util import get_2d_voxel_idx, generate_uniform_gt_voxel, get_basic_reward, get_newpoints_reward, get_voxel_idx
 from xml.etree import ElementTree
 from xml.dom import minidom
 
@@ -101,6 +102,7 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         self.touch_obj_bid = 0
         self.forearm_obj_bid = 0
         self.S_grasp_sid = 0
+        self.palm_obj_bid = 0
         self.ffknuckle_obj_bid = 0
         self.mfknuckle_obj_bid = 0
         self.rfknuckle_obj_bid = 0
@@ -133,6 +135,7 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         utils.EzPickle.__init__(self)
         self.forearm_obj_bid = self.sim.model.body_name2id("forearm")
         self.S_grasp_sid = self.sim.model.site_name2id('S_grasp')
+        self.palm_obj_bid = self.sim.model.body_name2id('palm')
         self.ffknuckle_obj_bid = self.sim.model.body_name2id('ffknuckle')
         self.mfknuckle_obj_bid = self.sim.model.body_name2id('mfknuckle')
         self.rfknuckle_obj_bid = self.sim.model.body_name2id('rfknuckle')
@@ -143,142 +146,12 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         
         self.sensor_rid_list = [self.sim.model.sensor_name2id('S_grasp_sensor'), self.sim.model.sensor_name2id('Tch_ffmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_mfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_rfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_thmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_palm_sensor'), self.sim.model.sensor_name2id('Tch_ffproximal_sensor'), self.sim.model.sensor_name2id('Tch_ffmiddle_sensor'), self.sim.model.sensor_name2id('S_fftip_sensor'), self.sim.model.sensor_name2id('Tch_fftip_sensor'), self.sim.model.sensor_name2id('Tch_mfproximal_sensor'), self.sim.model.sensor_name2id('Tch_mfmiddle_sensor'), self.sim.model.sensor_name2id('S_mftip_sensor'), self.sim.model.sensor_name2id('Tch_mftip_sensor'), self.sim.model.sensor_name2id('Tch_rfproximal_sensor'), self.sim.model.sensor_name2id('Tch_rfmiddle_sensor'), self.sim.model.sensor_name2id('S_rftip_sensor'), self.sim.model.sensor_name2id('Tch_rftip_sensor'), self.sim.model.sensor_name2id('Tch_lfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_lfproximal_sensor'), self.sim.model.sensor_name2id('Tch_lfmiddle_sensor'), self.sim.model.sensor_name2id('S_lftip_sensor'), self.sim.model.sensor_name2id('Tch_lftip_sensor'), self.sim.model.sensor_name2id('Tch_thproximal_sensor'), self.sim.model.sensor_name2id('Tch_thmiddle_sensor'), self.sim.model.sensor_name2id('S_thtip_sensor'), self.sim.model.sensor_name2id('Tch_thtip_sensor')]
 
-
-    def is_in_voxel_bound(self, posx, posy):
-        is_in_bound = False
-        is_in_bound = posx > -0.125 and posx < 0.125 and posy > -0.25 and posy < -0.025
-        return is_in_bound
-    
-    def get_voxel_len(self):
-        if self.voxel_type == '2d':
-            sep_x, sep_y = 0, 0
-            sep_x = 0.25 / self.twod_sep
-            sep_y = 0.225 / self.twod_sep
-            return math.ceil(sep_x) * math.ceil(sep_y)
-        else:
-            sep_x, sep_y, sep_z = 0, 0, 0
-            sep_x = math.ceil(0.25 / self.twod_sep)
-            sep_y = math.ceil(0.225 / self.twod_sep)
-            sep_z = math.ceil(0.1 / self.twod_sep)
-            return sep_x * sep_y * sep_z
-
-    def get_2d_voxel_idx(self, posx, posy):
-        # for simple objectobj5(index in obj_list:4) only
-        # here we use 14 pose each 600 sampled points as ground truth
-        # center point xy(0, -0.14)
-        # corner points (-0.125,-0.25) (-0.125,-0.025) (0.125, -0.25) (0.125, -0.025)
-        # test left (0,-0.25) (0,-0.025) (0.125, -0.25) (0.125, -0.025)
-        sep_x, sep_y, idx_x, idx_y = 0, 0, 0, 0
-        sep_x = 0.25 / self.twod_sep
-        sep_y = 0.225 / self.twod_sep
-        idx_x = math.floor((posx + 0.125) / self.twod_sep)
-        idx_y = math.floor((posy + 0.25) / self.twod_sep)
-        voxel_idx = idx_y * math.ceil(sep_x) + idx_x + 1
-        return voxel_idx
-
-    def generate_uniform_gt_voxel(self):
-        uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(self.obj_name))['pcd']
-        data_scale = uniform_gt_data * self.obj_scale
-        data_rotate = data_scale.copy()
-        x = data_rotate[:, 0].copy()
-        y = data_rotate[:, 1].copy()
-        z = data_rotate[:, 2].copy()
-        x_theta = self.obj_orientation[0]
-        data_rotate[:, 0] = x
-        data_rotate[:, 1] = y*math.cos(x_theta) - z*math.sin(x_theta)
-        data_rotate[:, 2] = y*math.sin(x_theta) + z*math.cos(x_theta)
-        data_trans = data_rotate.copy()
-        data_trans[:, 0] += self.obj_relative_position[0]
-        data_trans[:, 1] += self.obj_relative_position[1]
-        data_trans[:, 2] += self.obj_relative_position[2]
-
-        uniform_gt_data = data_trans.copy()
-
-        resolution_x, resolution_y, resolution_z = math.ceil(0.25 / self.twod_sep), math.ceil(0.225 / self.twod_sep), math.ceil(0.1 / self.twod_sep)
-        x, y, z = np.indices((self.twod_sep, self.twod_sep, self.twod_sep))
-
-        gtcube = (x<0) & (y <1) & (z<1)
-        gt_voxels = gtcube
-        gt_map_list = []
-        for idx,val in enumerate(uniform_gt_data):
-            idx_x = math.floor((val[0] + 0) / resolution_x)
-            idx_y = math.floor((val[1] + 0) / resolution_y)
-            idx_z = math.floor((val[2] - 0.05) / resolution_z)
-            name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
-            if name not in gt_map_list:
-                gt_map_list.append(name)
-            cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
-            # combine the objects into a single boolean array
-            gt_voxels += cube
-        self.gt_map_list = gt_map_list.copy()
-
-    def get_voxel_idx(self, posx, posy, posz):
-        resolution_x, resolution_y, resolution_z = math.ceil(0.25 / self.twod_sep), math.ceil(0.225 / self.twod_sep), math.ceil(0.1 / self.twod_sep)
-        idx_x = math.floor((posx + 0.125) / resolution_x)
-        idx_y = math.floor((posy + 0.125) / resolution_y)
-        idx_z = math.floor((posz + 0.125) / resolution_z)
-        name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
-        return self.gt_map_list.index(name) if name in self.gt_map_list else -1
-
-    def get_basic_reward(self, posA, posB):
-        dist = np.linalg.norm(posA-posB)
-        return -dist
-
-    def get_notouch_penalty(self, touched):
-        return 0
-
-    def get_newpoints_reward(self, min_pos_dist):
-        if min_pos_dist > 0.1:
-            return 30
-        else:
-            return 10
-
-    def loss_transform(self, loss):
-        # chamfer_dist loss normalization
-        if loss >= 1e-6:
-            loss = 1
-        elif loss <= 1e-15:
-            loss = 0
-        else:
-            loss = (loss - 1e-15) / (1e-6 - 1e-15)
-        return loss
-
-    def get_chamfer_reward(self, chamfer_distance_loss):
-        chamfer_reward = 0
-        if "nope" not in self.ground_truth_type:
-            chamfer_reward += (0.1-chamfer_distance_loss) * 10
-        else:
-            chamfer_reward += self.loss_transform(chamfer_distance_loss) * 10
-        return chamfer_reward
-
-    # def get_chamfer_distance_loss(self, is_touched, previous_pos_list, current_pos_list):
-    #     chamfer_distance_loss = 0.0
-    #     if "nope" not in self.ground_truth_type:
-    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-    #             gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([self.obj_current_gt]), torch.FloatTensor([current_pos_list]))
-    #             chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
-    #     else:
-    #         if is_touched and self.previous_contact_points != [] and previous_pos_list != []:
-    #             dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
-    #             chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
-    #     return chamfer_distance_loss
-
-    def get_knn_reward(self):
-        return 0
-
-    def get_penalty(self):
-        return 0
-
     def step(self, a):
         # uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
-        # if self.count_step == 49:
-        #     print(">>> obj {}".format(self.obj_name))
-        #     print(">>> body_xpos {}".format(self.data.body_xpos[self.sim.model.body_name2id('{}object'.format(self.obj_name))]))
-        #     print(">>> body_xquat {}".format(self.data.body_xquat[self.sim.model.body_name2id('{}object'.format(self.obj_name))]))
         if self.count_step % 200 == 0:
             orien_list = [[-1.57, 0, 3.14151926], [1.57, 0, 0], [-1.57, -1.57, 3.14151926], [-1.57, 1.57, 3.14151926]]
-            position_list = [[10, -0.56, 0.08], [0, 0.56, 0.08], [0.55, 0, 0.08], [-0.55, 0, 0.08]]
+            position_list = [[0, -0.56, 0.06], [0, 0.56, 0.06], [0.55, 0, 0.06], [-0.55, 0, 0.06]]
             self.model.body_quat[self.forearm_obj_bid] = euler2quat(orien_list[int(self.count_step / 200)])
             self.model.body_pos[self.forearm_obj_bid] = position_list[int(self.count_step / 200)]
         a = np.clip(a, -1.0, 1.0)
@@ -286,30 +159,24 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         self.do_simulation(a, self.frame_skip)
         self.count_step += 1
         obj_init_xpos  = self.data.body_xpos[self.touch_obj_bid].ravel()
-        palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
-        ffknuckle_xpos = self.data.site_xpos[self.ffknuckle_obj_bid].ravel()
-        mfknuckle_xpos = self.data.site_xpos[self.mfknuckle_obj_bid].ravel()
-        rfknuckle_xpos = self.data.site_xpos[self.rfknuckle_obj_bid].ravel()
-        lfmetacarpal_xpos = self.data.site_xpos[self.lfmetacarpal_obj_bid].ravel()
-        thbase_xpos = self.data.site_xpos[self.thbase_obj_bid].ravel()
-        
+        palm_pos = self.data.body_xpos[self.palm_obj_bid].ravel()
         # position for curiosity touch
-        ffknuckle_pos = self.model.body_pos[self.ffknuckle_obj_bid].ravel()
-        mfknuckle_pos = self.model.body_pos[self.mfknuckle_obj_bid].ravel()
-        rfknuckle_pos = self.model.body_pos[self.rfknuckle_obj_bid].ravel()
-        lfmetacarpal_pos = self.model.body_pos[self.lfmetacarpal_obj_bid].ravel()
-        thbase_pos = self.model.body_pos[self.thbase_obj_bid].ravel()
+        ffknuckle_pos = self.data.body_xpos[self.ffknuckle_obj_bid].ravel()
+        mfknuckle_pos = self.data.body_xpos[self.mfknuckle_obj_bid].ravel()
+        rfknuckle_pos = self.data.body_xpos[self.rfknuckle_obj_bid].ravel()
+        lfmetacarpal_pos = self.data.body_xpos[self.lfmetacarpal_obj_bid].ravel()
+        thbase_pos = self.data.body_xpos[self.thbase_obj_bid].ravel()
 
         # reward initialization
         reward = 0.0
         untouched_p = 0.0
         # palm close to object reward
-        palm_r = self.get_basic_reward(obj_init_xpos, palm_xpos) if self.palm_r_factor else 0
-        palm_r += self.get_basic_reward(obj_init_xpos, ffknuckle_xpos) if self.palm_r_factor else 0
-        palm_r += self.get_basic_reward(obj_init_xpos, mfknuckle_xpos) if self.palm_r_factor else 0
-        palm_r += self.get_basic_reward(obj_init_xpos, rfknuckle_xpos) if self.palm_r_factor else 0
-        palm_r += self.get_basic_reward(obj_init_xpos, lfmetacarpal_xpos) if self.palm_r_factor else 0
-        palm_r += self.get_basic_reward(obj_init_xpos, thbase_xpos) if self.palm_r_factor else 0
+        palm_r = get_basic_reward(obj_init_xpos, palm_pos) if self.palm_r_factor else 0
+        palm_r += get_basic_reward(obj_init_xpos, ffknuckle_pos) if self.palm_r_factor else 0
+        palm_r += get_basic_reward(obj_init_xpos, mfknuckle_pos) if self.palm_r_factor else 0
+        palm_r += get_basic_reward(obj_init_xpos, rfknuckle_pos) if self.palm_r_factor else 0
+        palm_r += get_basic_reward(obj_init_xpos, lfmetacarpal_pos) if self.palm_r_factor else 0
+        palm_r += get_basic_reward(obj_init_xpos, thbase_pos) if self.palm_r_factor else 0
         
         # pos of current obj's contacts
         current_pos_list = []
@@ -356,7 +223,7 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
                 # new contact points that are not close to already touched points
                 if min_pos_dist and min_pos_dist > 0.01: 
                     new_points_cnt += 1  
-                    newpoints_r += self.get_newpoints_reward(min_pos_dist)
+                    newpoints_r += get_newpoints_reward(min_pos_dist)
                     new_pos_list.append(pos)
                 knn_r += sum(heapq.nsmallest(min(len(pos_dist_list), self.knn_k),pos_dist_list))
         
@@ -376,20 +243,20 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
             self.voxel_array = [0] * self.voxel_num
         if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
-                idx = self.get_2d_voxel_idx(point[0], point[1]) if self.voxel_type == '2d' else self.get_voxel_idx(point[0], point[1], point[2])
+                idx = get_2d_voxel_idx(point[0], point[1], self.twod_sep) if self.voxel_type == '2d' else get_voxel_idx(point[0], point[1], point[2], self.twod_sep, self.gt_map_list, True)
                 if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] <= 0: # new voxel touched (known empty/unknown => known obj)
                     if self.coverage_voxel_r_factor > 0: coverage_voxel_r += 1
                     if self.new_voxel_r_factor > 0: new_voxel_r += 1
                     self.voxel_array[min(idx, self.voxel_num-1)] = 1
         # finger pos
         for finger_pos in [ffknuckle_pos, mfknuckle_pos, rfknuckle_pos, lfmetacarpal_pos, thbase_pos]:
-            finger_touch_idx = self.get_2d_voxel_idx(finger_pos[0], finger_pos[1]) if self.voxel_type == '2d' else self.get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2])
+            finger_touch_idx = get_2d_voxel_idx(finger_pos[0], finger_pos[1]) if self.voxel_type == '2d' else get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2], self.twod_sep, self.gt_map_list, False)
             if finger_touch_idx > 0 and self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] == 0: # unknown voxel explored
                 if self.curiosity_voxel_r_factor > 0: curiosity_voxel_r += 1
-                self.voxel_array[min(idx, self.voxel_num-1)] = -1
+                self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] = -1
 
         denominator = len(self.gt_map_list) #len(np.array(self.voxel_array))
-        voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
+        voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)[0]) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
         reward += self.chamfer_r_factor * chamfer_r
@@ -427,7 +294,7 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
     def get_obs(self):    
         qp = self.data.qpos.ravel()
         qv = self.data.qvel.ravel()
-        palm_xpos = self.data.site_xpos[self.S_grasp_sid].ravel()
+        palm_pos = self.data.body_xpos[self.palm_obj_bid].ravel() # self.data.site_xpos[self.S_grasp_sid].ravel()
         # 6 extreme pos
         all_points = np.array(self.previous_contact_points)
         if len(all_points) > 0:
@@ -438,7 +305,7 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         new_touch_pos = random.sample(self.new_current_pos_list, min(6, len(self.new_current_pos_list))) if len(self.new_current_pos_list) > 0 else []
         old_touch_pos = random.sample(self.previous_contact_points, min(6 - len(new_touch_pos), len(self.previous_contact_points))) if 6 > len(self.new_current_pos_list) and len(self.previous_contact_points) > 0 else []
         random_touch_pos = (0.5 * np.random.randn(1, 3 *(7 - len(new_touch_pos) - len(old_touch_pos)))) if 7 - len(new_touch_pos) - len(old_touch_pos) > 0 else []
-        touch_pos = np.array(palm_xpos)
+        touch_pos = np.array(palm_pos)
 
         if len(new_touch_pos) > 0:
             touch_pos = np.append(touch_pos, new_touch_pos)
@@ -474,7 +341,7 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         self.obj_name = name_map[num_traj_idx]
 
         self.touch_obj_bid = self.sim.model.body_name2id('{}object'.format(self.obj_name))
-        self.generate_uniform_gt_voxel()
+        self.gt_map_list = generate_uniform_gt_voxel(self.obj_name, self.obj_scale, self.obj_orientation, self.obj_relative_position, self.twod_sep)
 
         if self.ground_truth_type == "sample":
             self.obj_current_gt = np.load(os.path.join("/home/jianrenw/prox/tslam/assets", "uniform_gt", "uniform_{}_o3d.npz".format(self.obj_name)))['pcd']
@@ -492,8 +359,10 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
                 self.model.body_pos[other_obj_bid] = [0, 0, -1]
         obj_position_map = {'glass': [0, 0, 0.05510244], 'donut': [0, 0, 0.01466367], 'heart': [0, 0, 0.8], 'airplane': [0, 0, 0.0258596408], 'alarmclock': [0, 0, 0.024704989], 'apple': [0, 0, 0.04999409], 'banana': [0, 0, 0.02365614], 'binoculars': [0, 0, 0.07999943], 'body': [0, 0, 0.0145278], 'bowl': [0, 0, 0.03995771], 'camera': [0, 0, 0.03483407], 'coffeemug': [0, 0, 0.05387171], 'cubelarge': [0, 0, 0.06039196], 'cubemedium': [0, 0, 0.04103902], 'cubemiddle': [0, 0, 0.04103902], 'cubesmall': [0, 0, 0.02072159], 'cup': [0, 0, 0.05127277], 'cylinderlarge': [0, 0, 0.06135697], 'cylindermedium': [0, 0, 0.04103905], 'cylindersmall': [0, 0, 0.02072279], 'doorknob': [0, 0, 0.0379012], 'duck': [0, 0, 0.04917608], 'elephant': [0, 0, 0.05097572], 'eyeglasses': [0, 0, 0.02300015], 'flashlight': [0, 0, 0.07037258], 'flute': [0, 0, 0.0092959], 'fryingpan': [0, 0, 0.01514528], 'gamecontroller': [0, 0, 0.02604568], 'hammer': [0, 0, 0.01267463], 'hand': [0, 0, 0.07001909], 'headphones': [0, 0, 0.02992321], 'knife': [0, 0, 0.00824503], 'lightbulb': [0, 0, 0.03202522], 'mouse': [0, 0, 0.0201307], 'mug': [0, 0, 0.05387171], 'phone': [0, 0, 0.02552063], 'piggybank': [0, 0, 0.06923257], 'pyramidlarge': [0, 0, 0.05123203], 'pyramidmedium': [0, 0, 0.04103812], 'pyramidsmall': [0, 0, 0.02072198], 'rubberduck': [0, 0, 0.04917608], 'scissors': [0, 0, 0.00802606], 'spherelarge': [0, 0, 0.05382598], 'spheremedium': [0, 0, 0.03729011], 'spheresmall': [0, 0, 0.01897534], 'stamp': [0, 0, 0.0379012], 'stanfordbunny': [0, 0, 0.06453102], 'stapler': [0, 0, 0.02116039], 'table': [0, 0, 0.01403165], 'teapot': [0, 0, 0.05761634], 'toothbrush': [0, 0, 0.00701304], 'toothpaste': [0, 0, 0.02], 'toruslarge': [0, 0, 0.02080752], 'torusmedium': [0, 0, 0.01394647], 'torussmall': [0, 0, 0.00734874], 'train': [0, 0, 0.04335064], 'watch': [0, 0, 0.0424445], 'waterbottle': [0, 0, 0.08697578], 'wineglass': [0, 0, 0.0424445], 'wristwatch': [0, 0, 0.06880109]}
 
+        obj_orientation_map = {'glass': [0, 0, 0], 'donut': [0, 0, 0], 'heart': [0.70738827, -0.70682518, 0], 'airplane': [0, 0, 0], 'alarmclock': [0.70738827, -0.70682518, 0], 'apple': [0, 0, 0], 'banana': [0, 0, 0], 'binoculars': [0.70738827, -0.70682518, 0], 'body': [0, 0, 0], 'bowl': [0, 0, 0], 'camera': [0, 0, 0], 'coffeemug': [0, 0, 0], 'cubelarge': [0, 0, 0], 'cubemedium': [0, 0, 0], 'cubemiddle': [0, 0, 0], 'cubesmall': [0, 0, 0], 'cup': [0, 0, 0], 'cylinderlarge': [0, 0, 0], 'cylindermedium': [0, 0, 0], 'cylindersmall': [0, 0, 0], 'doorknob': [0, 0, 0], 'duck': [0, 0, 0], 'elephant': [0, 0, 0], 'eyeglasses': [0, 0, 0], 'flashlight': [0, 0, 0], 'flute': [0, 0, 0], 'fryingpan': [0, 0, 0], 'gamecontroller': [0, 0, 0], 'hammer': [0, 0, 0], 'hand': [0, 0, 0], 'headphones': [0, 0, 0], 'knife': [0, 0, 0], 'lightbulb': [0, 0, 0], 'mouse': [0, 0, 0], 'mug': [0, 0, 0], 'phone': [0, 0, 0], 'piggybank': [0, 0, 0], 'pyramidlarge': [0, 0, 0], 'pyramidmedium': [0, 0, 0], 'pyramidsmall': [0, 0, 0], 'rubberduck': [0, 0, 0], 'scissors': [0, 0, 0], 'spherelarge': [0, 0, 0], 'spheremedium': [0, 0, 0], 'spheresmall': [0, 0, 0], 'stamp': [0, 0, 0], 'stanfordbunny': [0, 0, 0], 'stapler': [0, 0, 0], 'table': [0, 0, 0], 'teapot': [0, 0, 0], 'toothbrush': [0, 0, 0], 'toothpaste': [0, 1.5, 0], 'toruslarge': [0, 0, 0], 'torusmedium': [0, 0, 0], 'torussmall': [0, 0, 0], 'train': [0, 0, 0], 'watch': [0, 0, 0], 'waterbottle': [0, 0, 0], 'wineglass': [0, 0, 0], 'wristwatch': [0, 0, 0]}
+
         self.model.body_pos[self.touch_obj_bid] = obj_position_map[self.obj_name] # self.obj_relative_position
-        # self.model.body_quat[self.touch_obj_bid] = euler2quat(self.obj_orientation)
+        self.model.body_quat[self.touch_obj_bid] = euler2quat(obj_orientation_map[self.obj_name]) # self.obj_orientation
 
         # set arm pose
         self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)

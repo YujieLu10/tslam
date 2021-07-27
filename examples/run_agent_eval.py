@@ -137,13 +137,13 @@ def run_experiment(log_dir, args):
         #     plt.close()
 
         # record gif
-        if i < 50:
-            frame = env.env.env.sim.render(width=640, height=480,
-                                mode='offscreen', camera_name="view_1", device_id=0)
-            frame = np.transpose(frame[::-1, :, :], (2,0,1))
-            gif_frames.append(frame)
-        if (i+1) % 50 == 0:
-            logger.log_gif("rendered", gif_frames, i)
+        # if i < 800:
+        #     frame = env.env.env.sim.render(width=640, height=480,
+        #                         mode='offscreen', camera_name="view_1", device_id=0)
+        #     frame = np.transpose(frame[::-1, :, :], (2,0,1))
+        #     gif_frames.append(frame)
+        # if (i+1) % 800 == 0:
+        #     logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()
     

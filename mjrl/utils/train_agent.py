@@ -72,6 +72,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
+
     x = data_rotate[:, 0].copy()
     y = data_rotate[:, 1].copy()
     z = data_rotate[:, 2].copy()
@@ -79,6 +80,23 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     data_rotate[:, 0] = x
     data_rotate[:, 1] = y*math.cos(x_theta) - z*math.sin(x_theta)
     data_rotate[:, 2] = y*math.sin(x_theta) + z*math.cos(x_theta)
+
+    x = data_rotate[:, 0].copy()
+    y = data_rotate[:, 1].copy()
+    z = data_rotate[:, 2].copy()
+    y_theta = obj_orientation[1]
+    data_rotate[:, 0] = x * math.cos(y_theta) + z * math.sin(y_theta)
+    data_rotate[:, 1] = y
+    data_rotate[:, 2] = z * math.cos(y_theta) - x * math.sin(y_theta)
+
+    x = data_rotate[:, 0].copy()
+    y = data_rotate[:, 1].copy()
+    z = data_rotate[:, 2].copy()
+    z_theta = obj_orientation[2]
+    data_rotate[:, 0] = x * math.cos(z_theta) - y * math.sin(z_theta)
+    data_rotate[:, 1] = x * math.sin(z_theta) + y * math.cos(z_theta)
+    data_rotate[:, 2] = z
+
     data_trans = data_rotate.copy()
     data_trans[:, 0] += obj_relative_position[0]
     data_trans[:, 1] += obj_relative_position[1]
@@ -87,9 +105,9 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     uniform_gt_data = data_trans.copy()
     data = pc_frame
     resolution = 0.01
-    sep_x = math.ceil(0.25 / resolution)
-    sep_y = math.ceil(0.25 / resolution)
-    sep_z = math.ceil(0.25 / resolution)
+    sep_x = math.ceil(0.3 / resolution)
+    sep_y = math.ceil(0.3 / resolution)
+    sep_z = math.ceil(0.3 / resolution)
     x, y, z = np.indices((sep_x, sep_y, sep_z))
 
     cube1 = (x<0) & (y <1) & (z<1)
@@ -100,11 +118,11 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     # draw gt
     gt_map_list = []
     for idx,val in enumerate(uniform_gt_data):
-        idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.125) / resolution)
-        idx_z = math.floor((val[2] + 0.125) / resolution)
-        if idx_z > 6:
-            continue
+        idx_x = math.floor((val[0] + 0.15) / resolution)
+        idx_y = math.floor((val[1] + 0.15) / resolution)
+        idx_z = math.floor((val[2]) / resolution)
+        # if idx_z > 6:
+        #     continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in gt_map_list:
             gt_map_list.append(name)
@@ -115,11 +133,11 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     # draw cuboids in the top left and bottom right corners, and a link between them
     map_list = []
     for idx,val in enumerate(data):
-        idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.125) / resolution)
-        idx_z = math.floor((val[2] + 0.125) / resolution)
-        if idx_z > 6:
-            continue
+        idx_x = math.floor((val[0] + 0.15) / resolution)
+        idx_y = math.floor((val[1] + 0.15) / resolution)
+        idx_z = math.floor((val[2]) / resolution)
+        # if idx_z > 6:
+        #     continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         if name not in map_list and name in gt_map_list:
             map_list.append(name)
@@ -147,7 +165,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     colors[voxels] = 'cyan'
     # and plot everything
     ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
+    ax.set_zlim(1,30)
     ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
@@ -157,7 +175,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     plt.close()
 
     ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
+    ax.set_zlim(1,30)
     ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy:# or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/gt.png'.format(obj_name, reset_mode_conf, reward_conf))    
@@ -165,7 +183,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     plt.close()
 
     ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
+    ax.set_zlim(1,30)
     ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy:# or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_exp.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
@@ -323,8 +341,8 @@ def train_agent(job_name, agent,
                 #     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
                 # =======================================================
-                exptools.logging.logger.record_image("rendered", video[-1], 0) # i
-                exptools.logging.logger.record_gif("rendered", video, 0) # i
+                exptools.logging.logger.record_image("rendered", video[-1], i)
+                exptools.logging.logger.record_gif("rendered", video, i)
                 # exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)
                 # exptools.logging.logger.record_gif("rendered_explore", video_explore, i)
 

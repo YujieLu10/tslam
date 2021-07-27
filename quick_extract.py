@@ -60,5 +60,5 @@ obj_map =         [["glass", 0.015, [0, 0, 0], [0, 0, 0.05510244]], # 0.06
         ["wristwatch", 1, [0, 0, 0], [0, 0, 0.06880109]]]
 output_map = {}
 for obj in obj_map:
-    output_map[obj[0]] = obj[3]
+    output_map[obj[0]] = obj[2]
 print(output_map)

@@ -216,10 +216,10 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.gt_map_list = gt_map_list.copy()
 
     def get_voxel_idx(self, posx, posy, posz):
-        resolution_x, resolution_y, resolution_z = math.ceil(0.25 / self.twod_sep), math.ceil(0.225 / self.twod_sep), math.ceil(0.1 / self.twod_sep)
+        resolution_x, resolution_y, resolution_z = 0.25 / self.twod_sep, 0.25 / self.twod_sep, 0.25 / self.twod_sep
         idx_x = math.floor((posx + 0.125) / resolution_x)
-        idx_y = math.floor((posy + 0.25) / resolution_y)
-        idx_z = math.floor((posz - 0.16) / resolution_z)
+        idx_y = math.floor((posy + 0.125) / resolution_y)
+        idx_z = math.floor((posz) / resolution_z)
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
         return self.gt_map_list.index(name) if name in self.gt_map_list else -1
 
@@ -379,7 +379,7 @@ class AdroitEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
                     new_voxel_r += 1
                     self.voxel_array[min(idx, self.voxel_num-1)] = 1
         denominator = len(np.array(self.voxel_array))
-        voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)) / denominator) if denominator > 0 else 0
+        voxel_occupancy = (len(np.where(np.array(self.voxel_array)>0)[0]) / denominator) if denominator > 0 else 0
         reward += self.palm_r_factor * palm_r
         reward += self.untouch_p_factor * untouched_p
         reward += self.chamfer_r_factor * chamfer_r
