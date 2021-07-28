@@ -123,25 +123,25 @@ def loss_transform(loss):
         loss = (loss - 1e-15) / (1e-6 - 1e-15)
     return loss
 
-def get_chamfer_reward(chamfer_distance_loss, ground_truth_type):
-    chamfer_reward = 0
-    if "nope" not in ground_truth_type:
-        chamfer_reward += (0.1-chamfer_distance_loss) * 10
-    else:
-        chamfer_reward += loss_transform(chamfer_distance_loss) * 10
-    return chamfer_reward
+# def get_chamfer_reward(chamfer_distance_loss, ground_truth_type):
+#     chamfer_reward = 0
+#     if "nope" not in ground_truth_type:
+#         chamfer_reward += (0.1-chamfer_distance_loss) * 10
+#     else:
+#         chamfer_reward += loss_transform(chamfer_distance_loss) * 10
+#     return chamfer_reward
 
-def get_chamfer_distance_loss(is_touched, previous_pos_list, current_pos_list, ground_truth_type, previous_contact_points, obj_current_gt):
-    chamfer_distance_loss = 0.0
-    if "nope" not in ground_truth_type:
-        if is_touched and previous_contact_points != [] and previous_pos_list != []:
-            gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([obj_current_gt]), torch.FloatTensor([current_pos_list]))
-            chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
-    else:
-        if is_touched and previous_contact_points != [] and previous_pos_list != []:
-            dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
-            chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
-    return chamfer_distance_loss
+# def get_chamfer_distance_loss(is_touched, previous_pos_list, current_pos_list, ground_truth_type, previous_contact_points, obj_current_gt):
+#     chamfer_distance_loss = 0.0
+#     if "nope" not in ground_truth_type:
+#         if is_touched and previous_contact_points != [] and previous_pos_list != []:
+#             gt_dist1, gt_dist2 = chamfer_dist(torch.FloatTensor([obj_current_gt]), torch.FloatTensor([current_pos_list]))
+#             chamfer_distance_loss = (torch.mean(gt_dist1)) + (torch.mean(gt_dist2))
+#     else:
+#         if is_touched and previous_contact_points != [] and previous_pos_list != []:
+#             dist1, dist2 = chamfer_dist(torch.FloatTensor([previous_pos_list]), torch.FloatTensor([current_pos_list]))
+#             chamfer_distance_loss = (torch.mean(dist1)) + (torch.mean(dist2))
+#     return chamfer_distance_loss
 
 def get_knn_reward(self):
     return 0

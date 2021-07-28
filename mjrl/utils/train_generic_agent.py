@@ -73,6 +73,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     uniform_gt_data = np.load("/home/jianrenw/prox/tslam/assets/uniform_gt/uniform_{}_o3d.npz".format(obj_name))['pcd']
     data_scale = uniform_gt_data * obj_scale
     data_rotate = data_scale.copy()
+
     x = data_rotate[:, 0].copy()
     y = data_rotate[:, 1].copy()
     z = data_rotate[:, 2].copy()
@@ -80,6 +81,23 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     data_rotate[:, 0] = x
     data_rotate[:, 1] = y*math.cos(x_theta) - z*math.sin(x_theta)
     data_rotate[:, 2] = y*math.sin(x_theta) + z*math.cos(x_theta)
+
+    x = data_rotate[:, 0].copy()
+    y = data_rotate[:, 1].copy()
+    z = data_rotate[:, 2].copy()
+    y_theta = obj_orientation[1]
+    data_rotate[:, 0] = x * math.cos(y_theta) + z * math.sin(y_theta)
+    data_rotate[:, 1] = y
+    data_rotate[:, 2] = z * math.cos(y_theta) - x * math.sin(y_theta)
+
+    x = data_rotate[:, 0].copy()
+    y = data_rotate[:, 1].copy()
+    z = data_rotate[:, 2].copy()
+    z_theta = obj_orientation[2]
+    data_rotate[:, 0] = x * math.cos(z_theta) - y * math.sin(z_theta)
+    data_rotate[:, 1] = x * math.sin(z_theta) + y * math.cos(z_theta)
+    data_rotate[:, 2] = z
+
     data_trans = data_rotate.copy()
     data_trans[:, 0] += obj_relative_position[0]
     data_trans[:, 1] += obj_relative_position[1]
@@ -88,9 +106,9 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     uniform_gt_data = data_trans.copy()
     data = pc_frame
     resolution = 0.01
-    sep_x = math.ceil(0.25 / resolution)
-    sep_y = math.ceil(0.225 / resolution)
-    sep_z = math.ceil(0.1 / resolution)
+    sep_x = math.ceil(0.3 / resolution)
+    sep_y = math.ceil(0.3 / resolution)
+    sep_z = math.ceil(0.3 / resolution)
     x, y, z = np.indices((sep_x, sep_y, sep_z))
 
     voxels = None
@@ -99,12 +117,13 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     # draw gt
     gt_map_list = []
     for idx,val in enumerate(uniform_gt_data):
-        idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.25) / resolution)
-        idx_z = math.floor((val[2] - 0.16) / resolution)
+        idx_x = math.floor((val[0] + 0.15) / resolution)
+        idx_y = math.floor((val[1] + 0.15) / resolution)
+        idx_z = math.floor((val[2]) / resolution)
         # if idx_z > 6:
         #     continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+        # print(">>> gt val {} name {}".format(val, name))
         if name not in gt_map_list:
             gt_map_list.append(name)
         cube = (x < idx_x + 1) & (y < idx_y + 1) & (z < idx_z + 1) & (x >= idx_x) & (y >= idx_y) & (z >= idx_z)
@@ -114,9 +133,9 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     # draw cuboids in the top left and bottom right corners, and a link between them
     map_list = []
     for idx,val in enumerate(data):
-        idx_x = math.floor((val[0] + 0.125) / resolution)
-        idx_y = math.floor((val[1] + 0.25) / resolution)
-        idx_z = math.floor((val[2] - 0.16) / resolution)
+        idx_x = math.floor((val[0] + 0.15) / resolution)
+        idx_y = math.floor((val[1] + 0.15) / resolution)
+        idx_z = math.floor((val[2]) / resolution)
         # if idx_z > 6:
         #     continue
         name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
@@ -141,7 +160,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
     gt_colors = np.empty(gt_voxels.shape, dtype=object)
     gt_colors[gt_voxels] = 'white'
     ax = plt.figure().add_subplot(projection='3d')
-    ax.set_zlim(1,20)
+    ax.set_zlim(1,30)
     ax.voxels(gt_voxels, facecolors=gt_colors, edgecolor='g', alpha=.4, linewidth=.05)
     if is_best_policy or is_best_reconstruct:
         plt.savefig(os.path.join(best_eval_path, 'voxel_gt.png'))    
@@ -152,7 +171,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
         exp_colors = np.empty(voxels.shape, dtype=object)
         exp_colors[voxels] = 'cyan'
         ax = plt.figure().add_subplot(projection='3d')
-        ax.set_zlim(1,20)
+        ax.set_zlim(1,30)
         ax.voxels(voxels, facecolors=exp_colors, edgecolor='g', alpha=.4, linewidth=.05)
         if is_best_policy or is_best_reconstruct:
             plt.savefig(os.path.join(best_eval_path, 'voxel_exp_bp{}_br{}_{}.png'.format(is_best_policy, is_best_reconstruct, occupancy)))    
@@ -166,7 +185,7 @@ def save_voxel_visualization(env_args, pc_frame, iternum, is_best_policy):
         colors[voxels] = 'cyan'
         # and plot everything
         ax = plt.figure().add_subplot(projection='3d')
-        ax.set_zlim(1,20)
+        ax.set_zlim(1,30)
         ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
         # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
@@ -243,6 +262,9 @@ def train_generic_agent(job_name, agent,
     if i_start:
         print("Resuming from an existing job folder ...")
 
+    obj_position_map = {'glass': [0, 0, 0.05510244], 'donut': [0, 0, 0.01466367], 'heart': [0, 0, 0.8], 'airplane': [0, 0, 0.0258596408], 'alarmclock': [0, 0, 0.024704989], 'apple': [0, 0, 0.04999409], 'banana': [0, 0, 0.02365614], 'binoculars': [0, 0, 0.07999943], 'body': [0, 0, 0.0145278], 'bowl': [0, 0, 0.03995771], 'camera': [0, 0, 0.03483407], 'coffeemug': [0, 0, 0.05387171], 'cubelarge': [0, 0, 0.06039196], 'cubemedium': [0, 0, 0.04103902], 'cubemiddle': [0, 0, 0.04103902], 'cubesmall': [0, 0, 0.02072159], 'cup': [0, 0, 0.05127277], 'cylinderlarge': [0, 0, 0.06135697], 'cylindermedium': [0, 0, 0.04103905], 'cylindersmall': [0, 0, 0.02072279], 'doorknob': [0, 0, 0.0379012], 'duck': [0, 0, 0.04917608], 'elephant': [0, 0, 0.05097572], 'eyeglasses': [0, 0, 0.02300015], 'flashlight': [0, 0, 0.07037258], 'flute': [0, 0, 0.0092959], 'fryingpan': [0, 0, 0.01514528], 'gamecontroller': [0, 0, 0.02604568], 'hammer': [0, 0, 0.01267463], 'hand': [0, 0, 0.07001909], 'headphones': [0, 0, 0.02992321], 'knife': [0, 0, 0.00824503], 'lightbulb': [0, 0, 0.03202522], 'mouse': [0, 0, 0.0201307], 'mug': [0, 0, 0.05387171], 'phone': [0, 0, 0.02552063], 'piggybank': [0, 0, 0.06923257], 'pyramidlarge': [0, 0, 0.05123203], 'pyramidmedium': [0, 0, 0.04103812], 'pyramidsmall': [0, 0, 0.02072198], 'rubberduck': [0, 0, 0.04917608], 'scissors': [0, 0, 0.00802606], 'spherelarge': [0, 0, 0.05382598], 'spheremedium': [0, 0, 0.03729011], 'spheresmall': [0, 0, 0.01897534], 'stamp': [0, 0, 0.0379012], 'stanfordbunny': [0, 0, 0.06453102], 'stapler': [0, 0, 0.02116039], 'table': [0, 0, 0.01403165], 'teapot': [0, 0, 0.05761634], 'toothbrush': [0, 0, 0.00701304], 'toothpaste': [0, 0, 0.02], 'toruslarge': [0, 0, 0.02080752], 'torusmedium': [0, 0, 0.01394647], 'torussmall': [0, 0, 0.00734874], 'train': [0, 0, 0.04335064], 'watch': [0, 0, 0.0424445], 'waterbottle': [0, 0, 0.08697578], 'wineglass': [0, 0, 0.0424445], 'wristwatch': [0, 0, 0.06880109]}
+    obj_orientation_map = {'glass': [0, 0, 0], 'donut': [0, 0, 0], 'heart': [0.70738827, -0.70682518, 0], 'airplane': [0, 0, 0], 'alarmclock': [0.70738827, -0.70682518, 0], 'apple': [0, 0, 0], 'banana': [0, 0, 0], 'binoculars': [0.70738827, -0.70682518, 0], 'body': [0, 0, 0], 'bowl': [0, 0, 0], 'camera': [0, 0, 0], 'coffeemug': [0, 0, 0], 'cubelarge': [0, 0, 0], 'cubemedium': [0, 0, 0], 'cubemiddle': [0, 0, 0], 'cubesmall': [0, 0, 0], 'cup': [0, 0, 0], 'cylinderlarge': [0, 0, 0], 'cylindermedium': [0, 0, 0], 'cylindersmall': [0, 0, 0], 'doorknob': [0, 0, 0], 'duck': [0, 0, 0], 'elephant': [0, 0, 0], 'eyeglasses': [0, 0, 0], 'flashlight': [0, 0, 0], 'flute': [0, 0, 0], 'fryingpan': [0, 0, 0], 'gamecontroller': [0, 0, 0], 'hammer': [0, 0, 0], 'hand': [0, 0, 0], 'headphones': [0, 0, 0], 'knife': [0, 0, 0], 'lightbulb': [0, 0, 0], 'mouse': [0, 0, 0], 'mug': [0, 0, 0], 'phone': [0, 0, 0], 'piggybank': [0, 0, 0], 'pyramidlarge': [0, 0, 0], 'pyramidmedium': [0, 0, 0], 'pyramidsmall': [0, 0, 0], 'rubberduck': [0, 0, 0], 'scissors': [0, 0, 0], 'spherelarge': [0, 0, 0], 'spheremedium': [0, 0, 0], 'spheresmall': [0, 0, 0], 'stamp': [0, 0, 0], 'stanfordbunny': [0, 0, 0], 'stapler': [0, 0, 0], 'table': [0, 0, 0], 'teapot': [0, 0, 0], 'toothbrush': [0, 0, 0], 'toothpaste': [0, 1.5, 0], 'toruslarge': [0, 0, 0], 'torusmedium': [0, 0, 0], 'torussmall': [0, 0, 0], 'train': [0, 0, 0], 'watch': [0, 0, 0], 'waterbottle': [0, 0, 0], 'wineglass': [0, 0, 0], 'wristwatch': [0, 0, 0]}
+
     for i in range(i_start, niter):
         print("......................................................................................")
         print("ITERATION : %i " % i)
@@ -300,6 +322,12 @@ def train_generic_agent(job_name, agent,
             print(">>> finish evaluation rollouts")
         
         if (i % save_freq == 0 and i > 0):
+            policy_file = 'policy_%i.pickle' % i
+            baseline_file = 'baseline_%i.pickle' % i
+            pickle.dump(agent.policy, open('iterations/' + policy_file, 'wb'))
+            pickle.dump(agent.baseline, open('iterations/' + baseline_file, 'wb'))
+            pickle.dump(best_policy, open('iterations/best_policy.pickle', 'wb'))
+            # pickle.dump(agent.global_status, open('iterations/global_status.pickle', 'wb'))
             if agent.save_logs:
                 agent.logger.save_log('logs/')
                 make_train_plots(log=agent.logger.log, keys=plot_keys, save_loc='logs/')
@@ -308,11 +336,11 @@ def train_generic_agent(job_name, agent,
                 obj_scale = env_kwargs["obj_scale"]
             if is_generic:
                 obj_name_map = ['duck', 'watch', 'doorknob', 'headphones', 'bowl', 'cubesmall', 'spheremedium', 'train', 'piggybank', 'cubemedium', 'cubelarge', 'elephant', 'flute', 'wristwatch', 'pyramidmedium', 'gamecontroller', 'toothbrush', 'pyramidsmall', 'body', 'cylinderlarge', 'cylindermedium', 'cylindersmall', 'fryingpan', 'stanfordbunny', 'scissors', 'pyramidlarge', 'stapler', 'flashlight', 'mug', 'hand', 'stamp', 'rubberduck', 'binoculars', 'apple', 'mouse', 'eyeglasses', 'airplane', 'coffeemug', 'cup', 'toothpaste', 'torusmedium', 'cubemiddle', 'phone', 'torussmall', 'spheresmall', 'knife', 'banana', 'teapot', 'hammer', 'alarmclock', 'waterbottle', 'camera', 'table', 'wineglass', 'lightbulb', 'spherelarge', 'toruslarge', 'glass', 'heart', 'donut']
-                for obj_idx in range(60):
+                for obj_idx in range(2):
                     obj_name = obj_name_map[obj_idx]
                     obj_scale = obj_to_scale_map[obj_name]
-                    if obj_name == "heart":
-                        obj_orientation = [-1.57, 0, 0]
+                    obj_orientation = obj_orientation_map[obj_name]
+                    obj_relative_position = obj_position_map[obj_name]
                     best_eval_path = '/home/jianrenw/prox/tslam/data/result/best_eval/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
                     best_policy_path = '/home/jianrenw/prox/tslam/data/result/best_policy/{}/gene{}_rot{}_{}/{}_{}'.format(obj_name, is_generic, is_rotate, forearm_orien, reset_mode_conf, reward_conf)
                     if os.path.isdir(best_policy_path) == False: os.makedirs(best_policy_path)

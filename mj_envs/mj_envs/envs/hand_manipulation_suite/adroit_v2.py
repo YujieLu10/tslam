@@ -10,8 +10,9 @@ import pyvista as pv
 import torch
 import math
 import heapq
+import random
 
-from mj_envs.envs.hand_manipulation_suite.adroit_util import get_2d_voxel_idx, generate_uniform_gt_voxel, get_basic_reward, get_newpoints_reward, get_voxel_idx
+from mj_envs.envs.hand_manipulation_suite.adroit_util import generate_uniform_gt_voxel, get_basic_reward, get_newpoints_reward
 from xml.etree import ElementTree
 from xml.dom import minidom
 
@@ -146,14 +147,21 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         
         self.sensor_rid_list = [self.sim.model.sensor_name2id('S_grasp_sensor'), self.sim.model.sensor_name2id('Tch_ffmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_mfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_rfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_thmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_palm_sensor'), self.sim.model.sensor_name2id('Tch_ffproximal_sensor'), self.sim.model.sensor_name2id('Tch_ffmiddle_sensor'), self.sim.model.sensor_name2id('S_fftip_sensor'), self.sim.model.sensor_name2id('Tch_fftip_sensor'), self.sim.model.sensor_name2id('Tch_mfproximal_sensor'), self.sim.model.sensor_name2id('Tch_mfmiddle_sensor'), self.sim.model.sensor_name2id('S_mftip_sensor'), self.sim.model.sensor_name2id('Tch_mftip_sensor'), self.sim.model.sensor_name2id('Tch_rfproximal_sensor'), self.sim.model.sensor_name2id('Tch_rfmiddle_sensor'), self.sim.model.sensor_name2id('S_rftip_sensor'), self.sim.model.sensor_name2id('Tch_rftip_sensor'), self.sim.model.sensor_name2id('Tch_lfmetacarpal_sensor'), self.sim.model.sensor_name2id('Tch_lfproximal_sensor'), self.sim.model.sensor_name2id('Tch_lfmiddle_sensor'), self.sim.model.sensor_name2id('S_lftip_sensor'), self.sim.model.sensor_name2id('Tch_lftip_sensor'), self.sim.model.sensor_name2id('Tch_thproximal_sensor'), self.sim.model.sensor_name2id('Tch_thmiddle_sensor'), self.sim.model.sensor_name2id('S_thtip_sensor'), self.sim.model.sensor_name2id('Tch_thtip_sensor')]
 
+    def get_voxel_idx(self, posx, posy, posz, need_gt):
+        resolution_x, resolution_y, resolution_z = 0.3 / self.twod_sep, 0.3 / self.twod_sep, 0.3 / self.twod_sep
+        idx_x = math.floor((posx + 0.15) / resolution_x)
+        idx_y = math.floor((posy + 0.15) / resolution_y)
+        idx_z = math.floor((posz) / resolution_z)
+        voxel_idx = idx_z * self.twod_sep * self.twod_sep + idx_y * self.twod_sep + idx_x
+        if need_gt:
+            name = str(idx_x) + '_' + str(idx_y) + '_' + str(idx_z)
+            return voxel_idx if name in self.gt_map_list else -1
+        else:
+            return voxel_idx
+
     def step(self, a):
         # uniform_samplegt = np.load('/home/jianrenw/prox/tslam/test_o3d.npz')['pcd']
         # apply action and step
-        if self.count_step % 200 == 0:
-            orien_list = [[-1.57, 0, 3.14151926], [1.57, 0, 0], [-1.57, -1.57, 3.14151926], [-1.57, 1.57, 3.14151926]]
-            position_list = [[0, -0.56, 0.06], [0, 0.56, 0.06], [0.55, 0, 0.06], [-0.55, 0, 0.06]]
-            self.model.body_quat[self.forearm_obj_bid] = euler2quat(orien_list[int(self.count_step / 200)])
-            self.model.body_pos[self.forearm_obj_bid] = position_list[int(self.count_step / 200)]
         a = np.clip(a, -1.0, 1.0)
         a = self.act_mid + a*self.act_rng
         self.do_simulation(a, self.frame_skip)
@@ -243,14 +251,14 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
             self.voxel_array = [0] * self.voxel_num
         if len(self.previous_contact_points) > 0:
             for point in self.previous_contact_points:
-                idx = get_2d_voxel_idx(point[0], point[1], self.twod_sep) if self.voxel_type == '2d' else get_voxel_idx(point[0], point[1], point[2], self.twod_sep, self.gt_map_list, True)
+                idx = self.get_voxel_idx(point[0], point[1], point[2], True)
                 if idx > 0 and self.voxel_array[min(idx, self.voxel_num-1)] <= 0: # new voxel touched (known empty/unknown => known obj)
                     if self.coverage_voxel_r_factor > 0: coverage_voxel_r += 1
                     if self.new_voxel_r_factor > 0: new_voxel_r += 1
                     self.voxel_array[min(idx, self.voxel_num-1)] = 1
         # finger pos
         for finger_pos in [ffknuckle_pos, mfknuckle_pos, rfknuckle_pos, lfmetacarpal_pos, thbase_pos]:
-            finger_touch_idx = get_2d_voxel_idx(finger_pos[0], finger_pos[1]) if self.voxel_type == '2d' else get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2], self.twod_sep, self.gt_map_list, False)
+            finger_touch_idx = self.get_voxel_idx(finger_pos[0], finger_pos[1], finger_pos[2], False)
             if finger_touch_idx > 0 and self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] == 0: # unknown voxel explored
                 if self.curiosity_voxel_r_factor > 0: curiosity_voxel_r += 1
                 self.voxel_array[min(finger_touch_idx, self.voxel_num-1)] = -1
@@ -367,6 +375,10 @@ class AdroitEnvV2(mujoco_env.MujocoEnv, utils.EzPickle):
         # set arm pose
         self.model.body_quat[self.forearm_obj_bid] = euler2quat(self.forearm_orientation)
         self.model.body_pos[self.forearm_obj_bid] = self.forearm_relative_position
+        # orien_list = [[-1.57, 0, 3.14151926], [1.57, 0, 0], [-1.57, -1.57, 3.14151926], [-1.57, 1.57, 3.14151926]]
+        # position_list = [[0, -0.56, 0.1], [0, 0.56, 0.1], [0.55, 0, 0.1], [-0.55, 0, 0.1]]
+        # self.model.body_quat[self.forearm_obj_bid] = euler2quat(random.choice(orien_list))
+        # self.model.body_pos[self.forearm_obj_bid] = random.choice(position_list)
 
         if not current_reset:
             self.sim.forward()

@@ -169,7 +169,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax.voxels(vis_voxel, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
     # plt.savefig('uniform_gtbox_{}.png'.format(step))
 
-    if is_best_policy:# or is_best_reconstruct:
+    if is_best_policy or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_overlap-{}.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))    
     plt.savefig('voxel/iter-{}-{}-overlap-{}.png'.format(iternum, obj_name, occupancy))
     plt.close()
@@ -177,7 +177,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,30)
     ax.voxels(gt_voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy:# or is_best_reconstruct:
+    if is_best_policy or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/gt.png'.format(obj_name, reset_mode_conf, reward_conf))    
     plt.savefig('voxel/iter-{}-{}-gt.png'.format(iternum, obj_name))
     plt.close()
@@ -185,7 +185,7 @@ def save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orienta
     ax = plt.figure().add_subplot(projection='3d')
     ax.set_zlim(1,30)
     ax.voxels(voxels, facecolors=colors, edgecolor='g', alpha=.4, linewidth=.05)
-    if is_best_policy:# or is_best_reconstruct:
+    if is_best_policy or is_best_reconstruct:
         plt.savefig('/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_exp.png'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct))    
     plt.savefig('voxel/iter-{}-{}-exp.png'.format(iternum, obj_name))
     plt.close()
@@ -323,9 +323,9 @@ def train_agent(job_name, agent,
 
                 # 3d voxel visualization
                 is_best_reconstruct, occupancy = save_voxel_visualization(obj_name, reset_mode_conf, reward_conf, obj_orientation, obj_relative_position, obj_scale, pc_frame, i, is_best_policy)
-                if is_best_policy:# or is_best_reconstruct:
+                if is_best_policy or is_best_reconstruct:
                     pickle.dump(best_policy, open('/home/jianrenw/prox/tslam/data/result/best_policy/{}/{}/{}/bp{}_br{}_best_policy.pickle'.format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct), 'wb'))
-                if is_best_policy:# or is_best_reconstruct:
+                if is_best_policy or is_best_reconstruct:
                     np.savez_compressed("pointcloudnpz/alpha_pointcloud_"+str(i)+".npz",pcd=pc_frame)
                     np.savez_compressed("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_pointcloud_overlap-{}.npz".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy), pcd=pc_frame)
                 # else:
@@ -334,13 +334,14 @@ def train_agent(job_name, agent,
                 # pc_frames.append(pc_frame)
                 ax = plt.axes()
                 ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-                if is_best_policy:# or is_best_reconstruct:
+                if is_best_policy or is_best_reconstruct:
                     plt.savefig("2dpointcloud/alpha_{}.png".format('2dpointcloud' + str(i)))
                     plt.savefig("/home/jianrenw/prox/tslam/data/result/best_eval/{}/{}/{}/bp{}_br{}_alpha_2dpointcloud_overlap-{}.png".format(obj_name, reset_mode_conf, reward_conf, is_best_policy, is_best_reconstruct, occupancy))
                 # else:
                 #     plt.savefig("2dpointcloud/{}.png".format('2dpointcloud' + str(i)))
                 plt.close()
                 # =======================================================
+                # if obj_name in ["airplane", "apple", "glass", "cup"]:
                 exptools.logging.logger.record_image("rendered", video[-1], i)
                 exptools.logging.logger.record_gif("rendered", video, i)
                 # exptools.logging.logger.record_image("rendered_explore", video_explore[-1], i)

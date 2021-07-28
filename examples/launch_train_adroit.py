@@ -74,14 +74,14 @@ default_config = dict(
         gae_lambda = 0.97,
         num_cpu = 8,
         sample_mode = 'trajectories',
-        horizon= 800, 
+        horizon= 200, 
         num_traj = 60,
         num_samples = 50000, # has precedence, used with sample_mode = 'samples' 50000
-        save_freq = 5,
+        save_freq = 3,
         evaluation_rollouts = 5,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
-            horizon=800,
+            horizon=200,
             num_episodes= 1,
             mode='evaluation',
             width= 640, height= 480,
@@ -193,7 +193,7 @@ def main(args):
                     # [True, False, "generic", "fixup3d", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.17], 1],
                     # [True, False, "generic", "500fixdown", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926],  [0, -0.7, 0.3], 1], # long horizon -7
                     # [True, False, "generic", "500fixup", [0, 0, 0],  [0, -0.14, 0.23], [-1.57, 0, 0],  [0, -0.7, 0.13], 1],
-                    [True, False, "generic", "unified3d", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926], [0, -0.56, 0.3], 1], # long horizon -7
+                    [True, False, "generic", "unified", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926], [0, -0.56, 0.1], 1], # long horizon -7
                     # [True, False, "generic", "unified", [0, 0, 0],  [0, -0.12, 0.23], [-1.57, 0, 3.14151926], [0, -0.56, 0.3], 1], # long horizon -7
                 ]
         # values = values[-idx-1:-idx]
@@ -217,7 +217,7 @@ def main(args):
     values = [
         # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
         # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
-        [1, 3, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
+        [1, 3, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 32], [True, False]], # cur & cove : ours
         # [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
