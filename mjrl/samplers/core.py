@@ -4,6 +4,11 @@ from mjrl.utils.gym_env import GymEnv
 from mjrl.utils import tensor_utils
 logging.disable(logging.CRITICAL)
 import multiprocessing as mp
+from multiprocessing import set_start_method
+try:
+    set_start_method('spawn')
+except RuntimeError:
+    pass
 import time as timer
 logging.disable(logging.CRITICAL)
 
@@ -192,7 +197,6 @@ def _try_multiprocess(func, input_dict_list, num_cpu, max_process_time, max_time
     # Base case
     if max_timeouts == 0:
         return None
-
     pool = mp.Pool(processes=num_cpu, maxtasksperchild=1)
     parallel_runs = [pool.apply_async(func, kwds=input_dict) for input_dict in input_dict_list]
     try:

@@ -52,8 +52,8 @@ class MLP:
         # Easy access variables
         # -------------------------
         self.log_std_val = np.float64(self.log_std.data.numpy().ravel())
-        self.param_shapes = [p.data.numpy().shape for p in self.trainable_params]
-        self.param_sizes = [p.data.numpy().size for p in self.trainable_params]
+        self.param_shapes = [p.cpu().data.numpy().shape for p in self.trainable_params]
+        self.param_sizes = [p.cpu().data.numpy().size for p in self.trainable_params]
         self.d = np.sum(self.param_sizes)  # total number of params
 
         # Placeholders
@@ -96,7 +96,7 @@ class MLP:
     def get_action(self, observation):
         o = np.float32(observation.reshape(1, -1))
         self.obs_var.data = torch.from_numpy(o)
-        mean = self.model(self.obs_var[:, :-4096], self.obs_var[:, -4096:]).data.numpy().ravel()
+        mean = self.model(self.obs_var[:, :-4096], self.obs_var[:, -4096:]).cpu().data.numpy().ravel()
         noise = np.exp(self.log_std_val) * np.random.randn(self.m)
         action = mean + noise
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]

@@ -4,6 +4,11 @@ from mjrl.utils.gym_env import GymEnv
 from mjrl.utils import tensor_utils
 logging.disable(logging.CRITICAL)
 import multiprocessing as mp
+from multiprocessing import set_start_method
+try:
+    set_start_method('spawn')
+except RuntimeError:
+    pass
 import time as timer
 import torch
 logging.disable(logging.CRITICAL)

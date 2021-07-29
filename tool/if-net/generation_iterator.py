@@ -7,7 +7,11 @@ import numpy as np
 from tqdm import tqdm
 import itertools
 import multiprocessing as mp
-from multiprocessing import Pool
+from multiprocessing import Pool, set_start_method
+try:
+    set_start_method('spawn')
+except RuntimeError:
+    pass
 import torch
 
 # def gen_iterator(out_path, dataset, gen_p , buff_p, start,end):
