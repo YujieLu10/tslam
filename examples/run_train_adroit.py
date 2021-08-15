@@ -12,7 +12,6 @@ from mjrl.utils.train_agent import train_agent
 from mjrl.utils.train_generic_agent import train_generic_agent
 from mjrl.utils.train_variant_agent import train_variant_agent
 
-
 def main(affinity_code, log_dir, run_ID, **kwargs):
     # affinity = affinity_from_code(affinity_code)
 

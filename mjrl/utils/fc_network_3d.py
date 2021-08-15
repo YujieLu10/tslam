@@ -19,14 +19,14 @@ class FCNetwork3D(nn.Module):
         self.layer_sizes = (self.obs_dim, ) + hidden_sizes + (act_dim, )
         self.set_transformations(in_shift, in_scale, out_shift, out_scale)
         # conv3d
-        self.conv_1 = nn.Conv3d(1, 16, 3, padding=1).cuda() # out: 32 
-        self.conv_1_1 = nn.Conv3d(16, 16, 3, padding=1).cuda() # out: 32
-        self.conv_2 = nn.Conv3d(16, 16, 3, padding=1).cuda() # out: 16 
-        self.conv_2_1 = nn.Conv3d(16, 16, 3, padding=1).cuda() # out: 16 
-        self.conv_3 = nn.Conv3d(16, 16, 3, padding=1).cuda() # out: 8 
-        self.conv_3_1 = nn.Conv3d(16, 1, 3, padding=1).cuda() # out: 8
+        self.conv_1 = nn.Conv3d(1, 16, 3, padding=1) # out: 32 
+        self.conv_1_1 = nn.Conv3d(16, 16, 3, padding=1) # out: 32
+        self.conv_2 = nn.Conv3d(16, 16, 3, padding=1) # out: 16 
+        self.conv_2_1 = nn.Conv3d(16, 16, 3, padding=1) # out: 16 
+        self.conv_3 = nn.Conv3d(16, 16, 3, padding=1) # out: 8 
+        self.conv_3_1 = nn.Conv3d(16, 1, 3, padding=1) # out: 8
         # hidden layers
-        self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]).to('cuda') \
+        self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
                          for i in range(len(self.layer_sizes) -1)])
         self.nonlinearity = torch.relu if nonlinearity == 'relu' else torch.tanh
 
@@ -49,20 +49,27 @@ class FCNetwork3D(nn.Module):
         #     out = x.to('cpu')
         # else:
         #     out = x
-        x = x.to('cuda')
-        x_voxel = x_voxel.to('cuda')
-
-        voxel_obs_1 = self.conv_1(x_voxel.reshape(-1,1,16,16,16))
-        voxel_obs_1_1 = self.conv_1_1(voxel_obs_1)
-        voxel_obs_2 = self.conv_2(voxel_obs_1_1)
-        voxel_obs_2_1 = self.conv_2_1(voxel_obs_2)
-        voxel_obs_3 = self.conv_3(voxel_obs_2_1)
-        voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
-        # x_voxel = torch.flatten(voxel_obs_3_1, start_dim=0, end_dim=-1)
-        x_voxel = voxel_obs_3_1.reshape(-1, 4096)
+        x = x
+        x_voxel = x_voxel
+        # print(">>> x_voxel {}".format(x_voxel.shape))
+        # voxel_obs_1 = self.conv_1(x_voxel.reshape(-1,1,16,16,16))
+        # voxel_obs_1_1 = self.conv_1_1(voxel_obs_1)
+        # voxel_obs_2 = self.conv_2(voxel_obs_1_1)
+        # voxel_obs_2_1 = self.conv_2_1(voxel_obs_2)
+        # voxel_obs_3 = self.conv_3(voxel_obs_2_1)
+        # voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
+        x_voxel = self.conv_1(x_voxel.reshape(-1,1,16,16,16))
+        x_voxel = self.conv_1_1(x_voxel)
+        x_voxel = self.conv_2(x_voxel)
+        x_voxel = self.conv_2_1(x_voxel)
+        x_voxel = self.conv_3(x_voxel)
+        x_voxel = self.conv_3_1(x_voxel)
+        x_voxel = x_voxel.reshape(-1, 4096)
+        # voxel_obs_3_1 = self.conv_3_1(voxel_obs_3)
+        # x_voxel = voxel_obs_3_1.reshape(-1, 4096)
         # x torch.Size([1,68]) voxel_obs_3_1 torch.Size([1,1,4,4,4]) x_voxel torch.Size([1,64])
-        out = torch.cat((x, x_voxel), 1).to('cuda')
-        out = (out - self.in_shift.to('cuda'))/(self.in_scale.to('cuda') + 1e-8)
+        out = torch.cat((x, x_voxel), 1)
+        out = (out - self.in_shift)/(self.in_scale + 1e-8)
         for i in range(len(self.fc_layers)-1):
             out = self.fc_layers[i](out)
             out = self.nonlinearity(out)

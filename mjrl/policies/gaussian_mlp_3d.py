@@ -34,7 +34,7 @@ class MLP:
 
         # Policy network
         # ------------------------
-        self.model = FCNetwork3D(self.n, self.m, hidden_sizes)
+        self.model = FCNetwork3D(self.n, self.m, hidden_sizes).to('cuda')
         # make weights small
         for param in list(self.model.parameters())[-2:]:  # only last layer
            param.data = 1e-2 * param.data
@@ -43,7 +43,7 @@ class MLP:
 
         # Old Policy network
         # ------------------------
-        self.old_model = FCNetwork3D(self.n, self.m, hidden_sizes)
+        self.old_model = FCNetwork3D(self.n, self.m, hidden_sizes).to('cuda')
         self.old_log_std = Variable(torch.ones(self.m) * init_log_std)
         self.old_params = list(self.old_model.parameters()) + [self.old_log_std]
         for idx, param in enumerate(self.old_params):
@@ -63,7 +63,7 @@ class MLP:
     # Utility functions
     # ============================================
     def get_param_values(self):
-        params = np.concatenate([p.contiguous().view(-1).data.numpy()
+        params = np.concatenate([p.contiguous().view(-1).to('cpu').data.numpy()
                                  for p in self.trainable_params])
         return params.copy()
 
@@ -96,7 +96,7 @@ class MLP:
     def get_action(self, observation):
         o = np.float32(observation.reshape(1, -1))
         self.obs_var.data = torch.from_numpy(o)
-        mean = self.model(self.obs_var[:, :-4096], self.obs_var[:, -4096:]).cpu().data.numpy().ravel()
+        mean = self.model(self.obs_var[:, :-4096].to('cuda'), self.obs_var[:, -4096:].to('cuda')).cpu().data.numpy().ravel()
         noise = np.exp(self.log_std_val) * np.random.randn(self.m)
         action = mean + noise
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
@@ -112,7 +112,7 @@ class MLP:
             act_var = Variable(torch.from_numpy(actions).float(), requires_grad=False)
         else:
             act_var = actions
-        mean = model(obs_var[:, :-4096], obs_var[:, -4096:])
+        mean = model(obs_var[:, :-4096].to('cuda'), obs_var[:, -4096:].to('cuda')).cpu()
         zs = (act_var - mean) / torch.exp(log_std)
         LL = - 0.5 * torch.sum(zs ** 2, dim=1) + \
              - torch.sum(log_std) + \
