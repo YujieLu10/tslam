@@ -3,7 +3,8 @@ from mjrl.utils.fc_network_3d import FCNetwork3D
 import torch
 from torch.autograd import Variable
 
-
+voxelobs_dim = 8
+voxel_dim = voxelobs_dim * voxelobs_dim * voxelobs_dim
 class MLP:
     def __init__(self, env_spec,
                  hidden_sizes=(64,64),
@@ -96,7 +97,7 @@ class MLP:
     def get_action(self, observation):
         o = np.float32(observation.reshape(1, -1))
         self.obs_var.data = torch.from_numpy(o)
-        mean = self.model(self.obs_var[:, :-4096].to('cuda'), self.obs_var[:, -4096:].to('cuda')).cpu().data.numpy().ravel()
+        mean = self.model(self.obs_var[:, :-voxel_dim].to('cuda'), self.obs_var[:, -voxel_dim:].to('cuda')).cpu().data.numpy().ravel()
         noise = np.exp(self.log_std_val) * np.random.randn(self.m)
         action = mean + noise
         return [action, {'mean': mean, 'log_std': self.log_std_val, 'evaluation': mean}]
@@ -112,7 +113,7 @@ class MLP:
             act_var = Variable(torch.from_numpy(actions).float(), requires_grad=False)
         else:
             act_var = actions
-        mean = model(obs_var[:, :-4096].to('cuda'), obs_var[:, -4096:].to('cuda')).cpu()
+        mean = model(obs_var[:, :-voxel_dim].to('cuda'), obs_var[:, -voxel_dim:].to('cuda')).cpu()
         zs = (act_var - mean) / torch.exp(log_std)
         LL = - 0.5 * torch.sum(zs ** 2, dim=1) + \
              - torch.sum(log_std) + \

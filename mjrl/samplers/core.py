@@ -121,8 +121,10 @@ def sample_paths(
     assert type(num_cpu) == int
 
     if num_cpu == 1:
-        input_dict = dict(num_traj=num_traj, env=env, policy=policy,
-                          eval_mode=eval_mode, horizon=horizon, base_seed=base_seed,
+        print(">>> onecpu do roll out")
+        input_dict = dict(num_traj=num_traj, start_traj=0, env=env, policy=policy,
+                          eval_mode=eval_mode, horizon=horizon,
+                          base_seed=base_seed,
                           env_kwargs=env_kwargs)
         # dont invoke multiprocessing if not necessary
         return do_rollout(**input_dict)
@@ -172,7 +174,7 @@ def sample_data_batch(
     assert type(num_cpu) == int
 
     start_time = timer.time()
-    print("####### Gathering Samples #######")
+    print("####### Data Batch Gathering Samples #######")
     sampled_so_far = 0
     paths_so_far = 0
     paths = []

@@ -72,16 +72,16 @@ default_config = dict(
         niter = 10000,
         gamma = 0.995,
         gae_lambda = 0.97,
-        num_cpu = 8,
+        num_cpu = 4,
         sample_mode = 'trajectories',
-        horizon= 30, 
+        horizon= 200, 
         num_traj = 60,
         num_samples = 5000, # has precedence, used with sample_mode = 'samples' 50000
         save_freq = 3,
         evaluation_rollouts = 5,
         plot_keys = ['stoc_pol_mean'],
         visualize_kwargs = dict(
-            horizon=30,
+            horizon=200,
             num_episodes= 1,
             mode='evaluation',
             width= 640, height= 480,
@@ -217,7 +217,7 @@ def main(args):
     values = [
         # [1, 0, 0.5, ['3d', 6], [True, False]], # curiosity
         # [0, 1, 0.5, ['3d', 6], [True, False]], # coverage : old best policy
-        [1, 3, 0.5, ['3d', 16], [True, False]], # cur & cove : ours
+        [1, 3, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 32], [True, False]], # cur & cove : ours
         # [1, 1, 0.5, ['3d', 6], [True, False]], # cur & cove : ours
         # [3, 1, 0.5, ['3d', 8], [True, False]], # cur & cove : ours
