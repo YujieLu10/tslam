@@ -259,16 +259,21 @@ def train_generic_agent(job_name, agent,
     i_start = _load_latest_policy_and_logs(agent,
                                            policy_dir='iterations',
                                            logs_dir='logs')
+    # if env_kwargs["pretrain_mode"] == "pretrain":
+    #     print("pretrain")
+    #     i_start = _load_latest_policy_and_logs(agent,
+    #                                            policy_dir='/home/jianrenw/prox/tslam/data/local/pretrain_iterations',
+    #                                            logs_dir='logs')
     if i_start:
-        print("Resuming from an existing job folder ...")
-
+        print("Resuming from an existing job folder {}...".format(i_start))
+    # i_start = 0
+    i_start = 0
     obj_position_map = {'glass': [0, 0, 0.05510244], 'donut': [0, 0, 0.01466367], 'heart': [0, 0, 0.8], 'airplane': [0, 0, 0.0258596408], 'alarmclock': [0, 0, 0.024704989], 'apple': [0, 0, 0.04999409], 'banana': [0, 0, 0.02365614], 'binoculars': [0, 0, 0.07999943], 'body': [0, 0, 0.0145278], 'bowl': [0, 0, 0.03995771], 'camera': [0, 0, 0.03483407], 'coffeemug': [0, 0, 0.05387171], 'cubelarge': [0, 0, 0.06039196], 'cubemedium': [0, 0, 0.04103902], 'cubemiddle': [0, 0, 0.04103902], 'cubesmall': [0, 0, 0.02072159], 'cup': [0, 0, 0.05127277], 'cylinderlarge': [0, 0, 0.06135697], 'cylindermedium': [0, 0, 0.04103905], 'cylindersmall': [0, 0, 0.02072279], 'doorknob': [0, 0, 0.0379012], 'duck': [0, 0, 0.04917608], 'elephant': [0, 0, 0.05097572], 'eyeglasses': [0, 0, 0.02300015], 'flashlight': [0, 0, 0.07037258], 'flute': [0, 0, 0.0092959], 'fryingpan': [0, 0, 0.01514528], 'gamecontroller': [0, 0, 0.02604568], 'hammer': [0, 0, 0.01267463], 'hand': [0, 0, 0.07001909], 'headphones': [0, 0, 0.02992321], 'knife': [0, 0, 0.00824503], 'lightbulb': [0, 0, 0.03202522], 'mouse': [0, 0, 0.0201307], 'mug': [0, 0, 0.05387171], 'phone': [0, 0, 0.02552063], 'piggybank': [0, 0, 0.06923257], 'pyramidlarge': [0, 0, 0.05123203], 'pyramidmedium': [0, 0, 0.04103812], 'pyramidsmall': [0, 0, 0.02072198], 'rubberduck': [0, 0, 0.04917608], 'scissors': [0, 0, 0.00802606], 'spherelarge': [0, 0, 0.05382598], 'spheremedium': [0, 0, 0.03729011], 'spheresmall': [0, 0, 0.01897534], 'stamp': [0, 0, 0.0379012], 'stanfordbunny': [0, 0, 0.06453102], 'stapler': [0, 0, 0.02116039], 'table': [0, 0, 0.01403165], 'teapot': [0, 0, 0.05761634], 'toothbrush': [0, 0, 0.00701304], 'toothpaste': [0, 0, 0.02], 'toruslarge': [0, 0, 0.02080752], 'torusmedium': [0, 0, 0.01394647], 'torussmall': [0, 0, 0.00734874], 'train': [0, 0, 0.04335064], 'watch': [0, 0, 0.0424445], 'waterbottle': [0, 0, 0.08697578], 'wineglass': [0, 0, 0.0424445], 'wristwatch': [0, 0, 0.06880109]}
     obj_orientation_map = {'glass': [0, 0, 0], 'donut': [0, 0, 0], 'heart': [0.70738827, -0.70682518, 0], 'airplane': [0, 0, 0], 'alarmclock': [0.70738827, -0.70682518, 0], 'apple': [0, 0, 0], 'banana': [0, 0, 0], 'binoculars': [0.70738827, -0.70682518, 0], 'body': [0, 0, 0], 'bowl': [0, 0, 0], 'camera': [0, 0, 0], 'coffeemug': [0, 0, 0], 'cubelarge': [0, 0, 0], 'cubemedium': [0, 0, 0], 'cubemiddle': [0, 0, 0], 'cubesmall': [0, 0, 0], 'cup': [0, 0, 0], 'cylinderlarge': [0, 0, 0], 'cylindermedium': [0, 0, 0], 'cylindersmall': [0, 0, 0], 'doorknob': [0, 0, 0], 'duck': [0, 0, 0], 'elephant': [0, 0, 0], 'eyeglasses': [0, 0, 0], 'flashlight': [0, 0, 0], 'flute': [0, 0, 0], 'fryingpan': [0, 0, 0], 'gamecontroller': [0, 0, 0], 'hammer': [0, 0, 0], 'hand': [0, 0, 0], 'headphones': [0, 0, 0], 'knife': [0, 0, 0], 'lightbulb': [0, 0, 0], 'mouse': [0, 0, 0], 'mug': [0, 0, 0], 'phone': [0, 0, 0], 'piggybank': [0, 0, 0], 'pyramidlarge': [0, 0, 0], 'pyramidmedium': [0, 0, 0], 'pyramidsmall': [0, 0, 0], 'rubberduck': [0, 0, 0], 'scissors': [0, 0, 0], 'spherelarge': [0, 0, 0], 'spheremedium': [0, 0, 0], 'spheresmall': [0, 0, 0], 'stamp': [0, 0, 0], 'stanfordbunny': [0, 0, 0], 'stapler': [0, 0, 0], 'table': [0, 0, 0], 'teapot': [0, 0, 0], 'toothbrush': [0, 0, 0], 'toothpaste': [0, 1.5, 0], 'toruslarge': [0, 0, 0], 'torusmedium': [0, 0, 0], 'torussmall': [0, 0, 0], 'train': [0, 0, 0], 'watch': [0, 0, 0], 'waterbottle': [0, 0, 0], 'wineglass': [0, 0, 0], 'wristwatch': [0, 0, 0]}
 
     for i in range(i_start, niter):
         print("......................................................................................")
         print("ITERATION : %i " % i)
-
         is_best_policy = False
         if train_curve[i-1] > best_perf:
             if exptools: exptools.logging.logger.log_text("update best_policy")
@@ -278,12 +283,12 @@ def train_generic_agent(job_name, agent,
 
         N = num_traj if sample_mode == 'trajectories' else num_samples
         stats = agent.train_step(
-            N=N, 
-            sample_mode=sample_mode,
+            N= N, 
+            sample_mode= sample_mode,
             horizon= horizon, 
-            gamma=gamma,
-            gae_lambda=gae_lambda,
-            num_cpu=num_cpu,
+            gamma= gamma,
+            gae_lambda= gae_lambda,
+            num_cpu= num_cpu,
             env_kwargs= env_kwargs,
             sample_paths_kwargs= sample_paths_kwargs,
         )

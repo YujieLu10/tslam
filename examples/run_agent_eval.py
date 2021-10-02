@@ -18,14 +18,15 @@ import shutil
 
 # save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval"
 # save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_supp"
-save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_camera"
+# save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_camera"
+save_agent_eval_root = "/home/jianrenw/prox/tslam/data/result/agent_eval_rebbuttal"
 
 def main(affinity_code, log_dir, run_ID, **kwargs):
     affinity = affinity_from_code(affinity_code)
 
     args = load_variant(log_dir)
 
-    name = "unified_agent_eval" #"sample_pointclouds"
+    name = "unified3d_agent_eval" #"sample_pointclouds"
     # This helps you know what GPU is recommand to you for this experiment
     # gpu_idx = affinity["cuda_idx"]
     
@@ -116,33 +117,33 @@ def run_experiment(log_dir, args):
         elif args["sample_method"] == "policy":
             obs, rew, done, info = env.step(policy.get_action(obs)[1]['evaluation'])
 
-        # logger.log_scalar("step", i, i)
-        # logger.log_scalar("total_reward", rew, i)
-        # logger.log_scalar("n_points", len(info["pointcloud"]), i)
-        # for k, v in info.items():
-        #     if "_p" in k or "_r" in k or "occupancy" in k:
-        #         logger.log_scalar(k, v, i)
+        logger.log_scalar("step", i, i)
+        logger.log_scalar("total_reward", rew, i)
+        logger.log_scalar("n_points", len(info["pointcloud"]), i)
+        for k, v in info.items():
+            if "_p" in k or "_r" in k or "occupancy" in k:
+                logger.log_scalar(k, v, i)
         
-        # if (i+1) % int(200) == 0:
-        #     pc_frame = np.array(info["pointcloud"])
-        #     # ====== voxel visualization
-        #     vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
-        #     overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
-        #     # ====== 3d pointcloud
-        #     np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_unifiedpose_alpha_pointcloud.npz",pcd=pc_frame)
-        #     # ====== 2d visualization
-        #     ax = plt.axes()
-        #     ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
-        #     plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
-        #     plt.close()
+        if (i+1) % int(100) == 0:
+            pc_frame = np.array(info["pointcloud"])
+            # ====== voxel visualization
+            vis_data_tuple = [args["env_kwargs"]["obj_name"], args["env_kwargs"]["obj_orientation"], args["env_kwargs"]["obj_relative_position"], args["env_kwargs"]["obj_scale"], pc_frame, i]
+            overlap = save_voxel_visualization(vis_data_tuple, save_agent_eval_dir)
+            # ====== 3d pointcloud
+            np.savez_compressed(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_unifiedpose_alpha_pointcloud.npz",pcd=pc_frame)
+            # ====== 2d visualization
+            ax = plt.axes()
+            ax.scatter(pc_frame[:, 0], pc_frame[:, 1], cmap='viridis', linewidth=0.5)
+            plt.savefig(os.path.join(save_agent_eval_dir, "iternum_" + str(i)) + "_2dpointcloud_overlap-{}.png".format(overlap))
+            plt.close()
 
         # record gif
-        # if i < 800:
+        # if i < 200:
         #     frame = env.env.env.sim.render(width=640, height=480,
         #                         mode='offscreen', camera_name="view_1", device_id=0)
         #     frame = np.transpose(frame[::-1, :, :], (2,0,1))
         #     gif_frames.append(frame)
-        # if (i+1) % 800 == 0:
+        # if (i+1) % 100 == 0:
         #     logger.log_gif("rendered", gif_frames, i)
 
         logger.dump_tabular()

@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 import random
 
 is_clear = False
-test_obj_list = ["airplane", "cup", "spherelarge", "body", "fryingpan", "lightbulb"]
-policy_type = ["knn1", "cf1", "voxel1", "random1", "npoint1", "ntouch1"]
+test_obj_list = ["airplane", "cup", "lightbulb"]
+policy_type = ["curf1covf3"]
 is_save_png = False
 vis_root = "exp" # exp uniform_gt two_pose long_step
 obj_relative_position_down = [0, -0.14, 0.23]#[0, -0.12, 0.23]
 obj_relative_position_up = [0, -0.14, 0.23]
-eval_dir = "best_eval"
+eval_dir = "agent_eval_rebbuttal"
 res_list = [32]
 save_root = "../../prox/tslam/data/result/{}_standard_voxel/{}".format(eval_dir, vis_root)
 

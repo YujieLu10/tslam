@@ -22,6 +22,7 @@ default_config = dict(
         # ntouch_r_factor= 0,
         # random_r_factor= 0,
         ground_truth_type= "nope",
+        # pretrain_mode= "pretrain",
         knn_r_factor= 0,
         # new_voxel_r_factor= 0, # new => coverage_voxel_r
         coverage_voxel_r_factor= 0, # new and touched objects
@@ -72,7 +73,7 @@ default_config = dict(
         niter = 10000,
         gamma = 0.995,
         gae_lambda = 0.97,
-        num_cpu = 4,
+        num_cpu = 8,
         sample_mode = 'trajectories',
         horizon= 200, 
         num_traj = 60,
@@ -108,6 +109,17 @@ def main(args):
         ("env_kwargs", "reset_mode"),
     ]
     variant_levels.append(VariantLevel(keys, values, dir_names))
+
+    # set pretrain task
+    # values = [
+    #     ["pretrain"],
+    #     ["randominit"],
+    # ]
+    # dir_names = ["pretrainmode{}".format(*tuple(str(vi) for vi in v)) for v in values]
+    # keys = [
+    #     ("env_kwargs", "pretrain_mode"),
+    # ]
+    # variant_levels.append(VariantLevel(keys, values, dir_names))
 
     # set ground truth type, unified touching policy, hand base rotation
     values = [
